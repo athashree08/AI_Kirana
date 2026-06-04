@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+@theme {
+  --color-fintech-dark: #0F172A;
+  --color-fintech-card: #1E293B;
+  --color-fintech-accent: #3B82F6;
+  --color-fintech-success: #10B981;
+  --color-fintech-warning: #F59E0B;
+  --color-fintech-danger: #EF4444;
+  --color-fintech-border: #334155;
+}
+
+body {
+  @apply bg-slate-950 text-slate-100 font-sans antialiased;
+}
+
+/* Custom CSS for Gauge Animation */
+@keyframes dash {
+  from {
+    stroke-dashoffset: 283;
+  }
+  to {
+    stroke-dashoffset: var(--dashoffset);
+  }
+}
+
+.gauge-path {
+  transition: stroke-dashoffset 1s ease-in-out;
+}
