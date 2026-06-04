@@ -42,3 +42,20 @@ class Udhar(Base):
 
     # Relationships
     merchant = relationship("Merchant", back_populates="udhars")
+
+
+class Customer(Base):
+    __tablename__ = "customers"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    customer_name = Column(String, nullable=False, index=True)
+    merchant_id = Column(String, ForeignKey("merchants.id", ondelete="CASCADE"), nullable=False)
+    relationship_type = Column(String, default="normal")  # loyal, normal, risky
+    late_repayments = Column(Integer, default=0)
+    total_repayments = Column(Integer, default=0)
+    last_reminder_sent = Column(DateTime, nullable=True)
+    phone_number = Column(String, nullable=True)  # WhatsApp-capable phone number
+
+    # Relationships
+    merchant = relationship("Merchant")
+

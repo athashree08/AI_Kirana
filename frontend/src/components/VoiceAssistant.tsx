@@ -269,10 +269,10 @@ export default function VoiceAssistant() {
     }
   };
 
-  // Force cancel recording or processing states
+    // Force cancel recording or processing states
   const cancelRecordingAndProcessing = () => {
     isRecordingCancelledRef.current = true;
-    const requestId = ++activeRequestIdRef.current; // invalidate pending requests
+    ++activeRequestIdRef.current; // invalidate pending requests
 
     if (recordingTimeoutRef.current) {
       clearTimeout(recordingTimeoutRef.current);

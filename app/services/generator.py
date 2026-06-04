@@ -268,22 +268,47 @@ def generate_mock_transactions(db: Session, merchant_id: str, days: int = 180):
 
 def generate_mock_udhar(db: Session, merchant_id: str):
     """
-    Generates outstanding udhar accounts.
+    Generates outstanding udhar accounts and corresponding customer metadata.
     """
+    # Delete existing
     db.query(models.Udhar).filter(models.Udhar.merchant_id == merchant_id).delete()
+    db.query(models.Customer).filter(models.Customer.merchant_id == merchant_id).delete()
     db.commit()
     
-    debtors = random.sample(INDIAN_NAMES, 12)
-    today = date.today()
+    # Core debtors we need for the demo script
+    core_debtors = ["Mohan", "Geeta", "Ravi"]
+    other_debtors = random.sample([n for n in INDIAN_NAMES if n.split()[0] not in core_debtors], 9)
+    debtors = core_debtors + other_debtors
     
+    today = date.today()
     udhars_to_add = []
-    for debtor in debtors:
-        days_ago = random.randint(5, 90)
+    customers_to_add = []
+    
+    # Seed 4 loyal, 4 risky, 4 normal
+    for idx, debtor in enumerate(debtors):
+        # 1. Determine profile type properties
+        if idx < 4:
+            # Loyal profile (e.g. Mohan, Geeta)
+            total_repayments = random.randint(3, 5)
+            late_repayments = 0
+            days_ago = random.randint(5, 12)
+            amount = round(random.uniform(500, 1400), 0)
+        elif idx < 8:
+            # Risky profile (e.g. Ravi)
+            total_repayments = random.randint(1, 3)
+            late_repayments = random.randint(2, 3)
+            days_ago = random.randint(35, 80) # > 30 days makes them risky
+            amount = round(random.uniform(2000, 3000), 0) # >= 2000 makes them risky
+        else:
+            # Normal profile
+            total_repayments = random.randint(1, 2)
+            late_repayments = 0
+            days_ago = random.randint(16, 28)
+            amount = round(random.uniform(1000, 1800), 0)
+            
         date_added = today - timedelta(days=days_ago)
         
-        # Outstanding amount (around Rs 1,500)
-        amount = round(random.uniform(500, 2500), 0)
-        
+        # Create Udhar Entry
         udhar_rec = models.Udhar(
             customer_name=debtor,
             amount=amount,
@@ -292,6 +317,30 @@ def generate_mock_udhar(db: Session, merchant_id: str):
         )
         udhars_to_add.append(udhar_rec)
         
+        # Determine relationship type
+        from app.services.relationship import determine_relationship_type
+        rel_type = determine_relationship_type(
+            total_repayments=total_repayments,
+            late_repayments=late_repayments,
+            pending_amount=amount,
+            days_pending=days_ago
+        )
+        
+        last_rem = today - timedelta(days=random.randint(1, 10)) if random.random() > 0.5 else None
+        last_rem_dt = datetime(last_rem.year, last_rem.month, last_rem.day, 12, 0, 0) if last_rem else None
+        
+        customer_rec = models.Customer(
+            customer_name=debtor,
+            merchant_id=merchant_id,
+            relationship_type=rel_type,
+            late_repayments=late_repayments,
+            total_repayments=total_repayments,
+            last_reminder_sent=last_rem_dt
+        )
+        customers_to_add.append(customer_rec)
+        
     db.add_all(udhars_to_add)
+    db.add_all(customers_to_add)
     db.commit()
     return len(udhars_to_add)
+

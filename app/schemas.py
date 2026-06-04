@@ -113,6 +113,7 @@ class UdharCreateRequest(BaseModel):
     amount: float = Field(..., gt=0, description="Outstanding credit amount in INR")
     date_added: Optional[date] = Field(None, description="Date when credit was extended (defaults to today)")
     merchant_id: str = Field(..., description="Merchant identifier")
+    phone_number: Optional[str] = Field(None, description="Customer WhatsApp phone number (e.g. +919876543210)")
 
 class UdharSummaryResponse(BaseModel):
     customer: str
@@ -148,5 +149,59 @@ class GSTStatusResponse(BaseModel):
     threshold: float
     percentage: int
     alert_level: str
+
+
+# --- UDHAR INTELLIGENCE & REMINDER SCHEMAS ---
+
+class CustomerResponse(BaseModel):
+    id: int
+    customer_name: str
+    merchant_id: str
+    relationship_type: str
+    late_repayments: int
+    total_repayments: int
+    last_reminder_sent: Optional[datetime] = None
+    phone_number: Optional[str] = None
+    pending_amount: float
+    days_pending: int
+    risk_score: int
+    risk_level: str
+
+    class Config:
+        from_attributes = True
+
+
+class ReminderGenerateRequest(BaseModel):
+    customer_id: Optional[int] = None
+    customer_name: Optional[str] = None
+
+
+class ReminderGenerateResponse(BaseModel):
+    customer: str
+    pending_amount: float
+    relationship: str
+    message: str
+
+
+class ReminderSendRequest(BaseModel):
+    customer_id: Optional[int] = None
+    customer_name: Optional[str] = None
+    to_number: Optional[str] = None
+
+
+class ReminderSendResponse(BaseModel):
+    success: bool
+    message_sid: Optional[str] = None
+    customer: str
+    message: Optional[str] = None
+
+
+class UdharHealthResponse(BaseModel):
+    total_udhar: float
+    healthy_amount: float
+    warning_amount: float
+    risky_amount: float
+    insights: List[str]
+
 
 

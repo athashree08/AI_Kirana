@@ -173,3 +173,49 @@ def calculate_loan_score(db: Session, merchant_id: str) -> schemas.LoanScoreResp
             growth_score=growth_score
         )
     )
+
+
+def calculate_risk_score(customer: str, amount_pending: float, days_pending: int, previous_late_repayments: int) -> dict:
+    """
+    Calculates a credit risk score from 0 to 100 for a customer.
+    Inputs:
+        - customer: customer name (str)
+        - amount_pending: outstanding udhar amount (float)
+        - days_pending: days since the oldest outstanding entry (int)
+        - previous_late_repayments: number of payments made late (int)
+    """
+    if amount_pending <= 0:
+        return {
+            "customer": customer,
+            "risk_score": 0,
+            "risk_level": "low"
+        }
+
+    # Weight amount pending (max 40 pts)
+    # E.g. Rs. 2500 pending gets full 40 pts
+    amount_factor = min(amount_pending / 2500.0 * 40.0, 40.0)
+
+    # Weight oldest days pending (max 40 pts)
+    # E.g. 45 days pending gets full 40 pts
+    days_factor = min(days_pending / 45.0 * 40.0, 40.0)
+
+    # Weight late repayments history (max 20 pts)
+    # E.g. 2 late repayments gets full 20 pts
+    late_factor = min(previous_late_repayments * 10.0, 20.0)
+
+    score = int(round(amount_factor + days_factor + late_factor))
+    score = max(0, min(100, score))
+
+    if score <= 39:
+        level = "low"
+    elif score <= 69:
+        level = "medium"
+    else:
+        level = "high"
+
+    return {
+        "customer": customer,
+        "risk_score": score,
+        "risk_level": level
+    }
+
