@@ -50,11 +50,18 @@ class Customer(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     customer_name = Column(String, nullable=False, index=True)
     merchant_id = Column(String, ForeignKey("merchants.id", ondelete="CASCADE"), nullable=False)
-    relationship_type = Column(String, default="normal")  # loyal, normal, risky
+    relationship_type = Column(String, default="New")  # VIP, Regular, New (sales-based) or loyal, normal, risky (udhar-based)
     late_repayments = Column(Integer, default=0)
     total_repayments = Column(Integer, default=0)
     last_reminder_sent = Column(DateTime, nullable=True)
     phone_number = Column(String, nullable=True)  # WhatsApp-capable phone number
+
+    # --- Customer Intelligence Fields (auto-updated from transactions) ---
+    visit_count = Column(Integer, default=0)
+    total_spent = Column(Float, default=0.0)
+    average_transaction = Column(Float, default=0.0)
+    first_transaction_date = Column(Date, nullable=True)
+    last_transaction_date = Column(Date, nullable=True)
 
     # Relationships
     merchant = relationship("Merchant")

@@ -166,6 +166,12 @@ class CustomerResponse(BaseModel):
     days_pending: int
     risk_score: int
     risk_level: str
+    # Sales-intelligence fields
+    visit_count: int = 0
+    total_spent: float = 0.0
+    average_transaction: float = 0.0
+    first_transaction_date: Optional[date] = None
+    last_transaction_date: Optional[date] = None
 
     class Config:
         from_attributes = True
@@ -202,6 +208,37 @@ class UdharHealthResponse(BaseModel):
     warning_amount: float
     risky_amount: float
     insights: List[str]
+
+
+# --- CUSTOMER INTELLIGENCE SCHEMAS ---
+
+class TopCustomerItem(BaseModel):
+    customer_name: str
+    total_spent: float
+    visit_count: int
+    relationship_type: str
+    last_transaction_date: Optional[date] = None
+
+
+class CustomerInsightsResponse(BaseModel):
+    total_customers: int
+    vip_customers: int
+    regular_customers: int
+    new_customers: int
+    avg_customer_spend: float
+    top_by_spend: List[TopCustomerItem]
+    top_by_frequency: List[TopCustomerItem]
+    newest_customers: List[TopCustomerItem]
+    ai_insights: List[str]
+
+
+class PaymentInsightResponse(BaseModel):
+    customer_name: str
+    visit_count: int
+    total_spent: float
+    relationship_type: str
+    insight_message: str
+    is_milestone: bool
 
 
 

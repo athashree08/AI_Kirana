@@ -280,8 +280,77 @@ async def process_voice(
             else:
                 response_text = "Mohan ka 1200 rupaye udhar baaki hai."
         else:
-            intent = "unknown"
-            response_text = "Maaf kijiye, main aapka sawaal samajh nahi paaya."
+            # ---- CUSTOMER INTELLIGENCE VOICE INTENTS ----
+            if any(kw in transcript_lower for kw in [
+                "sabse accha customer", "best customer", "top customer", "sabse bada customer",
+                "sabse valuable", "best customer kaun hai"
+            ]):
+                intent = "customer_top"
+                try:
+                    customers_intel = crud.get_customer_intelligence_data(db, "merchant_001")
+                    if customers_intel:
+                        top = max(customers_intel, key=lambda c: c["total_spent"])
+                        response_text = (
+                            f"{top['customer_name']} aapke sabse valuable customer hain. "
+                            f"Unhone kul ₹{int(top['total_spent']):,} spend kiye hain aur {top['visit_count']} baar aaye hain."
+                        )
+                    else:
+                        response_text = "Abhi koi customer purchase data record nahi hua hai."
+                except Exception as e:
+                    response_text = "Customer data fetch karne mein error aayi."
+
+            elif any(kw in transcript_lower for kw in [
+                "top 5 customers", "top customers dikhao", "top customers", "top panch customer"
+            ]):
+                intent = "customer_top5"
+                try:
+                    customers_intel = crud.get_customer_intelligence_data(db, "merchant_001")
+                    if customers_intel:
+                        top5 = sorted(customers_intel, key=lambda c: c["total_spent"], reverse=True)[:5]
+                        names = ", ".join([f"{c['customer_name']} (₹{int(c['total_spent']):,})" for c in top5])
+                        response_text = f"Aapke top 5 customers hain: {names}."
+                    else:
+                        response_text = "Abhi koi customer purchase data record nahi hua hai."
+                except Exception as e:
+                    response_text = "Top customers fetch karne mein error aayi."
+
+            elif (
+                any(kw in transcript_lower for kw in ["most frequent", "frequent customer", "zyada bar aaya", "zyada baar"]) or
+                ("sabse zyada" in transcript_lower and any(x in transcript_lower for x in ["aata", "aaya", "baar", "bar", "visit"]))
+            ):
+                intent = "customer_frequent"
+                try:
+                    customers_intel = crud.get_customer_intelligence_data(db, "merchant_001")
+                    if customers_intel:
+                        most_freq = max(customers_intel, key=lambda c: c["visit_count"])
+                        response_text = (
+                            f"{most_freq['customer_name']} sabse zyada {most_freq['visit_count']} baar aaye hain. "
+                            f"Unka total spend ₹{int(most_freq['total_spent']):,} hai."
+                        )
+                    else:
+                        response_text = "Abhi koi frequent customer data nahi hai."
+                except Exception as e:
+                    response_text = "Frequent customer data fetch karne mein error aayi."
+
+            elif any(kw in transcript_lower for kw in [
+                "customer base", "kitne customers", "mera customer base", "customers hain"
+            ]):
+                intent = "customer_base"
+                try:
+                    customers_intel = crud.get_customer_intelligence_data(db, "merchant_001")
+                    total_c = len(customers_intel)
+                    vip_c = sum(1 for c in customers_intel if c["relationship_type"] == "VIP")
+                    regular_c = sum(1 for c in customers_intel if c["relationship_type"] == "Regular")
+                    response_text = (
+                        f"Aapke paas {total_c} active customers hain. "
+                        f"Unmein se {vip_c} VIP aur {regular_c} regular customers hain."
+                    )
+                except Exception as e:
+                    response_text = "Aapke paas active customers hain. Customer Intelligence module check karein."
+
+            else:
+                intent = "unknown"
+                response_text = "Maaf kijiye, main aapka sawaal samajh nahi paaya."
             
     # 4. Call Sarvam text_to_speech service
     try:
@@ -448,7 +517,26 @@ def create_transaction(transaction: schemas.TransactionCreate, db: Session = Dep
     db_merchant = crud.get_merchant(db, merchant_id=transaction.merchant_id)
     if not db_merchant:
         raise HTTPException(status_code=404, detail="Merchant not found")
-    return crud.create_transaction(db=db, transaction=transaction)
+    db_tx = crud.create_transaction(db=db, transaction=transaction)
+
+    # --- CUSTOMER INTELLIGENCE HOOK ---
+    # After every successful payment, auto-update the customer profile
+    try:
+        from datetime import date as date_type
+        tx_date = transaction.timestamp.date() if hasattr(transaction.timestamp, 'date') else date_type.today()
+        crud.upsert_customer_from_transaction(
+            db=db,
+            merchant_id=transaction.merchant_id,
+            customer_name=transaction.customer_name,
+            transaction_amount=transaction.amount,
+            transaction_date=tx_date
+        )
+    except Exception as e:
+        # Non-fatal: log but don't fail the transaction
+        print(f"[CustomerIntelligence] Profile update failed for {transaction.customer_name}: {e}")
+
+    return db_tx
+
 
 @app.get(f"{settings.API_V1_STR}/transactions/{{merchant_id}}", response_model=List[schemas.TransactionResponse])
 def read_transactions(merchant_id: str, skip: int = 0, limit: int = 1000, db: Session = Depends(get_db)):
@@ -505,7 +593,31 @@ def reset_and_seed_demo_data(db: Session = Depends(get_db)):
     
     # 4. Seed udhar
     udhar_count = generator.generate_mock_udhar(db, merchant_id=merchant.id)
-    
+
+    # 5. Build customer intelligence profiles from seeded transactions
+    customer_count = 0
+    try:
+        all_txs = db.query(models.Transaction).filter(
+            models.Transaction.merchant_id == merchant.id
+        ).all()
+        seen_names = set()
+        from datetime import date as date_type
+        for tx in all_txs:
+            if tx.customer_name and not tx.customer_name.startswith("Walk-in"):
+                if tx.customer_name not in seen_names:
+                    seen_names.add(tx.customer_name)
+                    tx_date = tx.timestamp.date() if hasattr(tx.timestamp, 'date') else date_type.today()
+                    crud.upsert_customer_from_transaction(
+                        db=db,
+                        merchant_id=merchant.id,
+                        customer_name=tx.customer_name,
+                        transaction_amount=tx.amount,
+                        transaction_date=tx_date
+                    )
+                    customer_count += 1
+    except Exception as e:
+        print(f"[CustomerIntelligence] Seeding profiles failed: {e}")
+
     return {
         "status": "success",
         "message": f"Demo database reset and seeded successfully for {merchant.name}.",
@@ -514,6 +626,7 @@ def reset_and_seed_demo_data(db: Session = Depends(get_db)):
             "merchant_name": merchant.name,
             "transactions_seeded": tx_count,
             "udhar_accounts_seeded": udhar_count,
+            "customer_profiles_built": customer_count,
             "simulated_days": 180
         }
     }
@@ -715,4 +828,150 @@ def update_customer_phone(customer_id: int, req: PhoneUpdateRequest, db: Session
     db.commit()
     db.refresh(customer)
     return {"success": True, "customer_id": customer_id, "phone_number": customer.phone_number}
+
+
+# ============================================================
+# CUSTOMER INTELLIGENCE API ENDPOINTS
+# ============================================================
+
+@app.get("/api/customer-insights", response_model=schemas.CustomerInsightsResponse)
+def get_customer_insights_api(merchant_id: str = Query("merchant_001"), db: Session = Depends(get_db)):
+    """
+    Returns the full Customer Intelligence dashboard data:
+    - KPI counts (total, VIP, Regular, New)
+    - Average spend per customer
+    - Top 5 by spending
+    - Top 5 by visit frequency
+    - Newest 5 customers
+    - AI-generated insights in Hindi/Hinglish
+    """
+    from app.services.customer_insights import generate_customer_insights
+
+    customers = crud.get_customer_intelligence_data(db, merchant_id)
+
+    vip_count = sum(1 for c in customers if c["relationship_type"] == "VIP")
+    regular_count = sum(1 for c in customers if c["relationship_type"] == "Regular")
+    new_count = sum(1 for c in customers if c["relationship_type"] == "New")
+    total = len(customers)
+    avg_spend = sum(c["total_spent"] for c in customers) / total if total > 0 else 0.0
+
+    top_by_spend = sorted(customers, key=lambda c: c["total_spent"], reverse=True)[:5]
+    top_by_freq = sorted(customers, key=lambda c: c["visit_count"], reverse=True)[:5]
+    newest = sorted(
+        [c for c in customers if c.get("first_transaction_date")],
+        key=lambda c: c["first_transaction_date"],
+        reverse=True
+    )[:5]
+
+    ai_insights = generate_customer_insights(customers)
+
+    def to_item(c):
+        return {
+            "customer_name": c["customer_name"],
+            "total_spent": c["total_spent"],
+            "visit_count": c["visit_count"],
+            "relationship_type": c["relationship_type"],
+            "last_transaction_date": c.get("last_transaction_date")
+        }
+
+    return {
+        "total_customers": total,
+        "vip_customers": vip_count,
+        "regular_customers": regular_count,
+        "new_customers": new_count,
+        "avg_customer_spend": round(avg_spend, 2),
+        "top_by_spend": [to_item(c) for c in top_by_spend],
+        "top_by_frequency": [to_item(c) for c in top_by_freq],
+        "newest_customers": [to_item(c) for c in newest],
+        "ai_insights": ai_insights
+    }
+
+
+@app.get("/api/customer/{customer_id}")
+def get_single_customer_api(customer_id: int, merchant_id: str = Query("merchant_001"), db: Session = Depends(get_db)):
+    """
+    Returns the full profile for a single customer combining:
+    - Sales intelligence (visit_count, total_spent, relationship_type)
+    - Udhar / credit data (pending_amount, risk_score)
+    """
+    from app.services.scoring import calculate_risk_score
+
+    customer = db.query(models.Customer).filter(
+        models.Customer.id == customer_id,
+        models.Customer.merchant_id == merchant_id
+    ).first()
+
+    if not customer:
+        raise HTTPException(status_code=404, detail="Customer not found")
+
+    # Get udhar data
+    udhar_summary = crud.get_udhar_summary_by_customer(db, merchant_id, customer.customer_name)
+    pending_amount = udhar_summary["amount"] if udhar_summary else 0.0
+    days_pending = udhar_summary["days_pending"] if udhar_summary else 0
+
+    risk_res = calculate_risk_score(
+        customer=customer.customer_name,
+        amount_pending=pending_amount,
+        days_pending=days_pending,
+        previous_late_repayments=customer.late_repayments
+    )
+
+    return {
+        "id": customer.id,
+        "customer_name": customer.customer_name,
+        "merchant_id": customer.merchant_id,
+        "phone_number": customer.phone_number,
+        "relationship_type": customer.relationship_type,
+        "visit_count": customer.visit_count or 0,
+        "total_spent": customer.total_spent or 0.0,
+        "average_transaction": customer.average_transaction or 0.0,
+        "first_transaction_date": customer.first_transaction_date,
+        "last_transaction_date": customer.last_transaction_date,
+        "pending_udhar": pending_amount,
+        "days_pending": days_pending,
+        "risk_score": risk_res["risk_score"],
+        "risk_level": risk_res["risk_level"],
+        "late_repayments": customer.late_repayments,
+        "total_repayments": customer.total_repayments,
+        "last_reminder_sent": customer.last_reminder_sent
+    }
+
+
+@app.get("/api/payment-insight")
+def get_payment_insight_api(
+    customer_name: str = Query(...),
+    merchant_id: str = Query("merchant_001"),
+    payment_amount: float = Query(0.0),
+    db: Session = Depends(get_db)
+):
+    """
+    Returns an AI insight card for the payment success screen.
+    Called immediately after a successful payment to show the merchant
+    contextual intelligence about this customer.
+    """
+    from app.services.customer_insights import generate_payment_insight
+
+    customer = db.query(models.Customer).filter(
+        models.Customer.customer_name == customer_name,
+        models.Customer.merchant_id == merchant_id
+    ).first()
+
+    if not customer:
+        return {
+            "customer_name": customer_name,
+            "visit_count": 1,
+            "total_spent": payment_amount,
+            "relationship_type": "New",
+            "insight_message": f"Welcome! Yeh {customer_name} ki pehli purchase hai.",
+            "is_milestone": True
+        }
+
+    return generate_payment_insight(
+        customer_name=customer.customer_name,
+        visit_count=customer.visit_count or 1,
+        total_spent=customer.total_spent or payment_amount,
+        relationship_type=customer.relationship_type or "New",
+        payment_amount=payment_amount
+    )
+
 

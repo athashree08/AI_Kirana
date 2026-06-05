@@ -274,3 +274,142 @@ def process_udhar_repayment(db: Session, merchant_id: str, customer_name: str, r
     return new_pending_amount
 
 
+
+# ============================================================
+# CUSTOMER INTELLIGENCE CRUD
+# ============================================================
+
+from app.services.customer_insights import classify_relationship
+
+
+def upsert_customer_from_transaction(
+    db: Session,
+    merchant_id: str,
+    customer_name: str,
+    transaction_amount: float,
+    transaction_date: date
+) -> models.Customer:
+    """
+    Called after every successful transaction creation.
+    Creates or updates a customer profile with:
+    - visit_count (incremented)
+    - total_spent (summed from all transactions)
+    - average_transaction (computed)
+    - first/last_transaction_date
+    - relationship_type (VIP / Regular / New)
+
+    Uses actual DB aggregate so it stays consistent even after demo resets.
+    """
+    from sqlalchemy import func
+
+    # 1. Get or create base customer record
+    customer = db.query(models.Customer).filter(
+        models.Customer.customer_name == customer_name,
+        models.Customer.merchant_id == merchant_id
+    ).first()
+
+    if not customer:
+        customer = models.Customer(
+            customer_name=customer_name,
+            merchant_id=merchant_id,
+            relationship_type="New",
+            late_repayments=0,
+            total_repayments=0,
+            last_reminder_sent=None,
+            phone_number=None,
+            visit_count=0,
+            total_spent=0.0,
+            average_transaction=0.0,
+            first_transaction_date=None,
+            last_transaction_date=None
+        )
+        db.add(customer)
+        db.flush()  # get id without committing
+
+    # 2. Aggregate all transactions for this customer from the transactions table
+    agg = db.query(
+        func.count(models.Transaction.id).label("visit_count"),
+        func.sum(models.Transaction.amount).label("total_spent"),
+        func.min(models.Transaction.timestamp).label("first_tx"),
+        func.max(models.Transaction.timestamp).label("last_tx")
+    ).filter(
+        models.Transaction.merchant_id == merchant_id,
+        models.Transaction.customer_name == customer_name
+    ).first()
+
+    if agg and agg.visit_count:
+        customer.visit_count = agg.visit_count
+        customer.total_spent = float(agg.total_spent or 0.0)
+        customer.average_transaction = customer.total_spent / customer.visit_count if customer.visit_count > 0 else 0.0
+        if agg.first_tx:
+            customer.first_transaction_date = agg.first_tx.date() if hasattr(agg.first_tx, 'date') else agg.first_tx
+        if agg.last_tx:
+            customer.last_transaction_date = agg.last_tx.date() if hasattr(agg.last_tx, 'date') else agg.last_tx
+    else:
+        # Fallback: use the current transaction being processed
+        customer.visit_count = max(customer.visit_count, 1)
+        customer.total_spent += transaction_amount
+        customer.average_transaction = customer.total_spent / customer.visit_count
+        customer.first_transaction_date = customer.first_transaction_date or transaction_date
+        customer.last_transaction_date = transaction_date
+
+    # 3. Classify relationship type based on purchase history
+    customer.relationship_type = classify_relationship(
+        visit_count=customer.visit_count,
+        total_spent=customer.total_spent
+    )
+
+    db.add(customer)
+    db.commit()
+    db.refresh(customer)
+    return customer
+
+
+def get_customer_intelligence_data(db: Session, merchant_id: str) -> list:
+    """
+    Returns enriched customer data from the customers table combined with
+    transaction aggregates. Used by /api/customer-insights endpoint.
+    Only returns customers who have actual purchase transactions
+    (not just udhar-only entries).
+    """
+    from sqlalchemy import func
+
+    # Aggregate transactions per customer
+    tx_agg = db.query(
+        models.Transaction.customer_name,
+        func.count(models.Transaction.id).label("visit_count"),
+        func.sum(models.Transaction.amount).label("total_spent"),
+        func.min(models.Transaction.timestamp).label("first_tx"),
+        func.max(models.Transaction.timestamp).label("last_tx")
+    ).filter(
+        models.Transaction.merchant_id == merchant_id
+    ).group_by(models.Transaction.customer_name).all()
+
+    result = []
+    for row in tx_agg:
+        # Skip walk-in customers for intelligence dashboard
+        if row.customer_name.startswith("Walk-in"):
+            continue
+
+        cust = db.query(models.Customer).filter(
+            models.Customer.customer_name == row.customer_name,
+            models.Customer.merchant_id == merchant_id
+        ).first()
+
+        rel_type = classify_relationship(
+            visit_count=row.visit_count,
+            total_spent=float(row.total_spent or 0)
+        )
+
+        result.append({
+            "customer_name": row.customer_name,
+            "total_spent": float(row.total_spent or 0),
+            "visit_count": row.visit_count,
+            "relationship_type": rel_type,
+            "first_transaction_date": row.first_tx.date() if row.first_tx and hasattr(row.first_tx, 'date') else None,
+            "last_transaction_date": row.last_tx.date() if row.last_tx and hasattr(row.last_tx, 'date') else None,
+            "phone_number": cust.phone_number if cust else None,
+            "average_transaction": float(row.total_spent or 0) / row.visit_count if row.visit_count > 0 else 0.0
+        })
+
+    return result
