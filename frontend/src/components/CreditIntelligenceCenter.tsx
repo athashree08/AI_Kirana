@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLanguage } from "../context/LanguageContext";
 import ExpenseIntelligence from "./ExpenseIntelligence";
 import CashbookIntelligence from "./CashbookIntelligence";
 import StaffManagement from "./StaffManagement";
@@ -121,6 +122,7 @@ type SidebarView = "ledger" | "cfo" | "voice" | "settings" | "expenses" | "cashb
 type AssistantState = "idle" | "requesting" | "recording" | "processing";
 
 export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenceCenterProps) {
+  const { language, setLanguage, t } = useLanguage();
   const [merchantId] = useState("merchant_001");
   const [currentView, setCurrentView] = useState<SidebarView>("ledger");
   const [activeLedgerTab, setActiveLedgerTab] = useState<"customers" | "suppliers">("customers");
@@ -1039,8 +1041,8 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
               </svg>
             </div>
             <div>
-              <span className="text-lg font-extrabold tracking-tight block">AI Munshi</span>
-              <span className="text-[10px] uppercase tracking-widest text-[#00BAF2] font-extrabold -mt-1 block">Hindi Voice CFO</span>
+              <span className="text-lg font-extrabold tracking-tight block">{t("app_title")}</span>
+              <span className="text-[10px] uppercase tracking-widest text-[#00BAF2] font-extrabold -mt-1 block">{t("sub_title")}</span>
             </div>
           </div>
 
@@ -1060,13 +1062,30 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
             </div>
             <ChevronDown className="w-4 h-4 text-white/40 shrink-0" />
           </div>
+
+          {/* Language Selector Dropdown */}
+          <div className="mt-4 px-1">
+            <label className="text-[9px] font-extrabold text-white/30 uppercase tracking-widest block mb-1.5">
+              Select Language / भाषा
+            </label>
+            <div className="relative">
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as any)}
+                className="w-full bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-xs font-bold text-white shadow-sm outline-none cursor-pointer hover:bg-white/10 transition-all focus:border-[#00BAF2]"
+              >
+                <option value="en" className="bg-[#081A38] text-white">🇬🇧 English</option>
+                <option value="hinglish" className="bg-[#081A38] text-white">🇮🇳 Hinglish</option>
+              </select>
+            </div>
+          </div>
         </div>
 
         {/* Sidebar Nav Items */}
         <div className="flex-1 px-4 py-2 space-y-6 overflow-y-auto">
           <div>
             <span className="px-3 text-[9px] font-extrabold text-white/30 uppercase tracking-widest block mb-3">
-              Business Management
+              {t("mgmt_header")}
             </span>
             <nav className="space-y-1.5">
               <button
@@ -1079,7 +1098,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
               >
                 <div className="flex items-center gap-3">
                   <BookOpen className="w-4.5 h-4.5" />
-                  <span>Customer & Supplier Ledgers</span>
+                  <span>{t("ledgers")}</span>
                 </div>
               </button>
 
@@ -1092,7 +1111,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                 }`}
               >
                 <LayoutDashboard className="w-4.5 h-4.5" />
-                <span>CFO Insights</span>
+                <span>{t("cfo")}</span>
               </button>
 
               <button
@@ -1104,7 +1123,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                 }`}
               >
                 <Mic className="w-4.5 h-4.5" />
-                <span>Voice CFO Console</span>
+                <span>{t("voice")}</span>
               </button>
 
               <button
@@ -1117,7 +1136,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
               >
                 <div className="flex items-center gap-3">
                   <TrendingUp className="w-4.5 h-4.5" />
-                  <span>Expenses & Analytics</span>
+                  <span>{t("expenses")}</span>
                 </div>
                 <span className="bg-[#D32F2F] text-white text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider animate-pulse">AI</span>
               </button>
@@ -1132,7 +1151,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
               >
                 <div className="flex items-center gap-3">
                   <Wallet className="w-4.5 h-4.5" />
-                  <span>Cashbook & Liquidity</span>
+                  <span>{t("cashbook")}</span>
                 </div>
                 <span className="bg-[#00C853] text-white text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider animate-pulse">LIVE</span>
               </button>
@@ -1147,7 +1166,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
               >
                 <div className="flex items-center gap-3">
                   <SlidersHorizontal className="w-4.5 h-4.5" />
-                  <span>Staff & Permissions</span>
+                  <span>{t("staff")}</span>
                 </div>
                 <span className="bg-[#FF9100] text-white text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider">ERP</span>
               </button>
@@ -1162,7 +1181,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
               >
                 <div className="flex items-center gap-3">
                   <LineChart className="w-4.5 h-4.5" />
-                  <span>Reports & Analytics</span>
+                  <span>{t("reports")}</span>
                 </div>
                 <span className="bg-[#D32F2F] text-white text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider animate-pulse">AI</span>
               </button>
@@ -1177,7 +1196,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
               >
                 <div className="flex items-center gap-3">
                   <span className="text-base">🧠</span>
-                  <span>Customer Intelligence</span>
+                  <span>{t("customers_intel")}</span>
                 </div>
                 <span className="bg-[#7c3aed] text-white text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider">NEW</span>
               </button>
@@ -1192,7 +1211,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
               >
                 <div className="flex items-center gap-3">
                   <QrCode className="w-4.5 h-4.5" />
-                  <span>Live QR Terminal</span>
+                  <span>{t("terminal")}</span>
                 </div>
                 <span className="bg-[#e11d48] text-white text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider animate-pulse">QR</span>
               </button>
@@ -1201,7 +1220,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
 
           <div>
             <span className="px-3 text-[9px] font-extrabold text-white/30 uppercase tracking-widest block mb-3">
-              Settings & Seeders
+              {t("settings_header")}
             </span>
             <nav className="space-y-1.5">
               <button
@@ -1213,7 +1232,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                 }`}
               >
                 <Settings className="w-4.5 h-4.5" />
-                <span>Reset Demo Data</span>
+                <span>{t("settings")}</span>
               </button>
             </nav>
           </div>
@@ -1224,7 +1243,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
           <span>Version 1.4.0</span>
           {onLogout && (
             <button onClick={onLogout} className="hover:text-white transition-colors cursor-pointer">
-              Logout
+              {t("logout")}
             </button>
           )}
         </div>
@@ -1251,7 +1270,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
               <div className="px-6 pt-6 pb-4 border-b border-[#E5E7EB] shrink-0">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-bold tracking-tight text-[#002970]">
-                    {activeLedgerTab === "customers" ? "Credit Intelligence Center" : "Supplier Intelligence Center"}
+                    {activeLedgerTab === "customers" ? t("cust_intel_title") : "Supplier Intelligence Center"}
                   </h2>
                   
                   {/* Tabs */}
@@ -1288,7 +1307,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                   <div className="grid grid-cols-3 gap-4 mt-6">
                     <div className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl p-4 flex items-center justify-between shadow-sm">
                       <div>
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#6B7280]">You'll Give</span>
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#6B7280]">{t("you_give")}</span>
                         <h3 className="text-lg font-black text-[#00C853] mt-1">₹{Math.round(totalYouGive).toLocaleString("en-IN")}</h3>
                       </div>
                       <div className="w-8 h-8 rounded-full bg-[#00C853]/10 flex items-center justify-center shrink-0">
@@ -1298,7 +1317,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
 
                     <div className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl p-4 flex items-center justify-between shadow-sm">
                       <div>
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#6B7280]">You'll Get</span>
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#6B7280]">{t("you_get")}</span>
                         <h3 className="text-lg font-black text-[#D32F2F] mt-1">₹{Math.round(totalOutstanding).toLocaleString("en-IN")}</h3>
                       </div>
                       <div className="w-8 h-8 rounded-full bg-[#D32F2F]/10 flex items-center justify-center shrink-0">
@@ -1311,10 +1330,10 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                       className="bg-[#081A38] text-white rounded-2xl p-4 flex items-center justify-between shadow-lg cursor-pointer hover:bg-[#002970] transition-colors"
                     >
                       <div>
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/50">CFO Loan Rating</span>
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/50">{t("cfo_loan_rating")}</span>
                         <h3 className="text-lg font-black text-[#00BAF2] mt-1 flex items-center gap-1.5">
                           {loadingScore ? (
-                            <span className="text-xs text-white/50 font-normal">Calculating...</span>
+                            <span className="text-xs text-white/50 font-normal">{t("calculating")}</span>
                           ) : (
                             <>
                               <span>{loanData?.label || "Good"}</span>
@@ -1334,22 +1353,22 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                   /* Ledger Summary Cards - SUPPLIER TAB (Top Metrics) */
                   <div className="grid grid-cols-4 gap-3 mt-6">
                     <div className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl p-3.5 shadow-sm text-left">
-                      <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#6B7280]">Total Outstanding</span>
+                      <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#6B7280]">{t("total_outstanding")}</span>
                       <h3 className="text-base font-black text-[#00C853] mt-1">₹{totalSupplierOutstanding.toLocaleString("en-IN")}</h3>
                     </div>
 
                     <div className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl p-3.5 shadow-sm text-left">
-                      <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#6B7280]">Monthly Purchases</span>
+                      <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#6B7280]">{t("monthly_purchases")}</span>
                       <h3 className="text-base font-black text-[#002970] mt-1">₹{totalMonthlyPurchases.toLocaleString("en-IN")}</h3>
                     </div>
 
                     <div className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl p-3.5 shadow-sm text-left">
-                      <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#6B7280]">Average Payment Delay</span>
+                      <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#6B7280]">{t("avg_payment_delay")}</span>
                       <h3 className="text-base font-black text-[#f59e0b] mt-1">{avgSupplierPaymentDelay} Days</h3>
                     </div>
 
                     <div className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl p-3.5 shadow-sm text-left">
-                      <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#6B7280]">Reliability Score</span>
+                      <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#6B7280]">{t("reliability_score")}</span>
                       <h3 className="text-base font-black text-[#00BAF2] mt-1">{avgSupplierReliability} / 100</h3>
                     </div>
                   </div>
@@ -1363,7 +1382,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                     <Search className="w-4 h-4 text-[#6B7280]" />
                     <input
                       type="text"
-                      placeholder="Search by customer name or phone..."
+                      placeholder={t("search_placeholder")}
                       value={customerSearch}
                       onChange={(e) => setCustomerSearch(e.target.value)}
                       className="w-full text-xs font-semibold text-[#111827] outline-none placeholder-[#A0AEC0]"
@@ -1377,10 +1396,10 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                       onChange={(e) => setFilterRisk(e.target.value)}
                       className="bg-white border border-[#E5E7EB] rounded-xl px-2.5 py-2 text-xs font-bold text-[#002970] shadow-sm outline-none cursor-pointer"
                     >
-                      <option value="all">All Risks</option>
-                      <option value="low">Low Risk</option>
-                      <option value="medium">Medium Risk</option>
-                      <option value="high">High Risk</option>
+                      <option value="all">{t("all_risks")}</option>
+                      <option value="low">{t("low_risk")}</option>
+                      <option value="medium">{t("medium_risk")}</option>
+                      <option value="high">{t("high_risk")}</option>
                     </select>
                   </div>
 
@@ -1391,9 +1410,9 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                       onChange={(e) => setSortBy(e.target.value)}
                       className="bg-white border border-[#E5E7EB] rounded-xl px-2.5 py-2 text-xs font-bold text-[#002970] shadow-sm outline-none cursor-pointer"
                     >
-                      <option value="active">Sort: Days Pending</option>
-                      <option value="amount">Sort: Outstanding</option>
-                      <option value="risk">Sort: Risk Score</option>
+                      <option value="active">{t("sort_days")}</option>
+                      <option value="amount">{t("sort_outstanding")}</option>
+                      <option value="risk">{t("sort_risk")}</option>
                     </select>
                   </div>
                 </div>
@@ -1591,14 +1610,14 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                       className="flex-1 bg-[#00BAF2] hover:bg-[#009FD0] text-white font-extrabold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-[#00BAF2]/10"
                     >
                       <Plus className="w-4.5 h-4.5" />
-                      <span>Add Customer</span>
+                      <span>{t("add_customer")}</span>
                     </button>
                     <button
                       onClick={() => showToast("success", "Tally & Vyapar customer ledger synchronized successfully.")}
                       className="flex-1 border-2 border-[#E5E7EB] hover:bg-white text-[#002970] font-extrabold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95"
                     >
                       <RefreshCw className="w-4.5 h-4.5" />
-                      <span>Sync Tally</span>
+                      <span>{t("sync_ledger")}</span>
                     </button>
                   </>
                 ) : (
@@ -1608,14 +1627,14 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                       className="flex-1 bg-[#00C853] hover:bg-[#00B24A] text-white font-extrabold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-[#00C853]/10"
                     >
                       <Plus className="w-4.5 h-4.5" />
-                      <span>Add Supplier</span>
+                      <span>{t("add_supplier")}</span>
                     </button>
                     <button
                       onClick={() => showToast("success", "Tally & Vyapar supplier database synchronized successfully.")}
                       className="flex-1 border-2 border-[#E5E7EB] hover:bg-white text-[#002970] font-extrabold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95"
                     >
                       <RefreshCw className="w-4.5 h-4.5" />
-                      <span>Sync Tally</span>
+                      <span>{t("sync_ledger")}</span>
                     </button>
                   </>
                 )}

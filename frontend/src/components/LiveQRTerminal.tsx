@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLanguage } from "../context/LanguageContext";
 import { 
   QrCode, 
   Download, 
@@ -16,7 +17,7 @@ import {
 } from "lucide-react";
 
 // --- TRANSLATIONS DICTIONARY ---
-type SupportedLang = 'en' | 'hi' | 'mr';
+type SupportedLang = 'en' | 'hinglish';
 
 const translations = {
   en: {
@@ -61,89 +62,47 @@ const translations = {
     presetLabel: "Preset",
     soundboxLang: "Soundbox Language"
   },
-  hi: {
-    terminalTitle: "एआई मुंशी लाइव टर्मिनल",
-    terminalSubtitle: "रीअल-टाइम यूपीआई क्यूआर भुगतान का अनुकरण करें और सीएफओ वॉयस मेट्रिक्स और ग्राहक विश्लेषण का परीक्षण करें।",
-    merchantName: "रमेश किराना स्टोर",
-    upiId: "यूपीआई आईडी: merchant_001@ybl",
-    qrInstruct: "किसी भी नकली यूपीआई प्रदाता से भुगतान स्वीकार करें। स्कैन करने के लिए नीचे दिए गए सिम्युलेटर टूल का उपयोग करें।",
-    scanQrBtn: "क्यूआर स्कैन करें (डेमो)",
-    download: "डाउनलोड",
-    share: "लिंक साझा करें",
-    soundboxTitle: "साउंडबॉक्स ऑडियो अलर्ट",
-    soundboxSubtitle: "भुगतान की आवाज़ घोषणाएं बजाएं",
-    alertsOn: "अलर्ट चालू",
-    alertsOff: "अलर्ट बंद",
-    logTitle: "लाइव ट्रांजैक्शन टर्मिनल लॉग",
-    syncActive: "लाइव सिंक सक्रिय",
-    noPayments: "अभी तक कोई क्यूआर भुगतान दर्ज नहीं किया गया है।",
-    clickInstruct: "अपने मर्चेंट कोड को स्कैन करने वाले ग्राहक का अनुकरण करने के लिए \"क्यूआर स्कैन करें (डेमो)\" पर क्लिक करें!",
-    customerCol: "ग्राहक",
-    amountCol: "राशि",
-    modeCol: "माध्यम",
-    categoryCol: "श्रेणी",
-    dateTimeCol: "दिनांक और समय",
-    sandboxTitle: "त्वरित सिमुलेशन ट्रिगर सैंडबॉक्स",
-    sandboxSubtitle: "यूपीआई पिन कीबोर्ड को दरकिनार करते हुए त्वरित नकली ट्रिगर",
-    payingTo: "भुगतान प्राप्तकर्ता",
-    amountToPay: "भुगतान की राशि",
-    customerName: "ग्राहक का नाम",
-    customerMobile: "ग्राहक का मोबाइल नंबर",
-    proceedPay: "भुगतान के लिए आगे बढ़ें",
-    enterPin: "४-अंकीय यूपीआई पिन दर्ज करें",
-    cancel: "रद्द करें",
-    confirmPay: "भुगतान की पुष्टि करें",
-    processing: "यूपीआई भुगतान संसाधित हो रहा है...",
-    secureUpi: "सुरक्षित भीम यूपीआई",
-    successMsg: "भुगतान सफल रहा",
-    recipient: "प्राप्तकर्ता",
-    modeUpi: "यूपीआई क्यूआर कोड",
-    done: "पूर्ण",
-    merchantPayee: "सत्यापित मर्चेंट प्राप्तकर्ता",
-    presetLabel: "प्रीसेट",
-    soundboxLang: "साउंडबॉक्स भाषा"
-  },
-  mr: {
-    terminalTitle: "आय मुन्शी लाइव्ह टर्मिनल",
-    terminalSubtitle: "रिअल-टाइम यूपीआय क्यूआर पेमेंटचे सिम्युलेशन करा आणि सीएफओ व्हॉइस मेट्रिक्स आणि ग्राहक विश्लेषणाची चाचणी घ्या.",
-    merchantName: "रमेश किराणा स्टोअर्स",
-    upiId: "यूपीआय आयडी: merchant_001@ybl",
-    qrInstruct: "कोणत्याही सिम्युलेटेड यूपीआय ॲपवरून पेमेंट स्वीकारा. स्कॅन करण्यासाठी खालील सिम्युलेटर टूल वापरा.",
-    scanQrBtn: "क्यूआर स्कॅन करा (डेमो)",
-    download: "डाउनलोड",
-    share: "लिंक शेअर करा",
-    soundboxTitle: "साउंडबॉक्स ऑडिओ अलर्ट",
-    soundboxSubtitle: "पेमेंटची व्हॉइस घोषणा वाजवा",
-    alertsOn: "अलर्ट चालू",
-    alertsOff: "अलर्ट बंद",
-    logTitle: "लाइव्ह ट्रान्झॅक्शन टर्मिनल लॉग",
-    syncActive: "लाइव्ह सिंक सक्रिय",
-    noPayments: "अद्याप कोणतेही क्यूआर पेमेंट नोंदवले गेले नाही.",
-    clickInstruct: "तुमचा मर्चेंट कोड स्कॅन करणाऱ्या ग्राहकाचे सिम्युलेशन करण्यासाठी \"क्यूआर स्कॅन करा (डेमो)\" वर क्लिक करा!",
-    customerCol: "ग्राहक",
-    amountCol: "रक्कम",
-    modeCol: "माध्यम",
-    categoryCol: "श्रेणी",
-    dateTimeCol: "दिनांक आणि वेळ",
-    sandboxTitle: "त्वरित सिम्युलेशन ट्रिगर सँडबॉक्स",
-    sandboxSubtitle: "यूपीआय पिन कीबोर्ड न वापरता त्वरित नकली ट्रिगर्स",
-    payingTo: "पेमेंट प्राप्तकर्ता",
-    amountToPay: "पेमेंटची रक्कम",
-    customerName: "ग्राहकाचे नाव",
-    customerMobile: "ग्राहकाचा मोबाईल नंबर",
-    proceedPay: "पेमेंटसाठी पुढे जा",
-    enterPin: "४-अंकी यूपीआय पिन प्रविष्ट करा",
-    cancel: "रद्द करा",
-    confirmPay: "पेमेंटची पुष्टी करा",
-    processing: "यूपीआय पेमेंट प्रक्रियेत आहे...",
-    secureUpi: "सुरक्षित भीम यूपीआय",
-    successMsg: "पेमेंट यशस्वी झाले",
-    recipient: "प्राप्तकर्ता",
-    modeUpi: "यूपीआय क्यूआर कोड",
-    done: "पूर्ण",
-    merchantPayee: "सत्यापित मर्चेंट प्राप्तकर्ता",
-    presetLabel: "प्रीसेट",
-    soundboxLang: "साउंडबॉक्स भाषा"
+  hinglish: {
+    terminalTitle: "AI Munshi Live Terminal",
+    terminalSubtitle: "Simulate karein real-time UPI QR payments aur check karein voice metrics aur analytics.",
+    merchantName: "Ramesh Kirana Store",
+    upiId: "UPI ID: merchant_001@ybl",
+    qrInstruct: "Simulated UPI app se mock payments accept karein. Neeche diye simulator tool se scan karein.",
+    scanQrBtn: "QR Scan Karein (Demo)",
+    download: "Download",
+    share: "Share Link",
+    soundboxTitle: "Soundbox Audio Alerts",
+    soundboxSubtitle: "Payment voice confirmations play karein",
+    alertsOn: "ALERTS ON",
+    alertsOff: "ALERTS OFF",
+    logTitle: "Live Transactions Terminal Log",
+    syncActive: "Live Connection Active",
+    noPayments: "Abhi tak koi QR payments nahi hain.",
+    clickInstruct: "\"QR Scan Karein (Demo)\" par click karke simulation check karein!",
+    customerCol: "Grahak",
+    amountCol: "Amount",
+    modeCol: "Mode",
+    categoryCol: "Category",
+    dateTimeCol: "Date & Time",
+    sandboxTitle: "Quick Simulation Trigger Sandbox",
+    sandboxSubtitle: "Bina UPI pin ke instant mock trigger",
+    payingTo: "Paying To",
+    amountToPay: "Amount to Pay",
+    customerName: "Grahak Ka Naam",
+    customerMobile: "Grahak Ka Mobile Number",
+    proceedPay: "Proceed to Pay",
+    enterPin: "ENTER 4-DIGIT UPI PIN",
+    cancel: "CANCEL",
+    confirmPay: "Confirm Payment",
+    processing: "Processing UPI Payment...",
+    secureUpi: "Secure BHIM UPI",
+    successMsg: "Payment Successful",
+    recipient: "Recipient",
+    modeUpi: "UPI QR Code",
+    done: "Done",
+    merchantPayee: "Verified Merchant Payee",
+    presetLabel: "Preset",
+    soundboxLang: "Soundbox Language"
   }
 };
 
@@ -171,8 +130,8 @@ const formatDate = (dateString: string): { date: string; time: string } => {
   return { date: dateStr, time: timeStr };
 };
 
-// Speech Alert function supporting English, Hindi, and Marathi
-const playVoiceAlert = (text: string, lang: SupportedLang = 'hi') => {
+// Speech Alert function supporting English and Hinglish
+const playVoiceAlert = (text: string, lang: SupportedLang = 'en') => {
   if (!('speechSynthesis' in window)) {
     console.warn('Speech synthesis not supported in this browser.');
     return;
@@ -183,21 +142,19 @@ const playVoiceAlert = (text: string, lang: SupportedLang = 'hi') => {
   utterance.pitch = 1.0;
 
   const voices = window.speechSynthesis.getVoices();
-  if (lang === 'hi') {
+  if (lang === 'hinglish') {
     const hiVoice = voices.find(v => v.lang.includes('hi-IN') || v.lang.includes('hi'));
     if (hiVoice) {
       utterance.voice = hiVoice;
       utterance.lang = 'hi-IN';
     } else {
-      utterance.lang = 'hi-IN';
-    }
-  } else if (lang === 'mr') {
-    const mrVoice = voices.find(v => v.lang.includes('mr-IN') || v.lang.includes('mr'));
-    if (mrVoice) {
-      utterance.voice = mrVoice;
-      utterance.lang = 'mr-IN';
-    } else {
-      utterance.lang = 'mr-IN';
+      const enIndVoice = voices.find(v => v.lang.includes('en-IN'));
+      if (enIndVoice) {
+        utterance.voice = enIndVoice;
+        utterance.lang = 'en-IN';
+      } else {
+        utterance.lang = 'en-US';
+      }
     }
   } else {
     const enVoice = voices.find(v => v.lang.includes('en-IN')) || voices.find(v => v.lang.includes('en'));
@@ -231,11 +188,20 @@ export default function LiveQRTerminal({
   merchantId = "merchant_001",
   onPaymentSuccess 
 }: LiveQRTerminalProps) {
+  const { language } = useLanguage();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCustomerSim, setShowCustomerSim] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
-  const [voiceLang, setVoiceLang] = useState<SupportedLang>('hi');
+  const [voiceLang, setVoiceLang] = useState<SupportedLang>('en');
+
+  useEffect(() => {
+    if (language === 'hinglish') {
+      setVoiceLang('hinglish');
+    } else {
+      setVoiceLang('en');
+    }
+  }, [language]);
 
   // Customer Sim Fields
   const [simStep, setSimStep] = useState<'FORM' | 'PIN' | 'PROCESSING' | 'SUCCESS'>('FORM');
@@ -300,10 +266,8 @@ export default function LiveQRTerminal({
 
       if (res.ok) {
         if (voiceEnabled) {
-          const speechText = voiceLang === 'hi' 
-            ? `${name} से ${amt} रुपये प्राप्त हुए हैं।` 
-            : voiceLang === 'mr'
-            ? `${name} कडून ${amt} रुपये प्राप्त झाले आहेत।`
+          const speechText = voiceLang === 'hinglish' 
+            ? `${name} se ${amt} rupees received hue hain.` 
             : `Payment of ${amt} rupees received from ${name}.`;
           playVoiceAlert(speechText, voiceLang);
         }
@@ -373,10 +337,8 @@ export default function LiveQRTerminal({
 
       // Trigger Soundbox alert
       if (voiceEnabled) {
-        const speechText = voiceLang === 'hi' 
-          ? `${customerName} से ${amount} रुपये प्राप्त हुए हैं।` 
-          : voiceLang === 'mr'
-          ? `${customerName} कडून ${amount} रुपये प्राप्त झाले आहेत।`
+        const speechText = voiceLang === 'hinglish' 
+          ? `${customerName} se ${amount} rupees received hue hain.` 
           : `Payment received. Amount ${amount} rupees from ${customerName}.`;
         playVoiceAlert(speechText, voiceLang);
       }
@@ -505,20 +467,12 @@ export default function LiveQRTerminal({
                 {/* Language Switch */}
                 <div className="bg-slate-800 p-1 rounded-2xl flex border border-slate-700">
                   <button 
-                    onClick={() => setVoiceLang('hi')}
+                    onClick={() => setVoiceLang('hinglish')}
                     className={`px-3 py-1.5 text-xs font-bold rounded-xl transition cursor-pointer ${
-                      voiceLang === 'hi' ? 'bg-[#D32F2F] text-white' : 'text-slate-400 hover:text-white'
+                      voiceLang === 'hinglish' ? 'bg-[#D32F2F] text-white' : 'text-slate-400 hover:text-white'
                     }`}
                   >
-                    हिन्दी
-                  </button>
-                  <button 
-                    onClick={() => setVoiceLang('mr')}
-                    className={`px-3 py-1.5 text-xs font-bold rounded-xl transition cursor-pointer ${
-                      voiceLang === 'mr' ? 'bg-[#D32F2F] text-white' : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    मराठी
+                    Hinglish
                   </button>
                   <button 
                     onClick={() => setVoiceLang('en')}
@@ -641,25 +595,25 @@ export default function LiveQRTerminal({
                 onClick={() => handleTriggerPreset("Kiran Rao", 1500)}
                 className="py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white rounded-2xl text-xs font-bold transition cursor-pointer"
               >
-                + ₹1,500 ({voiceLang === 'hi' ? 'किरण' : voiceLang === 'mr' ? 'किरण' : 'Kiran'})
+                + ₹1,500 (Kiran)
               </button>
               <button 
                 onClick={() => handleTriggerPreset("Sunil Joshi", 800)}
                 className="py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white rounded-2xl text-xs font-bold transition cursor-pointer"
               >
-                + ₹800 ({voiceLang === 'hi' ? 'सुनील' : voiceLang === 'mr' ? 'सुनील' : 'Sunil'})
+                + ₹800 (Sunil)
               </button>
               <button 
                 onClick={() => handleTriggerPreset("Sandeep Gupta", 5000)}
                 className="py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white rounded-2xl text-xs font-bold transition cursor-pointer"
               >
-                + ₹5,000 ({voiceLang === 'hi' ? 'संदीप' : voiceLang === 'mr' ? 'संदीप' : 'Sandeep'})
+                + ₹5,000 (Sandeep)
               </button>
               <button 
                 onClick={() => handleTriggerPreset("Rahul Sharma", 2500)}
                 className="py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white rounded-2xl text-xs font-bold transition cursor-pointer"
               >
-                + ₹2,500 ({voiceLang === 'hi' ? 'राहुल' : voiceLang === 'mr' ? 'राहुल' : 'Rahul'})
+                + ₹2,500 (Rahul)
               </button>
             </div>
           </div>

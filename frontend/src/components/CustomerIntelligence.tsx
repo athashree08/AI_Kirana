@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLanguage } from "../context/LanguageContext";
 
 // --- INTERFACES ---
 interface TopCustomerItem {
@@ -129,6 +130,7 @@ interface CustomerIntelligenceProps {
 }
 
 export default function CustomerIntelligence({ merchantId = "merchant_001" }: CustomerIntelligenceProps) {
+  const { t } = useLanguage();
   const [data, setData] = useState<CustomerInsightsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -209,7 +211,7 @@ export default function CustomerIntelligence({ merchantId = "merchant_001" }: Cu
         <div>
           <h2 className="text-xl font-extrabold text-white tracking-tight flex items-center gap-2">
             <span className="text-2xl">🧠</span>
-            Customer Intelligence
+            {t("cust_intel_title")}
           </h2>
           <p className="text-xs text-[#64748b] mt-1 font-medium">
             AI-powered customer analytics — automatically updated on every payment.
@@ -222,7 +224,7 @@ export default function CustomerIntelligence({ merchantId = "merchant_001" }: Cu
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
-          Refresh
+          {t("refresh")}
         </button>
       </div>
 
@@ -231,7 +233,7 @@ export default function CustomerIntelligence({ merchantId = "merchant_001" }: Cu
         {/* Total */}
         <div className="bg-[#0c1526] border border-[#1e3a5a]/50 rounded-2xl p-5 flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-extrabold text-[#64748b] uppercase tracking-widest">Total Customers</span>
+            <span className="text-[10px] font-extrabold text-[#64748b] uppercase tracking-widest">{t("total_customers")}</span>
             <span className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-base">👥</span>
           </div>
           <span className="text-3xl font-black text-white">{data.total_customers}</span>
@@ -241,7 +243,7 @@ export default function CustomerIntelligence({ merchantId = "merchant_001" }: Cu
         {/* VIP */}
         <div className="bg-[#0c1526] border border-amber-500/20 rounded-2xl p-5 flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-extrabold text-amber-500/70 uppercase tracking-widest">VIP Customers</span>
+            <span className="text-[10px] font-extrabold text-amber-500/70 uppercase tracking-widest">{t("vip_customers")}</span>
             <span className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-base">👑</span>
           </div>
           <span className="text-3xl font-black text-amber-400">{data.vip_customers}</span>
@@ -254,7 +256,7 @@ export default function CustomerIntelligence({ merchantId = "merchant_001" }: Cu
         {/* Regular */}
         <div className="bg-[#0c1526] border border-blue-500/20 rounded-2xl p-5 flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-extrabold text-blue-500/70 uppercase tracking-widest">Regular</span>
+            <span className="text-[10px] font-extrabold text-blue-500/70 uppercase tracking-widest">{t("regular_customers")}</span>
             <span className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-base">⭐</span>
           </div>
           <span className="text-3xl font-black text-blue-400">{data.regular_customers}</span>
@@ -267,7 +269,7 @@ export default function CustomerIntelligence({ merchantId = "merchant_001" }: Cu
         {/* Avg Spend */}
         <div className="bg-[#0c1526] border border-emerald-500/20 rounded-2xl p-5 flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-extrabold text-emerald-500/70 uppercase tracking-widest">Avg Spend</span>
+            <span className="text-[10px] font-extrabold text-emerald-500/70 uppercase tracking-widest">{t("avg_spend")}</span>
             <span className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-base">💰</span>
           </div>
           <span className="text-2xl font-black text-emerald-400">₹{Math.round(data.avg_customer_spend).toLocaleString("en-IN")}</span>
@@ -280,7 +282,7 @@ export default function CustomerIntelligence({ merchantId = "merchant_001" }: Cu
         {/* Customer Tier Distribution */}
         <div className="bg-[#0c1526] border border-[#1e3a5a]/50 rounded-2xl p-6">
           <h3 className="text-sm font-extrabold text-white mb-5 flex items-center gap-2">
-            <span className="text-base">📊</span> Customer Tier Distribution
+            <span className="text-base">📊</span> {t("tier_dist")}
           </h3>
 
           {/* Segmented bar */}
@@ -300,7 +302,7 @@ export default function CustomerIntelligence({ merchantId = "merchant_001" }: Cu
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-                <span className="text-xs text-[#94a3b8] font-medium">VIP — 10+ visits, ₹10k+</span>
+                <span className="text-xs text-[#94a3b8] font-medium">{t("vip_desc")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-white">{data.vip_customers}</span>
@@ -310,7 +312,7 @@ export default function CustomerIntelligence({ merchantId = "merchant_001" }: Cu
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-                <span className="text-xs text-[#94a3b8] font-medium">Regular — 4+ visits</span>
+                <span className="text-xs text-[#94a3b8] font-medium">{t("regular_desc")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-white">{data.regular_customers}</span>
@@ -320,7 +322,7 @@ export default function CustomerIntelligence({ merchantId = "merchant_001" }: Cu
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full bg-slate-500" />
-                <span className="text-xs text-[#94a3b8] font-medium">New — 1–3 visits</span>
+                <span className="text-xs text-[#94a3b8] font-medium">{t("new_desc")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-white">{data.new_customers}</span>
@@ -339,7 +341,7 @@ export default function CustomerIntelligence({ merchantId = "merchant_001" }: Cu
         {/* AI Insights */}
         <div className="lg:col-span-2 bg-[#0c1526] border border-[#1e3a5a]/50 rounded-2xl p-6">
           <h3 className="text-sm font-extrabold text-white mb-4 flex items-center gap-2">
-            <span className="text-base">🤖</span> AI Customer Insights
+            <span className="text-base">🤖</span> {t("ai_cust_insights")}
             <span className="ml-2 text-[10px] bg-blue-500/10 border border-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
               Live
             </span>
@@ -363,7 +365,7 @@ export default function CustomerIntelligence({ merchantId = "merchant_001" }: Cu
         {/* Table Tabs */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-5">
           <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
-            <span className="text-base">🏆</span> Top Customers
+            <span className="text-base">🏆</span> {t("top_customers")}
           </h3>
           <div className="flex gap-1 bg-[#1e2a3a] p-1 rounded-xl">
             {(["spend", "frequency", "newest"] as const).map((tab) => (
@@ -376,7 +378,7 @@ export default function CustomerIntelligence({ merchantId = "merchant_001" }: Cu
                     : "text-[#64748b] hover:text-white"
                 }`}
               >
-                {tab === "spend" ? "By Spending" : tab === "frequency" ? "By Frequency" : "Newest"}
+                {tab === "spend" ? t("by_spend") : tab === "frequency" ? t("by_freq") : t("newest")}
               </button>
             ))}
           </div>
@@ -479,7 +481,7 @@ export default function CustomerIntelligence({ merchantId = "merchant_001" }: Cu
       {/* ---- VOICE QUERY HINTS ---- */}
       <div className="bg-[#0c1526] border border-[#1e3a5a]/30 rounded-2xl p-5">
         <h4 className="text-xs font-extrabold text-[#64748b] uppercase tracking-widest mb-3 flex items-center gap-2">
-          <span>🎙️</span> Ask Voice CFO About Customers
+          <span>🎙️</span> {t("voice_hints_title")}
         </h4>
         <div className="flex flex-wrap gap-2">
           {[

@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
+import { useLanguage } from "../context/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
@@ -243,6 +244,7 @@ const INITIAL_MOCK_DATA: TransactionItem[] = [
 ];
 
 export default function ExpenseIntelligence() {
+  const { t } = useLanguage();
   // --- STATE ---
   const [transactions, setTransactions] = useState<TransactionItem[]>(() => {
     const local = localStorage.getItem("ai_munshi_expenses_data");
@@ -617,7 +619,7 @@ export default function ExpenseIntelligence() {
         <div className="flex justify-between items-center mb-5 border-b border-[#E5E7EB] pb-3">
           <div>
             <h2 className="text-xl font-black text-[#002970] flex items-center gap-2">
-              Expense Intelligence Hub
+              {t("exp_intel_title")}
               <span className="bg-[#00BAF2]/10 text-[#00BAF2] text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">AI Powered</span>
             </h2>
             <p className="text-[11px] text-[#6B7280] font-semibold mt-0.5">Real-time expense diagnostic audit, cash burn ratios, and inventory analysis.</p>
@@ -627,7 +629,7 @@ export default function ExpenseIntelligence() {
             className="bg-[#00BAF2] hover:bg-[#009FD0] text-white font-extrabold text-xs py-2.5 px-4 rounded-xl flex items-center gap-2 shadow-lg shadow-[#00BAF2]/15 transition-all cursor-pointer active:scale-95 shrink-0"
           >
             <Plus className="w-4 h-4" />
-            <span>Add Entry</span>
+            <span>{t("add_expense")}</span>
           </button>
         </div>
 

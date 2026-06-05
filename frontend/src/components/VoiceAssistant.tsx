@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useLanguage } from "../context/LanguageContext";
 
 type AssistantState = "idle" | "requesting" | "recording" | "processing";
 
 export default function VoiceAssistant() {
+  const { t } = useLanguage();
   const [status, setStatus] = useState<AssistantState>("idle");
   const [transcript, setTranscript] = useState("");
   const [intent, setIntent] = useState("");
@@ -476,7 +478,7 @@ export default function VoiceAssistant() {
       {/* Mic Input Panel */}
       <div className="lg:col-span-1 bg-slate-900/50 backdrop-blur-md rounded-2xl border border-slate-800/80 p-8 shadow-xl flex flex-col items-center justify-between min-h-[460px]">
         <div className="w-full flex flex-col items-center">
-          <h3 className="text-base font-bold text-slate-300 mb-6 tracking-wide text-center">Voice CFO Control Panel</h3>
+          <h3 className="text-base font-bold text-slate-300 mb-6 tracking-wide text-center">{t("voice")}</h3>
           
           {/* Large Mic Button Container */}
           <div className="relative mb-5 flex items-center justify-center">
@@ -588,7 +590,7 @@ export default function VoiceAssistant() {
       {/* Output Panel */}
       <div className="lg:col-span-2 bg-slate-900/50 backdrop-blur-md rounded-2xl border border-slate-800/80 p-8 shadow-xl flex flex-col justify-between min-h-[460px]">
         <div>
-          <h2 className="text-lg font-bold tracking-tight text-slate-200 mb-6">AI Voice CFO Insights</h2>
+          <h2 className="text-lg font-bold tracking-tight text-slate-200 mb-6">{t("cfo")}</h2>
           
           <div className="space-y-6">
             {/* 1. Transcript Section */}

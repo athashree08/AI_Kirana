@@ -85,15 +85,26 @@ async def process_voice(
         transcript_lower = transcript.lower()
         import re
         
+        # Detect language of the query
+        is_devanagari = any(0x0900 <= ord(c) <= 0x097F for c in transcript)
+        query_lang = "hinglish"
+        if is_devanagari:
+            # Check if Marathi keywords are present
+            marathi_kws = ["सर्वात", "सगळ्यात", "किती", "दाखवा", "आहे", "येतो", "येणारा", "एकूण", "आहेत", "कडून", "झाले", "झालेत"]
+            if any(kw in transcript_lower for kw in marathi_kws):
+                query_lang = "mr"
+            else:
+                query_lang = "hi"
+        
         summary_keywords = ["hisaab", "aaj", "revenue", "income", "business", "हिसाब", "आज", "रेवेन्यू", "इनकम", "बिजनेस", "व्यापार", "धंधा", "कमाई"]
         loan_keywords = ["loan", "eligibility", "score", "finance", "लोन", "एलिजिबिलिटी", "स्कोर", "फाइनेंस", "ऋण"]
         gst_keywords = ["gst", "registration", "tax", "जीएसटी", "रजिस्ट्रेशन", "टैक्स", "कर"]
         
         # New Udhar Intents & Keywords
-        repayment_keywords = ["wapas", "paise wapas", "wapas diye", "diye", "chukaye", "chuka", "वापस", "पैसे वापस", "वापस दिए", "दिए", "चुकाए", "चुकाया", "भुगतान"]
+        repayment_keywords = ["wapas", "paise wapas", "wapas diye", "diye", "chukaye", "chuka", "वापस", "पैसे वापस", "वापस दिए", "दिए", "चुकाए", "चुकाया", "भुगतान", "जमा"]
         reminder_keywords = ["yaad dila", "reminder bhejo", "reminder bheja", "reminder dila", "remind", "याद दिला", "रिमाइंडर", "याद दिलाओ", "मैसेज भेजो"]
         status_keywords = ["kaisa chal raha hai", "udhar kaisa", "udhar status", "report", "कैसा चल रहा है", "उधार कैसा", "उधार स्थिति", "रिपोर्ट", "उधार रिपोर्ट"]
-        add_keywords = ["udhar diya", "credit diya", "udhar diya hai", "diya", "उधार दिया", "क्रेडिट दिया", "दिया", "उधार"]
+        add_keywords = ["udhar diya", "credit diya", "udhar diya hai", "diya", "उधार दिया", "क्रेडिट दिया", "दिया", "उधार", "लिख", "लिखो", "लिखा", "लिख लो"]
         
         matched_name = None
         
@@ -117,37 +128,73 @@ async def process_voice(
                 "geeta": "Geeta", "गीता": "Geeta",
                 "ravi": "Ravi", "रवि": "Ravi",
                 "रमेश": "Ramesh", "ramesh": "Ramesh",
+                "रमेश चावला": "Ramesh Chawla", "रमेशचावला": "Ramesh Chawla",
                 "प्रथमेष": "Prathmesh", "prathmesh": "Prathmesh", "प्रथमेस": "Prathmesh", "प्रथमेश": "Prathmesh",
                 "जौन": "chandrasen", "john": "chandrasen", "जॉन": "chandrasen", "चंद्रसेन": "chandrasen", "चन्द्रसेन": "chandrasen", "chandrasen": "chandrasen",
-                "अमित": "Amit", "amit": "Amit", "संदीप": "Sandeep", "sandeep": "Sandeep",
-                "राजेश": "Rajesh", "rajesh": "Rajesh", "संजय": "Sanjay", "sanjay": "Sanjay",
-                "सुरेश": "Suresh", "suresh": "Suresh", "विजय": "Vijay", "vijay": "Vijay",
-                "अनिल": "Anil", "anil": "Anil", "सुनील": "Sunil", "sunil": "Sunil",
-                "राकेश": "Rakesh", "rakesh": "Rakesh", "प्रिया": "Priya", "priya": "Priya",
-                "नेहा": "Neha", "neha": "Neha", "सुनीता": "Sunita", "sunita": "Sunita",
-                "किरण": "Kiran", "kiran": "Kiran", "मीना": "Meena", "meena": "Meena",
-                "पूजा": "Pooja", "pooja": "Pooja", "आशा": "Asha", "asha": "Asha",
-                "रेखा": "Rekha", "rekha": "Rekha", "ज्योति": "Jyoti", "jyoti": "Jyoti",
-                "दीपा": "Deepa", "deepa": "Deepa", "विक्रम": "Vikram", "vikram": "Vikram",
-                "अर्जुन": "Arjun", "arjun": "Arjun", "करन": "Karan", "karan": "Karan",
-                "राहुल": "Rahul", "rahul": "Rahul", "आदित्य": "Aditya", "aditya": "Aditya",
-                "मनीष": "Manish", "manish": "Manish", "गौरव": "Gaurav", "gaurav": "Gaurav",
-                "आलोक": "Alok", "alok": "Alok", "विवेक": "Vivek", "vivek": "Vivek",
-                "दिनेश": "Dinesh", "dinesh": "Dinesh",
-                "shilpa": "Shilpa", "शिल्पा": "Shilpa"
+                "अमित": "Amit", "amit": "Amit", "अमित शर्मा": "Amit Sharma",
+                "संदीप": "Sandeep", "sandeep": "Sandeep", "संदीप गुप्ता": "Sandeep Gupta",
+                "राजेश": "Rajesh", "rajesh": "Rajesh", "राजेश कुमार": "Rajesh Kumar",
+                "संजय": "Sanjay", "sanjay": "Sanjay", "संजय वर्मा": "Sanjay Verma",
+                "सुरेश": "Suresh", "suresh": "Suresh", "सुरेश पटेल": "Suresh Patel",
+                "विजय": "Vijay", "vijay": "Vijay", "विजय यादव": "Vijay Yadav",
+                "अनिल": "Anil", "anil": "Anil", "अनिल मिश्रा": "Anil Mishra",
+                "सुनील": "Sunil", "sunil": "Sunil", "सुनील जोशी": "Sunil Joshi",
+                "राकेश": "Rakesh", "rakesh": "Rakesh", "राकेश तिवारी": "Rakesh Tiwari",
+                "प्रिया": "Priya", "priya": "Priya", "प्रिया सिंह": "Priya Singh",
+                "नेहा": "Neha", "neha": "Neha", "नेहा शर्मा": "Neha Sharma",
+                "सुनीता": "Sunita", "sunita": "Sunita", "सुनीता देवी": "Sunita Devi",
+                "किरण": "Kiran", "kiran": "Kiran", "किरण राव": "Kiran Rao",
+                "मीना": "Meena", "meena": "Meena", "मीना अग्रवाल": "Meena Aggarwal",
+                "पूजा": "Pooja", "pooja": "Pooja", "पूजा गुप्ता": "Pooja Gupta", "पुजा": "Pooja", "पुजा गुप्ता": "Pooja Gupta",
+                "आशा": "Asha", "asha": "Asha", "आशा भोसले": "Asha Bhosle",
+                "रेखा": "Rekha", "rekha": "Rekha", "रेखा शर्मा": "Rekha Sharma",
+                "ज्योति": "Jyoti", "jyoti": "Jyoti", "ज्योति प्रसाद": "Jyoti Prasad",
+                "दीपा": "Deepa", "deepa": "Deepa", "दीपा नायर": "Deepa Nair", "दीपानायर": "Deepa Nair",
+                "विक्रम": "Vikram", "vikram": "Vikram", "विक्रम मल्होत्रा": "Vikram Malhotra",
+                "अर्जुन": "Arjun", "arjun": "Arjun", "अर्जुन सेन": "Arjun Sen",
+                "करन": "Karan", "karan": "Karan", "करण": "Karan", "करण जौहर": "Karan Johar",
+                "राहुल": "Rahul", "rahul": "Rahul", "राहुल द्रविड़": "Rahul Dravid", "राहुल द्रविड": "Rahul Dravid",
+                "आदित्य": "Aditya", "aditya": "Aditya", "आदित्य रॉय": "Aditya Roy",
+                "मनीष": "Manish", "manish": "Manish", "मनीष मल्होत्रा": "Manish Malhotra",
+                "गौरव": "Gaurav", "gaurav": "Gaurav", "गौरव कपूर": "Gaurav Kapur",
+                "आलोक": "Alok", "alok": "Alok", "आलोक नाथ": "Alok Nath",
+                "विवेक": "Vivek", "vivek": "Vivek", "विवेक ओबेरॉय": "Vivek Oberoi",
+                "दिनेश": "Dinesh", "dinesh": "Dinesh", "दिनेश कार्तिक": "Dinesh Karthik",
+                "अभिषेक": "Abhishek", "abhishek": "Abhishek", "अभिषेक बच्चन": "Abhishek Bachchan",
+                "shilpa": "Shilpa", "शिल्पा": "Shilpa",
+                "पाथू": "Pathu", "पथु": "Pathu", "pathu": "Pathu",
+                "अनु": "Anu", "anu": "Anu"
             }
             for key_name, db_name in name_map.items():
                 if key_name in transcript_lower:
                     matched_name = db_name
                     break
 
-        # 3. Dynamic preposition-based extraction for new/unseen names
+        # 3. Check if matched name exists in database. If not, check prefix/substring matches
+        if matched_name:
+            try:
+                from app.models import Customer as CustomerModel
+                exact_exists = db.query(CustomerModel).filter(
+                    CustomerModel.merchant_id == "merchant_001",
+                    CustomerModel.customer_name == matched_name
+                ).first()
+                if not exact_exists:
+                    prefix_match = db.query(CustomerModel).filter(
+                        CustomerModel.merchant_id == "merchant_001",
+                        CustomerModel.customer_name.like(f"%{matched_name}%")
+                    ).first()
+                    if prefix_match:
+                        matched_name = prefix_match.customer_name
+            except Exception as e:
+                print(f"Error checking customer name prefix match: {e}")
+
+        # 4. Dynamic preposition-based extraction for new/unseen names
         STOP_WORDS = {
             "rupaye", "rupiya", "rupiye", "rs", "rupees", "rupee", "paise",
             "udhar", "credit", "kitna", "ka", "ki", "ke", "hai", "tha", "hoga",
             "aur", "ya", "mera", "meri", "tera", "uska", "unka", "yeh", "woh",
             "kya", "kab", "kaise", "kyun", "main", "hum", "aap", "tum",
-            "pending", "baaki", "baki", "total", "sab", "sabka"
+            "pending", "baaki", "baki", "total", "sab", "sabka", "bada", "achha", "accha", "chaangla"
         }
         if not matched_name:
             words = transcript.strip().split()
@@ -166,7 +213,7 @@ async def process_voice(
                             matched_name = potential_name  # assign regardless of script
                             break
 
-        # 4. Broad noun scan — catch names even without postpositions
+        # 5. Broad noun scan — catch names even without postpositions
         #    e.g. "Suresh kitna udhar hai" — pick first proper-noun-looking word
         if not matched_name:
             words = transcript.strip().split()
@@ -195,7 +242,7 @@ async def process_voice(
         is_repayment = any(kw in transcript_lower for kw in ["wapas", "paise wapas", "chukaye", "chuka", "वापस", "पैसे वापस", "चुकाए", "चुकाया", "भुगतान", "जमा"])
         is_addition = (
             any(kw in transcript_lower for kw in ["likh", "likho", "likha", "लिख", "लिखो", "लिखा", "लिख लो"]) or
-            (any(kw in transcript_lower for kw in ["udhar", "credit", "उधार", "क्रेडिट"]) and
+            (any(kw in transcript_lower for kw in ["udhar", "credit", "उधार", "उधर", "क्रेडिट"]) and
              any(kw in transcript_lower for kw in ["diya", "diye", "दिया", "दिए", "add", "जोड़", "जोड़ा"]))
         )
         
@@ -224,23 +271,47 @@ async def process_voice(
             intent = "udhar_reminder"
             if matched_name:
                 try:
-                    # Trigger Twilio WhatsApp reminder sending
                     send_res = send_reminder_api(schemas.ReminderSendRequest(customer_name=matched_name), db)
                     if send_res.success:
-                        response_text = f"{matched_name} ko WhatsApp reminder bhej diya gaya."
+                        if query_lang == "mr":
+                            response_text = f"{matched_name} ला WhatsApp रिमाइंडर पाठवले आहे."
+                        elif query_lang == "hi":
+                            response_text = f"{matched_name} को WhatsApp रिमाइंडर भेज दिया गया है।"
+                        else:
+                            response_text = f"{matched_name} ko WhatsApp reminder bhej diya gaya."
                     else:
-                        response_text = f"{matched_name} ko WhatsApp reminder bhejna safal nahi raha."
+                        if query_lang == "mr":
+                            response_text = f"{matched_name} ला WhatsApp रिमाइंडर पाठवणे यशस्वी झाले नाही."
+                        elif query_lang == "hi":
+                            response_text = f"{matched_name} को WhatsApp रिमाइंडर भेजना असफल रहा।"
+                        else:
+                            response_text = f"{matched_name} ko WhatsApp reminder bhejna safal nahi raha."
                 except Exception:
-                    response_text = f"{matched_name} ko WhatsApp reminder bhej diya gaya." # fallback success for mock
+                    if query_lang == "mr":
+                        response_text = f"{matched_name} ला WhatsApp रिमाइंडर पाठवले आहे."
+                    elif query_lang == "hi":
+                        response_text = f"{matched_name} को WhatsApp रिमाइंडर भेज दिया गया है।"
+                    else:
+                        response_text = f"{matched_name} ko WhatsApp reminder bhej diya gaya."
             else:
-                response_text = "Mohan ko WhatsApp reminder bhej diya gaya."
+                if query_lang == "mr":
+                    response_text = "मोहन ला WhatsApp रिमाइंडर पाठवले आहे."
+                elif query_lang == "hi":
+                    response_text = "मोहन को WhatsApp रिमाइंडर भेज दिया गया है।"
+                else:
+                    response_text = "Mohan ko WhatsApp reminder bhej diya gaya."
         elif any(kw in transcript_lower for kw in status_keywords) or "udhar kaisa" in transcript_lower:
             intent = "udhar_status"
             # Get actual health breakdown dynamically
             health = get_udhar_health_api("merchant_001", db)
             total = int(health["total_udhar"])
             risky = int(health["risky_amount"])
-            response_text = f"Aapka total udhar ₹{total:,} hai. Isme se ₹{risky:,} high risk category mein hai."
+            if query_lang == "mr":
+                response_text = f"तुमचे एकूण उधार ₹{total:,} आहे. त्यापैकी ₹{risky:,} उच्च जोखीम श्रेणीत आहे."
+            elif query_lang == "hi":
+                response_text = f"आपका कुल उधार ₹{total:,} है। इसमें से ₹{risky:,} उच्च जोखिम श्रेणी में है।"
+            else:
+                response_text = f"Aapka total udhar ₹{total:,} hai. Isme se ₹{risky:,} high risk category mein hai."
         elif is_addition:
             intent = "udhar_add"
             if matched_name and amount:
@@ -254,9 +325,21 @@ async def process_voice(
                 db.add(new_udhar)
                 db.commit()
                 crud.get_or_create_customer(db, "merchant_001", matched_name)
-                response_text = f"{matched_name} ko {int(amount)} rupaye udhar add kar diya gaya hai."
+                if query_lang == "mr":
+                    response_text = f"{matched_name} साठी ₹{int(amount)} उधार जोडले गेले आहे."
+                elif query_lang == "hi":
+                    response_text = f"{matched_name} के लिए ₹{int(amount)} उधार जोड़ दिया गया है।"
+                else:
+                    response_text = f"{matched_name} ko {int(amount)} rupaye udhar add kar diya gaya hai."
             else:
-                response_text = f"{matched_name or 'Mohan'} ko {int(amount) if amount else 500} rupaye udhar add kar diya gaya hai."
+                name_disp = matched_name or 'Mohan'
+                amt_disp = int(amount) if amount else 500
+                if query_lang == "mr":
+                    response_text = f"{name_disp} साठी ₹{amt_disp} उधार जोडले गेले आहे."
+                elif query_lang == "hi":
+                    response_text = f"{name_disp} के लिए ₹{amt_disp} उधार जोड़ दिया गया है।"
+                else:
+                    response_text = f"{name_disp} ko {amt_disp} rupaye udhar add kar diya gaya hai."
         elif is_repayment:
             intent = "udhar_repayment"
             if matched_name:
@@ -266,35 +349,74 @@ async def process_voice(
                     amount = sum_res["amount"] if sum_res else 0.0
                 
                 remaining = crud.process_udhar_repayment(db, "merchant_001", matched_name, amount)
-                response_text = f"{matched_name} ka balance ab {int(remaining)} rupaye baki hai."
+                if query_lang == "mr":
+                    response_text = f"{matched_name} चा बाकी शिल्लक आता ₹{int(remaining)} आहे."
+                elif query_lang == "hi":
+                    response_text = f"{matched_name} का बाकी बैलेंस अब ₹{int(remaining)} है।"
+                else:
+                    response_text = f"{matched_name} ka balance ab {int(remaining)} rupaye baki hai."
             else:
-                response_text = "Mohan ka balance ab 900 rupaye baki hai."
-        elif "udhar" in transcript_lower or "credit" in transcript_lower or "उधार" in transcript_lower or "क्रेडिट" in transcript_lower:
+                if query_lang == "mr":
+                    response_text = "मोहन चा बाकी शिल्लक आता ₹९०० आहे."
+                elif query_lang == "hi":
+                    response_text = "मोहन का बाकी बैलेंस अब ₹९०० है।"
+                else:
+                    response_text = "Mohan ka balance ab 900 rupaye baki hai."
+        elif any(x in transcript_lower for x in ["udhar", "credit", "उधार", "उधर", "क्रेडिट", "बाकी", "baki"]):
             intent = "udhar"
             if matched_name:
                 summary = crud.get_udhar_summary_by_customer(db, merchant_id="merchant_001", customer_name=matched_name)
                 if summary:
-                    response_text = f"{summary['customer']} ka {int(summary['amount'])} rupaye udhar baaki hai."
+                    if query_lang == "mr":
+                        response_text = f"{summary['customer']} कडून ₹{int(summary['amount'])} उधार बाकी आहे."
+                    elif query_lang == "hi":
+                        response_text = f"{summary['customer']} का ₹{int(summary['amount'])} उधार बाकी है।"
+                    else:
+                        response_text = f"{summary['customer']} ka {int(summary['amount'])} rupaye udhar baaki hai."
                 else:
-                    response_text = f"{matched_name} ka koi udhar baaki nahi hai."
+                    if query_lang == "mr":
+                        response_text = f"{matched_name} चे कोणतेही उधार बाकी नाही."
+                    elif query_lang == "hi":
+                        response_text = f"{matched_name} का कोई उधार बाकी नहीं है।"
+                    else:
+                        response_text = f"{matched_name} ka koi udhar baaki nahi hai."
             else:
-                response_text = "Mohan ka 1200 rupaye udhar baaki hai."
+                if query_lang == "mr":
+                    response_text = "मोहन कडून ₹१,२०० उधार बाकी आहे."
+                elif query_lang == "hi":
+                    response_text = "मोहन का ₹१,२०० उधार बाकी है।"
+                else:
+                    response_text = "Mohan ka 1200 rupaye udhar baaki hai."
         else:
             # ---- CUSTOMER INTELLIGENCE VOICE INTENTS ----
-            # Detect language of the query
-            query_lang = "hinglish"
-            marathi_kws = ["सर्वात", "सगळ्यात", "किती", "दाखवा", "आहे", "येतो", "येणारा", "एकूण"]
-            hindi_kws = ["सबसे", "कितने", "दिखाओ", "है", "आता", "आया", "कौन", "किरण"]
-            if any(kw in transcript_lower for kw in marathi_kws):
-                query_lang = "mr"
-            elif any(kw in transcript_lower for kw in hindi_kws):
-                query_lang = "hi"
-
-            if any(kw in transcript_lower for kw in [
+            is_top_customer_query = any(kw in transcript_lower for kw in [
                 "sabse accha customer", "best customer", "top customer", "sabse bada customer",
                 "sabse valuable", "best customer kaun hai",
-                "सर्वात चांगला कस्टमर", "सगळ्यात चांगला कस्टमर", "सर्वात चांगला ग्राहक", "सगळ्यात चांगला ग्राहक", "सर्वात मोठा ग्राहक", "सबसे अच्छा ग्राहक", "सबसे बड़ा ग्राहक"
-            ]):
+                "सर्वात चांगला कस्टमर", "सगळ्यात चांगला कस्टमर", "सर्वात चांगला ग्राहक", "सगळ्यात चांगला ग्राहक", "सर्वात मोठा ग्राहक", "सबसे अच्छा ग्राहक", "सबसे बड़ा ग्राहक",
+                "बड़ा ग्राहक", "बड़ा कस्टमर", "चांगला ग्राहक", "चांगला कस्टमर", "सबसे अच्छा कस्टमर"
+            ])
+            
+            is_top5_customer_query = any(kw in transcript_lower for kw in [
+                "top 5 customers", "top customers dikhao", "top customers", "top panch customer",
+                "टॉप ५", "टॉप 5", "पहिली ५", "पहिले ५", "पहिले 5", "टॉप ५ ग्राहक", "टॉप ५ कस्टमर", "पहिले ५ ग्राहक", "पहिले ५ कस्टमर"
+            ])
+            
+            is_frequent_customer_query = (
+                any(kw in transcript_lower for kw in [
+                    "most frequent", "frequent customer", "zyada bar aaya", "zyada baar", "jyada bar", "jyada baar",
+                    "ज्यादा बार", "ज्यादा बार आया", "जास्त वेळा", "वारंवार"
+                ]) or
+                ("sabse zyada" in transcript_lower and any(x in transcript_lower for x in ["aata", "aaya", "baar", "bar", "visit"])) or
+                ("sabse jyada" in transcript_lower and any(x in transcript_lower for x in ["aata", "aaya", "baar", "bar", "visit"])) or
+                (("सर्वात जास्त" in transcript_lower or "सगळ्यात जास्त" in transcript_lower or "सबसे ज्यादा" in transcript_lower or "सबसे ज़्यादा" in transcript_lower) and any(x in transcript_lower for x in ["aata", "aaya", "baar", "bar", "visit", "yeil", "yeun", "yeणारा", "येतो", "येणारा", "वेळा", "येऊन", "फेऱ्या", "visit", "आया", "आता"]))
+            )
+            
+            is_customer_base_query = any(kw in transcript_lower for kw in [
+                "customer base", "kitne customers", "mera customer base", "customers hain",
+                "किती कस्टमर", "एकूण कस्टमर", "कस्टमर बेस", "किती ग्राहक", "एकूण ग्राहक", "एकॉन ग्राहक", "एकुण ग्राहक", "ग्राहक किती", "किती आहेत"
+            ])
+
+            if is_top_customer_query:
                 intent = "customer_top"
                 try:
                     customers_intel = crud.get_customer_intelligence_data(db, "merchant_001")
@@ -319,11 +441,8 @@ async def process_voice(
                         response_text = "Abhi koi customer purchase data record nahi hua hai."
                 except Exception as e:
                     response_text = "Customer data fetch karne mein error aayi."
-
-            elif any(kw in transcript_lower for kw in [
-                "top 5 customers", "top customers dikhao", "top customers", "top panch customer",
-                "टॉप ५", "टॉप 5", "पहिली ५", "पहिले ५", "पहिले 5", "टॉप ५ ग्राहक", "टॉप ५ कस्टमर"
-            ]):
+            
+            elif is_top5_customer_query:
                 intent = "customer_top5"
                 try:
                     customers_intel = crud.get_customer_intelligence_data(db, "merchant_001")
@@ -340,12 +459,8 @@ async def process_voice(
                         response_text = "Abhi koi customer purchase data record nahi hua hai."
                 except Exception as e:
                     response_text = "Top customers fetch karne mein error aayi."
-
-            elif (
-                any(kw in transcript_lower for kw in ["most frequent", "frequent customer", "zyada bar aaya", "zyada baar"]) or
-                ("sabse zyada" in transcript_lower and any(x in transcript_lower for x in ["aata", "aaya", "baar", "bar", "visit"])) or
-                (("सर्वात जास्त" in transcript_lower or "सगळ्यात जास्त" in transcript_lower) and any(x in transcript_lower for x in ["येतो", "येणारा", "वेळा", "येऊन", "फेऱ्या", "visit"]))
-            ):
+            
+            elif is_frequent_customer_query:
                 intent = "customer_frequent"
                 try:
                     customers_intel = crud.get_customer_intelligence_data(db, "merchant_001")
@@ -370,11 +485,8 @@ async def process_voice(
                         response_text = "Abhi koi frequent customer data nahi hai."
                 except Exception as e:
                     response_text = "Frequent customer data fetch karne mein error aayi."
-
-            elif any(kw in transcript_lower for kw in [
-                "customer base", "kitne customers", "mera customer base", "customers hain",
-                "किती कस्टमर", "एकूण कस्टमर", "कस्टमर बेस", "किती ग्राहक", "एकूण ग्राहक"
-            ]):
+            
+            elif is_customer_base_query:
                 intent = "customer_base"
                 try:
                     customers_intel = crud.get_customer_intelligence_data(db, "merchant_001")
@@ -398,10 +510,15 @@ async def process_voice(
                         )
                 except Exception as e:
                     response_text = "Aapke paas active customers hain. Customer Intelligence module check karein."
-
+            
             else:
                 intent = "unknown"
-                response_text = "Maaf kijiye, main aapka sawaal samajh nahi paaya."
+                if query_lang == "mr":
+                    response_text = "माफ करा, मला तुमचा प्रश्न समजला नाही."
+                elif query_lang == "hi":
+                    response_text = "माफ़ कीजिए, मैं आपका सवाल समझ नहीं पाया।"
+                else:
+                    response_text = "Maaf kijiye, main aapka sawaal samajh nahi paaya."
             
     # 4. Call Sarvam text_to_speech service
     try:

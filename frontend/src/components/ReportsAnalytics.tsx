@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useLanguage } from "../context/LanguageContext";
 import {
   Search,
   Activity,
@@ -64,6 +65,7 @@ const UNIFIED_DATABASE: UnifiedRecord[] = [
 ];
 
 export default function ReportsAnalytics() {
+  const { t } = useLanguage();
   // --- STATE ---
   const [activeCategory, setActiveCategory] = useState<typeof REPORT_CATEGORIES[number]["id"]>("transactions");
   
@@ -337,7 +339,7 @@ export default function ReportsAnalytics() {
         <div className="flex justify-between items-center flex-wrap gap-4">
           <div>
             <h2 className="text-xl font-black text-[#002970] flex items-center gap-2">
-              BI Analytics Dashboard
+              {t("reports_title")}
               <span className="bg-[#D32F2F]/10 text-[#D32F2F] text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">AI Intelligence</span>
             </h2>
             <p className="text-[11px] text-[#6B7280] font-semibold mt-0.5">Enterprise ledger audits, tax logs, GST thresholds, and cash balances diagnostics.</p>

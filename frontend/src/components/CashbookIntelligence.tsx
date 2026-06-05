@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
+import { useLanguage } from "../context/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
@@ -169,6 +170,7 @@ const INITIAL_CASH_RECORDS: CashRecord[] = [
 ];
 
 export default function CashbookIntelligence() {
+  const { t } = useLanguage();
   // --- STATE ---
   const [records, setRecords] = useState<CashRecord[]>(() => {
     const local = localStorage.getItem("ai_munshi_cashbook_data");
@@ -481,7 +483,7 @@ export default function CashbookIntelligence() {
         <div className="flex justify-between items-center mb-5 border-b border-[#E5E7EB] pb-3">
           <div>
             <h2 className="text-xl font-black text-[#002970] flex items-center gap-2">
-              Cashbook & Drawer Intelligence
+              {t("cashbook_title")}
               <span className="bg-[#00C853]/10 text-[#00C853] text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">Tally Connected</span>
             </h2>
             <p className="text-[11px] text-[#6B7280] font-semibold mt-0.5">Physical currency tracking, capital leakage analysis, and daily cash drawer balancing audits.</p>
@@ -491,7 +493,7 @@ export default function CashbookIntelligence() {
             className="bg-[#00BAF2] hover:bg-[#009FD0] text-white font-extrabold text-xs py-2.5 px-4 rounded-xl flex items-center gap-2 shadow-lg shadow-[#00BAF2]/15 transition-all cursor-pointer active:scale-95 shrink-0"
           >
             <Plus className="w-4 h-4" />
-            <span>Record Cash</span>
+            <span>{t("add_expense")}</span>
           </button>
         </div>
 
@@ -502,7 +504,7 @@ export default function CashbookIntelligence() {
             <div className="absolute top-0 left-0 w-1 h-full bg-[#00C853]" />
             <div className="flex justify-between items-start">
               <div>
-                <span className="text-[9px] font-extrabold uppercase text-[#6B7280] tracking-wider block">Cash In Hand</span>
+                <span className="text-[9px] font-extrabold uppercase text-[#6B7280] tracking-wider block">{t("net_balance")}</span>
                 <h3 className="text-xl font-black text-[#002970] mt-1">₹{kpis.cashInHand.toLocaleString("en-IN")}</h3>
               </div>
               <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center text-[#00C853]">
@@ -520,7 +522,7 @@ export default function CashbookIntelligence() {
             <div className="absolute top-0 left-0 w-1 h-full bg-[#00BAF2]" />
             <div className="flex justify-between items-start">
               <div>
-                <span className="text-[9px] font-extrabold uppercase text-[#6B7280] tracking-wider block">Today's Inflows</span>
+                <span className="text-[9px] font-extrabold uppercase text-[#6B7280] tracking-wider block">{t("cash_in")}</span>
                 <h3 className="text-xl font-black text-[#002970] mt-1">₹{kpis.todayIn.toLocaleString("en-IN")}</h3>
               </div>
               <div className="w-8 h-8 rounded-xl bg-sky-50 flex items-center justify-center text-[#00BAF2]">
@@ -537,7 +539,7 @@ export default function CashbookIntelligence() {
             <div className="absolute top-0 left-0 w-1 h-full bg-[#D32F2F]" />
             <div className="flex justify-between items-start">
               <div>
-                <span className="text-[9px] font-extrabold uppercase text-[#6B7280] tracking-wider block">Today's Outflows</span>
+                <span className="text-[9px] font-extrabold uppercase text-[#6B7280] tracking-wider block">{t("cash_out")}</span>
                 <h3 className="text-xl font-black text-[#002970] mt-1">₹{kpis.todayOut.toLocaleString("en-IN")}</h3>
               </div>
               <div className="w-8 h-8 rounded-xl bg-rose-50 flex items-center justify-center text-[#D32F2F]">
@@ -601,7 +603,7 @@ export default function CashbookIntelligence() {
                 }`}
               >
                 <ArrowDownLeft className="w-4 h-4" />
-                <span>Cash-In (Receipts)</span>
+                <span>{t("cash_in")}</span>
               </button>
               <button
                 onClick={() => {
@@ -613,7 +615,7 @@ export default function CashbookIntelligence() {
                 }`}
               >
                 <ArrowUpRight className="w-4 h-4" />
-                <span>Cash-Out (Payouts)</span>
+                <span>{t("cash_out")}</span>
               </button>
             </div>
 

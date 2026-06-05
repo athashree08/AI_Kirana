@@ -149,10 +149,12 @@ def test_fifo_repayment_tracking(db_session):
     assert cust.late_repayments == 1 # Paid off entry1 which was > 30 days pending
 
 
-def test_twilio_mock_service():
+def test_twilio_mock_service(monkeypatch):
     """
     Test Twilio helper function in mock mode.
     """
+    monkeypatch.setattr("app.services.twilio_service.load_dotenv", lambda *args, **kwargs: None)
+    monkeypatch.setenv("MOCK_TWILIO", "true")
     res = twilio_service.send_whatsapp_reminder("Mohan", "Namaste Mohan ji", "+919999999999")
     assert res["success"] is True
     assert res["message_sid"].startswith("SM")
@@ -222,4 +224,57 @@ def test_hindi_voice_intent_matching(db_session):
     assert cust_kavita is not None
 
     app.dependency_overrides.clear()
+
+
+def test_multilingual_voice_cfo_intents(db_session):
+    from fastapi.testclient import TestClient
+    from app.main import app
+    from app.main import get_db
+    
+    app.dependency_overrides[get_db] = lambda: db_session
+    client = TestClient(app)
+
+    # Seed some dummy intelligence data to prevent empty records
+    from app.models import Customer
+    from datetime import date
+    c1 = Customer(
+        customer_name="Deepa Nair",
+        merchant_id="merchant_001",
+        relationship_type="VIP",
+        visit_count=10,
+        total_spent=12000.0,
+        average_transaction=1200.0,
+        first_transaction_date=date.today(),
+        last_transaction_date=date.today()
+    )
+    db_session.add(c1)
+    db_session.commit()
+
+    # 1. बड़ा ग्राहक कौन है -> customer_top
+    response = client.post("/api/voice", data={"mock_text": "बड़ा ग्राहक कौन है"})
+    assert response.status_code == 200
+    assert response.json()["intent"] == "customer_top"
+
+    # 2. दीपा नायर का कितना उधर बाकी है -> udhar
+    response = client.post("/api/voice", data={"mock_text": "दीपा नायर का कितना उधर बाकी है"})
+    assert response.status_code == 200
+    assert response.json()["intent"] == "udhar"
+
+    # 3. मेरा सबसे अच्छा कस्टमर कौन है -> customer_top
+    response = client.post("/api/voice", data={"mock_text": "मेरा सबसे अच्छा कस्टमर कौन है"})
+    assert response.status_code == 200
+    assert response.json()["intent"] == "customer_top"
+
+    # 4. एकॉन ग्राहक किती आहेत -> customer_base
+    response = client.post("/api/voice", data={"mock_text": "एकॉन ग्राहक किती आहेत"})
+    assert response.status_code == 200
+    assert response.json()["intent"] == "customer_base"
+
+    # 5. ज्यादा बार कौन आया -> customer_frequent
+    response = client.post("/api/voice", data={"mock_text": "ज्यादा बार कौन आया"})
+    assert response.status_code == 200
+    assert response.json()["intent"] == "customer_frequent"
+
+    app.dependency_overrides.clear()
+
 

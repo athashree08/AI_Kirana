@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
+import { useLanguage } from "../context/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
@@ -117,6 +118,7 @@ const INITIAL_STAFF: StaffMember[] = [
 ];
 
 export default function StaffManagement() {
+  const { language, t } = useLanguage();
   // --- STATE ---
   const [staffList, setStaffList] = useState<StaffMember[]>(() => {
     const local = localStorage.getItem("ai_munshi_staff_data");
@@ -333,7 +335,7 @@ export default function StaffManagement() {
         <div className="flex justify-between items-center mb-5 border-b border-[#E5E7EB] pb-3">
           <div>
             <h2 className="text-xl font-black text-[#002970] flex items-center gap-2">
-              Staff & Permissions Control
+              {t("staff_title")}
               <span className="bg-[#FF9100]/10 text-[#FF9100] text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">Store ERP</span>
             </h2>
             <p className="text-[11px] text-[#6B7280] font-semibold mt-0.5">Role allocations, security credential logs, AI workflow metrics, and access checks.</p>
@@ -343,7 +345,7 @@ export default function StaffManagement() {
             className="bg-[#00BAF2] hover:bg-[#009FD0] text-white font-extrabold text-xs py-2.5 px-4 rounded-xl flex items-center gap-2 shadow-lg shadow-[#00BAF2]/15 transition-all cursor-pointer active:scale-95 shrink-0"
           >
             <Plus className="w-4 h-4" />
-            <span>Add Staff Member</span>
+            <span>{language === "hinglish" ? "Naya Staff Jodein" : "Add Staff Member"}</span>
           </button>
         </div>
 
@@ -353,7 +355,7 @@ export default function StaffManagement() {
             <div className="absolute top-0 left-0 w-1 h-full bg-[#00BAF2]" />
             <div className="flex justify-between items-start">
               <div>
-                <span className="text-[9px] font-extrabold uppercase text-[#6B7280] tracking-wider block">Total Staff</span>
+                <span className="text-[9px] font-extrabold uppercase text-[#6B7280] tracking-wider block">{t("total_staff")}</span>
                 <h3 className="text-xl font-black text-[#002970] mt-1">{metrics.total}</h3>
               </div>
               <div className="w-8 h-8 rounded-xl bg-sky-50 flex items-center justify-center text-[#00BAF2]">
@@ -369,7 +371,7 @@ export default function StaffManagement() {
             <div className="absolute top-0 left-0 w-1 h-full bg-[#00C853]" />
             <div className="flex justify-between items-start">
               <div>
-                <span className="text-[9px] font-extrabold uppercase text-[#6B7280] tracking-wider block">Active Staff</span>
+                <span className="text-[9px] font-extrabold uppercase text-[#6B7280] tracking-wider block">{t("active_staff")}</span>
                 <h3 className="text-xl font-black text-[#002970] mt-1">{metrics.active}</h3>
               </div>
               <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center text-[#00C853]">
@@ -386,7 +388,7 @@ export default function StaffManagement() {
             <div className="absolute top-0 left-0 w-1 h-full bg-[#FF9100]" />
             <div className="flex justify-between items-start">
               <div>
-                <span className="text-[9px] font-extrabold uppercase text-[#6B7280] tracking-wider block">Pending Approvals</span>
+                <span className="text-[9px] font-extrabold uppercase text-[#6B7280] tracking-wider block">{t("pending_approvals")}</span>
                 <h3 className="text-xl font-black text-[#002970] mt-1">{metrics.pending}</h3>
               </div>
               <div className="w-8 h-8 rounded-xl bg-amber-50 flex items-center justify-center text-[#FF9100]">
