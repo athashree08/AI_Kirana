@@ -10,6 +10,8 @@ class Merchant(Base):
     language = Column(String, nullable=False)
     business_type = Column(String, nullable=False)
     city = Column(String, nullable=False)
+    password_hash = Column(String, nullable=True)
+    phone_number = Column(String, nullable=True)
 
     # Relationships
     transactions = relationship("Transaction", back_populates="merchant", cascade="all, delete-orphan")

@@ -373,7 +373,7 @@ export default function LiveQRTerminal({
       <div className="flex items-center justify-between bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl">
         <div>
           <h2 className="text-2xl font-black text-white flex items-center gap-2">
-            <QrCode className="w-7 h-7 text-[#00BAF2]" />
+            <QrCode className="w-7 h-7 text-[#c83226]" />
             {t.terminalTitle}
           </h2>
           <p className="text-slate-400 text-xs mt-1">
@@ -395,10 +395,10 @@ export default function LiveQRTerminal({
           
           {/* MERCHANT QR CARD */}
           <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl flex flex-col items-center text-center shadow-lg relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[#00BAF2]/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#c83226]/10 rounded-full blur-3xl pointer-events-none"></div>
             
             <h3 className="text-white font-extrabold text-lg">{t.merchantName}</h3>
-            <p className="text-[#00BAF2] text-xs font-semibold">{t.upiId}</p>
+            <p className="text-[#c83226] text-xs font-semibold">{t.upiId}</p>
             
             {/* Real visual QR container */}
             <div className="my-6 p-4 bg-white rounded-3xl shadow-inner relative group border-4 border-slate-800">
@@ -407,9 +407,9 @@ export default function LiveQRTerminal({
                 alt="Payment QR Code" 
                 className="w-48 h-48 rounded-xl object-contain"
               />
-              <div className="absolute inset-0 bg-[#00BAF2]/5 rounded-xl pointer-events-none flex flex-col items-center justify-center">
+              <div className="absolute inset-0 bg-[#c83226]/5 rounded-xl pointer-events-none flex flex-col items-center justify-center">
                 {/* Laser animation */}
-                <div className="w-4/5 h-[2px] bg-[#00BAF2] shadow-[0_0_8px_#00BAF2] rounded-full animate-bounce"></div>
+                <div className="w-4/5 h-[2px] bg-[#c83226] shadow-[0_0_8px_#c83226] rounded-full animate-bounce"></div>
               </div>
             </div>
 
@@ -420,7 +420,7 @@ export default function LiveQRTerminal({
             <div className="w-full space-y-3">
               <button 
                 onClick={() => setShowCustomerSim(true)}
-                className="w-full py-3 bg-[#00BAF2] hover:bg-[#009bd0] text-white font-bold rounded-2xl shadow-lg shadow-[#00BAF2]/20 flex items-center justify-center gap-2 transition cursor-pointer"
+                className="w-full py-3 bg-[#c83226] hover:bg-[#b0281e] text-white font-bold rounded-2xl shadow-lg shadow-[#c83226]/20 flex items-center justify-center gap-2 transition cursor-pointer"
               >
                 <Scan className="w-4.5 h-4.5" />
                 {t.scanQrBtn}
@@ -506,7 +506,7 @@ export default function LiveQRTerminal({
           <div className="bg-slate-900 border border-slate-800 rounded-3xl shadow-lg flex flex-col h-[400px]">
             <div className="p-6 border-b border-slate-800 flex items-center justify-between shrink-0">
               <h3 className="text-white font-extrabold text-sm flex items-center gap-2">
-                <CreditCard className="w-4 h-4 text-[#00BAF2]" />
+                <CreditCard className="w-4 h-4 text-[#c83226]" />
                 {t.logTitle}
               </h3>
               <div className="flex items-center gap-2 text-[10px] text-slate-400">
@@ -518,7 +518,7 @@ export default function LiveQRTerminal({
             <div className="flex-1 overflow-y-auto min-h-0">
               {loading ? (
                 <div className="h-full flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00BAF2]"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#c83226]"></div>
                 </div>
               ) : transactions.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-2 text-slate-500">
@@ -545,7 +545,7 @@ export default function LiveQRTerminal({
                         <tr 
                           key={txn.id} 
                           className={`text-xs hover:bg-slate-800/30 transition-all ${
-                            isNewest ? "bg-[#00BAF2]/5 font-semibold text-white border-l-4 border-[#00BAF2]" : "text-slate-300"
+                            isNewest ? "bg-[#c83226]/5 font-semibold text-white border-l-4 border-[#c83226]" : "text-slate-300"
                           }`}
                         >
                           <td className="px-6 py-4">
@@ -558,7 +558,7 @@ export default function LiveQRTerminal({
                             {formatCurrency(txn.amount)}
                           </td>
                           <td className="px-6 py-4">
-                            <span className="bg-[#00BAF2]/10 text-[#00BAF2] px-2 py-0.5 rounded-full text-[9px] font-black uppercase">
+                            <span className="bg-[#c83226]/10 text-[#c83226] px-2 py-0.5 rounded-full text-[9px] font-black uppercase">
                               {t.modeUpi}
                             </span>
                           </td>
@@ -641,10 +641,10 @@ export default function LiveQRTerminal({
                 </div>
 
                 <div className="text-center mb-6">
-                  <div className="w-12 h-12 rounded-2xl bg-[#002970] text-white flex items-center justify-center font-black text-xl mx-auto shadow-md">
+                  <div className="w-12 h-12 rounded-2xl bg-[#0e1b2f] text-white flex items-center justify-center font-black text-xl mx-auto shadow-md">
                     M
                   </div>
-                  <h4 className="font-extrabold text-[#002970] text-base mt-2">{t.merchantName}</h4>
+                  <h4 className="font-extrabold text-[#0e1b2f] text-base mt-2">{t.merchantName}</h4>
                   <p className="text-slate-400 text-[10px]">payingto: merchant_001@ybl</p>
                 </div>
 
@@ -653,20 +653,20 @@ export default function LiveQRTerminal({
                     <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide block">{t.payingTo}</label>
                     <div className="flex items-center gap-2 p-3 bg-white border border-slate-200 rounded-2xl shadow-sm">
                       <Building className="w-4 h-4 text-slate-500" />
-                      <span className="font-extrabold text-xs text-[#002970]">{t.merchantName}</span>
+                      <span className="font-extrabold text-xs text-[#0e1b2f]">{t.merchantName}</span>
                     </div>
                   </div>
 
                   <div className="space-y-1">
                     <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide block">{t.amountToPay}</label>
                     <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-black text-[#002970]">₹</span>
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-black text-[#0e1b2f]">₹</span>
                       <input 
                         type="number"
                         placeholder="0"
                         value={amount}
                         onChange={(e) => setAmount(e.target.value)}
-                        className="w-full pl-9 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-2xl font-black text-[#002970] shadow-sm focus:outline-none focus:border-[#00BAF2]"
+                        className="w-full pl-9 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-2xl font-black text-[#0e1b2f] shadow-sm focus:outline-none focus:border-[#c83226]"
                         required
                       />
                     </div>
@@ -679,7 +679,7 @@ export default function LiveQRTerminal({
                       placeholder="e.g. Pathu"
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
-                      className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-xs font-semibold text-slate-700 shadow-sm focus:outline-none focus:border-[#00BAF2]"
+                      className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-xs font-semibold text-slate-700 shadow-sm focus:outline-none focus:border-[#c83226]"
                       required
                     />
                   </div>
@@ -691,14 +691,14 @@ export default function LiveQRTerminal({
                       placeholder="e.g. 9876543210"
                       value={customerPhone}
                       onChange={(e) => setCustomerPhone(e.target.value)}
-                      className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-xs font-semibold text-slate-700 shadow-sm focus:outline-none focus:border-[#00BAF2]"
+                      className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-xs font-semibold text-slate-700 shadow-sm focus:outline-none focus:border-[#c83226]"
                       required
                     />
                   </div>
 
                   <button 
                     type="submit"
-                    className="w-full py-3.5 bg-[#002970] hover:bg-[#001c4e] text-white font-bold rounded-2xl shadow-lg mt-auto cursor-pointer transition"
+                    className="w-full py-3.5 bg-[#0e1b2f] hover:bg-[#081322] text-white font-bold rounded-2xl shadow-lg mt-auto cursor-pointer transition"
                   >
                     {t.proceedPay}
                   </button>
@@ -716,7 +716,7 @@ export default function LiveQRTerminal({
                   </div>
                   <div className="text-right">
                     <span className="text-[10px] text-slate-500 font-extrabold uppercase block">{t.amountCol}</span>
-                    <span className="font-black text-[#00BAF2] text-lg">₹{amount}</span>
+                    <span className="font-black text-[#c83226] text-lg">₹{amount}</span>
                   </div>
                 </div>
 
@@ -727,7 +727,7 @@ export default function LiveQRTerminal({
                       <div 
                         key={i} 
                         className={`w-4 h-4 rounded-full border-2 transition-all ${
-                          i < pin.length ? "bg-[#00BAF2] border-[#00BAF2] scale-110" : "border-slate-600 bg-transparent"
+                          i < pin.length ? "bg-[#c83226] border-[#c83226] scale-110" : "border-slate-600 bg-transparent"
                         }`}
                       ></div>
                     ))}
@@ -776,8 +776,8 @@ export default function LiveQRTerminal({
             {/* STEP 3: PROCESSING SPINNER */}
             {simStep === 'PROCESSING' && (
               <div className="p-6 flex flex-col flex-1 items-center justify-center bg-white">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00BAF2] mb-4"></div>
-                <h3 className="font-extrabold text-base text-[#002970]">{t.processing}</h3>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#c83226] mb-4"></div>
+                <h3 className="font-extrabold text-base text-[#0e1b2f]">{t.processing}</h3>
                 <p className="text-slate-400 text-xs mt-1">Establishing secure bank link</p>
               </div>
             )}
@@ -792,7 +792,7 @@ export default function LiveQRTerminal({
                   </div>
                   
                   <h3 className="text-emerald-600 font-black text-xl">{t.successMsg}</h3>
-                  <h2 className="text-3xl font-black text-[#002970]">{formatCurrency(createdTxn.amount)}</h2>
+                  <h2 className="text-3xl font-black text-[#0e1b2f]">{formatCurrency(createdTxn.amount)}</h2>
                   
                   <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl text-left text-xs space-y-2.5">
                     <div className="flex justify-between">
@@ -816,7 +816,7 @@ export default function LiveQRTerminal({
 
                 <button 
                   onClick={handleCloseSim}
-                  className="w-full py-3.5 bg-[#002970] hover:bg-[#001c4e] text-white font-bold rounded-2xl transition cursor-pointer mt-6"
+                  className="w-full py-3.5 bg-[#0e1b2f] hover:bg-[#081322] text-white font-bold rounded-2xl transition cursor-pointer mt-6"
                 >
                   {t.done}
                 </button>

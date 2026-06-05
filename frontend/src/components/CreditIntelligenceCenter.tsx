@@ -35,6 +35,8 @@ import {
 } from "lucide-react";
 
 interface CreditIntelligenceCenterProps {
+  merchantId?: string;
+  merchantName?: string;
   onLogout?: () => void;
 }
 
@@ -121,9 +123,14 @@ interface SupplierLedgerEntry {
 type SidebarView = "ledger" | "cfo" | "voice" | "settings" | "expenses" | "cashbook" | "staff" | "reports" | "customers" | "terminal";
 type AssistantState = "idle" | "requesting" | "recording" | "processing";
 
-export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenceCenterProps) {
+export default function CreditIntelligenceCenter({ 
+  merchantId: initialMerchantId, 
+  merchantName: initialMerchantName, 
+  onLogout 
+}: CreditIntelligenceCenterProps) {
   const { language, setLanguage, t } = useLanguage();
-  const [merchantId] = useState("merchant_001");
+  const [merchantId] = useState(initialMerchantId || "merchant_001");
+  const [merchantName] = useState(initialMerchantName || "Ramesh Kirana Store");
   const [currentView, setCurrentView] = useState<SidebarView>("ledger");
   const [activeLedgerTab, setActiveLedgerTab] = useState<"customers" | "suppliers">("customers");
 
@@ -1030,30 +1037,38 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
       {/* ============================================================== */}
       {/* 1. LEFT SIDEBAR                                               */}
       {/* ============================================================== */}
-      <div className="w-[280px] h-full bg-[#081A38] text-white flex flex-col justify-between shrink-0 relative z-30">
+      <div className="w-[280px] h-full bg-[#0e1b2f] text-white flex flex-col justify-between shrink-0 relative z-30">
         
         {/* Top Branding Section */}
         <div className="p-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#00BAF2] to-[#00C853] flex items-center justify-center shadow-lg shadow-[#00BAF2]/10">
-              <svg className="w-5.5 h-5.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z" />
+            <div className="w-10 h-10 rounded-xl bg-[#c83226] flex items-center justify-center shadow-lg shadow-[#c83226]/20">
+              <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 2H6c-1.206 0-3 .799-3 3v14c0 2.201 1.794 3 3 3h13c1.104 0 2-.896 2-2V4c0-1.104-.896-2-2-2zM6 20c-.57 0-1-.18-1-.5s.43-.5 1-.5h13v1H6z" />
               </svg>
             </div>
             <div>
-              <span className="text-lg font-extrabold tracking-tight block">{t("app_title")}</span>
-              <span className="text-[10px] uppercase tracking-widest text-[#00BAF2] font-extrabold -mt-1 block">{t("sub_title")}</span>
+              <span className="text-xl font-extrabold tracking-tight block">
+                Vyapar<span className="text-[#c83226]"> Saathi</span><sup className="text-[10px] text-[#c83226] font-bold">®</sup>
+              </span>
+              <span className="text-[9px] uppercase tracking-widest text-white/50 font-extrabold -mt-1 block">Business hua easy</span>
             </div>
           </div>
 
           {/* Business Profile Card */}
           <div className="mt-8 bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center justify-between hover:bg-white/10 transition-all cursor-pointer">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#00BAF2]/20 border border-[#00BAF2]/30 flex items-center justify-center font-bold text-[#00BAF2] text-sm shrink-0">
-                RK
+              <div className="w-10 h-10 rounded-xl bg-[#c83226]/20 border border-[#c83226]/30 flex items-center justify-center font-bold text-[#c83226] text-sm shrink-0">
+                {(() => {
+                  const words = merchantName.trim().split(/\s+/);
+                  if (words.length >= 2) {
+                    return (words[0][0] + words[1][0]).toUpperCase();
+                  }
+                  return merchantName.substring(0, 2).toUpperCase() || "VS";
+                })()}
               </div>
               <div className="min-w-0">
-                <h4 className="text-xs font-bold text-white truncate">Ramesh Kirana Store</h4>
+                <h4 className="text-xs font-bold text-white truncate">{merchantName}</h4>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#00C853] animate-pulse"></span>
                   <span className="text-[9px] text-white/50 font-semibold uppercase tracking-wider">Online</span>
@@ -1072,10 +1087,10 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value as any)}
-                className="w-full bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-xs font-bold text-white shadow-sm outline-none cursor-pointer hover:bg-white/10 transition-all focus:border-[#00BAF2]"
+                className="w-full bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-xs font-bold text-white shadow-sm outline-none cursor-pointer hover:bg-white/10 transition-all focus:border-[#c83226]"
               >
-                <option value="en" className="bg-[#081A38] text-white">🇬🇧 English</option>
-                <option value="hinglish" className="bg-[#081A38] text-white">🇮🇳 Hinglish</option>
+                <option value="en" className="bg-[#0e1b2f] text-white">🇬🇧 English</option>
+                <option value="hinglish" className="bg-[#0e1b2f] text-white">🇮🇳 Hinglish</option>
               </select>
             </div>
           </div>
@@ -1092,7 +1107,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                 onClick={() => { setCurrentView("ledger"); }}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   currentView === "ledger"
-                    ? "bg-[#00BAF2] text-white shadow-md shadow-[#00BAF2]/25"
+                    ? "bg-[#182c47] text-white border-l-4 border-[#3b82f6]"
                     : "text-white/70 hover:bg-white/5 hover:text-white"
                 }`}
               >
@@ -1106,7 +1121,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                 onClick={() => setCurrentView("cfo")}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   currentView === "cfo"
-                    ? "bg-[#00BAF2] text-white shadow-md shadow-[#00BAF2]/25"
+                    ? "bg-[#182c47] text-white border-l-4 border-[#3b82f6]"
                     : "text-white/70 hover:bg-white/5 hover:text-white"
                 }`}
               >
@@ -1118,7 +1133,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                 onClick={() => setCurrentView("voice")}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   currentView === "voice"
-                    ? "bg-[#00BAF2] text-white shadow-md shadow-[#00BAF2]/25"
+                    ? "bg-[#182c47] text-white border-l-4 border-[#3b82f6]"
                     : "text-white/70 hover:bg-white/5 hover:text-white"
                 }`}
               >
@@ -1130,7 +1145,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                 onClick={() => setCurrentView("expenses")}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   currentView === "expenses"
-                    ? "bg-[#00BAF2] text-white shadow-md shadow-[#00BAF2]/25"
+                    ? "bg-[#182c47] text-white border-l-4 border-[#3b82f6]"
                     : "text-white/70 hover:bg-white/5 hover:text-white"
                 }`}
               >
@@ -1138,14 +1153,14 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                   <TrendingUp className="w-4.5 h-4.5" />
                   <span>{t("expenses")}</span>
                 </div>
-                <span className="bg-[#D32F2F] text-white text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider animate-pulse">AI</span>
+                
               </button>
 
               <button
                 onClick={() => setCurrentView("cashbook")}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   currentView === "cashbook"
-                    ? "bg-[#00BAF2] text-white shadow-md shadow-[#00BAF2]/25"
+                    ? "bg-[#182c47] text-white border-l-4 border-[#3b82f6]"
                     : "text-white/70 hover:bg-white/5 hover:text-white"
                 }`}
               >
@@ -1160,7 +1175,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                 onClick={() => setCurrentView("staff")}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   currentView === "staff"
-                    ? "bg-[#00BAF2] text-white shadow-md shadow-[#00BAF2]/25"
+                    ? "bg-[#182c47] text-white border-l-4 border-[#3b82f6]"
                     : "text-white/70 hover:bg-white/5 hover:text-white"
                 }`}
               >
@@ -1175,7 +1190,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                 onClick={() => setCurrentView("reports")}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   currentView === "reports"
-                    ? "bg-[#00BAF2] text-white shadow-md shadow-[#00BAF2]/25"
+                    ? "bg-[#182c47] text-white border-l-4 border-[#3b82f6]"
                     : "text-white/70 hover:bg-white/5 hover:text-white"
                 }`}
               >
@@ -1183,19 +1198,19 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                   <LineChart className="w-4.5 h-4.5" />
                   <span>{t("reports")}</span>
                 </div>
-                <span className="bg-[#D32F2F] text-white text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider animate-pulse">AI</span>
+                
               </button>
 
               <button
                 onClick={() => setCurrentView("customers")}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   currentView === "customers"
-                    ? "bg-[#00BAF2] text-white shadow-md shadow-[#00BAF2]/25"
+                    ? "bg-[#182c47] text-white border-l-4 border-[#3b82f6]"
                     : "text-white/70 hover:bg-white/5 hover:text-white"
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-base">🧠</span>
+                  <LineChart className="w-4.5 h-4.5" />
                   <span>{t("customers_intel")}</span>
                 </div>
                 <span className="bg-[#7c3aed] text-white text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider">NEW</span>
@@ -1205,7 +1220,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                 onClick={() => setCurrentView("terminal")}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   currentView === "terminal"
-                    ? "bg-[#00BAF2] text-white shadow-md shadow-[#00BAF2]/25"
+                    ? "bg-[#182c47] text-white border-l-4 border-[#3b82f6]"
                     : "text-white/70 hover:bg-white/5 hover:text-white"
                 }`}
               >
@@ -1227,7 +1242,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                 onClick={() => setCurrentView("settings")}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   currentView === "settings"
-                    ? "bg-[#00BAF2] text-white shadow-md shadow-[#00BAF2]/25"
+                    ? "bg-[#182c47] text-white border-l-4 border-[#3b82f6]"
                     : "text-white/70 hover:bg-white/5 hover:text-white"
                 }`}
               >
@@ -1269,7 +1284,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
               {/* Center Column Header / Tabs */}
               <div className="px-6 pt-6 pb-4 border-b border-[#E5E7EB] shrink-0">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-bold tracking-tight text-[#002970]">
+                  <h2 className="text-lg font-bold tracking-tight text-[#0e1b2f]">
                     {activeLedgerTab === "customers" ? t("cust_intel_title") : "Supplier Intelligence Center"}
                   </h2>
                   
@@ -1282,7 +1297,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                         setSelectedSupplier(null);
                       }}
                       className={`px-3 py-1.5 rounded-lg cursor-pointer transition-all ${
-                        activeLedgerTab === "customers" ? "bg-white text-[#002970] shadow-sm" : "hover:text-[#002970]"
+                        activeLedgerTab === "customers" ? "bg-white text-[#0e1b2f] shadow-sm" : "hover:text-[#0e1b2f]"
                       }`}
                     >
                       Customers
@@ -1294,7 +1309,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                         setSelectedSupplier(null);
                       }}
                       className={`px-3 py-1.5 rounded-lg cursor-pointer transition-all ${
-                        activeLedgerTab === "suppliers" ? "bg-white text-[#002970] shadow-sm" : "hover:text-[#002970]"
+                        activeLedgerTab === "suppliers" ? "bg-white text-[#0e1b2f] shadow-sm" : "hover:text-[#0e1b2f]"
                       }`}
                     >
                       Suppliers
@@ -1327,25 +1342,25 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
 
                     <div 
                       onClick={() => setShowLoanDetailsModal(true)}
-                      className="bg-[#081A38] text-white rounded-2xl p-4 flex items-center justify-between shadow-lg cursor-pointer hover:bg-[#002970] transition-colors"
+                      className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl p-4 flex items-center justify-between shadow-sm cursor-pointer hover:bg-slate-50 transition-colors"
                     >
                       <div>
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/50">{t("cfo_loan_rating")}</span>
-                        <h3 className="text-lg font-black text-[#00BAF2] mt-1 flex items-center gap-1.5">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#6B7280]">{t("cfo_loan_rating")}</span>
+                        <h3 className="text-lg font-black text-[#c83226] mt-1 flex items-center gap-1.5">
                           {loadingScore ? (
-                            <span className="text-xs text-white/50 font-normal">{t("calculating")}</span>
+                            <span className="text-xs text-[#6B7280] font-normal">{t("calculating")}</span>
                           ) : (
                             <>
                               <span>{loanData?.label || "Good"}</span>
-                              <span className="text-xs bg-[#00BAF2]/20 border border-[#00BAF2]/30 px-1.5 py-0.5 rounded text-white font-bold">
-                                {loanData?.score || 720}
+                              <span className="text-xs bg-[#c83226]/10 border border-[#c83226]/20 px-1.5 py-0.5 rounded text-[#c83226] font-extrabold">
+                                {loanData?.score || 72}
                               </span>
                             </>
                           )}
                         </h3>
                       </div>
-                      <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-                        <Award className="w-4 h-4 text-[#00BAF2]" />
+                      <div className="w-8 h-8 rounded-full bg-[#c83226]/10 flex items-center justify-center shrink-0">
+                        <Award className="w-4 h-4 text-[#c83226]" />
                       </div>
                     </div>
                   </div>
@@ -1359,7 +1374,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
 
                     <div className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl p-3.5 shadow-sm text-left">
                       <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#6B7280]">{t("monthly_purchases")}</span>
-                      <h3 className="text-base font-black text-[#002970] mt-1">₹{totalMonthlyPurchases.toLocaleString("en-IN")}</h3>
+                      <h3 className="text-base font-black text-[#0e1b2f] mt-1">₹{totalMonthlyPurchases.toLocaleString("en-IN")}</h3>
                     </div>
 
                     <div className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl p-3.5 shadow-sm text-left">
@@ -1369,7 +1384,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
 
                     <div className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl p-3.5 shadow-sm text-left">
                       <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#6B7280]">{t("reliability_score")}</span>
-                      <h3 className="text-base font-black text-[#00BAF2] mt-1">{avgSupplierReliability} / 100</h3>
+                      <h3 className="text-base font-black text-[#c83226] mt-1">{avgSupplierReliability} / 100</h3>
                     </div>
                   </div>
                 )}
@@ -1394,7 +1409,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                     <select
                       value={filterRisk}
                       onChange={(e) => setFilterRisk(e.target.value)}
-                      className="bg-white border border-[#E5E7EB] rounded-xl px-2.5 py-2 text-xs font-bold text-[#002970] shadow-sm outline-none cursor-pointer"
+                      className="bg-white border border-[#E5E7EB] rounded-xl px-2.5 py-2 text-xs font-bold text-[#0e1b2f] shadow-sm outline-none cursor-pointer"
                     >
                       <option value="all">{t("all_risks")}</option>
                       <option value="low">{t("low_risk")}</option>
@@ -1408,7 +1423,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
-                      className="bg-white border border-[#E5E7EB] rounded-xl px-2.5 py-2 text-xs font-bold text-[#002970] shadow-sm outline-none cursor-pointer"
+                      className="bg-white border border-[#E5E7EB] rounded-xl px-2.5 py-2 text-xs font-bold text-[#0e1b2f] shadow-sm outline-none cursor-pointer"
                     >
                       <option value="active">{t("sort_days")}</option>
                       <option value="amount">{t("sort_outstanding")}</option>
@@ -1435,7 +1450,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                     <select
                       value={filterSupplierRisk}
                       onChange={(e) => setFilterSupplierRisk(e.target.value)}
-                      className="bg-white border border-[#E5E7EB] rounded-xl px-2.5 py-2 text-xs font-bold text-[#002970] shadow-sm outline-none cursor-pointer"
+                      className="bg-white border border-[#E5E7EB] rounded-xl px-2.5 py-2 text-xs font-bold text-[#0e1b2f] shadow-sm outline-none cursor-pointer"
                     >
                       <option value="all">All Risks</option>
                       <option value="low">Low Risk</option>
@@ -1449,7 +1464,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                     <select
                       value={sortSupplierBy}
                       onChange={(e) => setSortSupplierBy(e.target.value)}
-                      className="bg-white border border-[#E5E7EB] rounded-xl px-2.5 py-2 text-xs font-bold text-[#002970] shadow-sm outline-none cursor-pointer"
+                      className="bg-white border border-[#E5E7EB] rounded-xl px-2.5 py-2 text-xs font-bold text-[#0e1b2f] shadow-sm outline-none cursor-pointer"
                     >
                       <option value="amount">Sort: Outstanding</option>
                       <option value="reliability">Sort: Reliability</option>
@@ -1465,7 +1480,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                   /* CUSTOMER LIST */
                   loadingCustomers ? (
                     <div className="py-16 flex flex-col items-center justify-center gap-3">
-                      <div className="w-8 h-8 border-4 border-[#00BAF2]/20 border-t-[#00BAF2] rounded-full animate-spin"></div>
+                      <div className="w-8 h-8 border-4 border-[#c83226]/20 border-t-[#c83226] rounded-full animate-spin"></div>
                       <span className="text-xs text-[#6B7280] font-semibold">Loading ledger accounts...</span>
                     </div>
                   ) : customerList.length > 0 ? (
@@ -1480,17 +1495,17 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                         }}
                         className={`p-5 flex items-center justify-between hover:bg-[#F8F9FB] transition-all cursor-pointer border-l-4 ${
                           selectedCustomer?.customer_name === c.customer_name
-                            ? "bg-[#EEF3F7] border-l-[#00BAF2]"
+                            ? "bg-[#EEF3F7] border-l-[#c83226]"
                             : "border-l-transparent"
                         }`}
                       >
                         <div className="flex items-center gap-4 min-w-0">
-                          <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 border uppercase bg-slate-100 text-[#002970]`}>
+                          <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 border uppercase bg-slate-100 text-[#0e1b2f]`}>
                             {c.customer_name.substring(0, 2)}
                           </div>
                           <div className="min-w-0">
                             <div className="flex items-center gap-2">
-                              <span className="font-extrabold text-[#002970] text-sm truncate">{c.customer_name}</span>
+                              <span className="font-extrabold text-[#0e1b2f] text-sm truncate">{c.customer_name}</span>
                               <span className={`px-2 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wide border ${
                                 c.relationship_type === "loyal" ? "bg-[#00C853]/10 border-[#00C853]/20 text-[#00C853]" :
                                 c.relationship_type === "risky" ? "bg-[#D32F2F]/10 border-[#D32F2F]/20 text-[#D32F2F]" :
@@ -1530,7 +1545,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                   ) : (
                     <div className="py-20 flex flex-col items-center justify-center text-center px-6">
                       <FolderOpen className="w-12 h-12 text-[#6B7280]/30 mb-3" />
-                      <h4 className="text-sm font-bold text-[#002970]">No customers found</h4>
+                      <h4 className="text-sm font-bold text-[#0e1b2f]">No customers found</h4>
                       <p className="text-xs text-[#6B7280] mt-1">Try another name or check filters.</p>
                     </div>
                   )
@@ -1558,7 +1573,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                           </div>
                           <div className="min-w-0">
                             <div className="flex items-center gap-2">
-                              <span className="font-extrabold text-[#002970] text-sm truncate">{s.name}</span>
+                              <span className="font-extrabold text-[#0e1b2f] text-sm truncate">{s.name}</span>
                               <span className={`px-2 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wide border ${
                                 s.risk_level === "low" ? "bg-[#00C853]/10 border-[#00C853]/20 text-[#00C853]" :
                                 s.risk_level === "high" ? "bg-[#D32F2F]/10 border-[#D32F2F]/20 text-[#D32F2F]" :
@@ -1594,7 +1609,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                   ) : (
                     <div className="py-20 flex flex-col items-center justify-center text-center px-6">
                       <FolderOpen className="w-12 h-12 text-[#6B7280]/30 mb-3" />
-                      <h4 className="text-sm font-bold text-[#002970]">No suppliers found</h4>
+                      <h4 className="text-sm font-bold text-[#0e1b2f]">No suppliers found</h4>
                       <p className="text-xs text-[#6B7280] mt-1">Try another search name.</p>
                     </div>
                   )
@@ -1607,14 +1622,14 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                   <>
                     <button
                       onClick={() => setShowAddCustomerModal(true)}
-                      className="flex-1 bg-[#00BAF2] hover:bg-[#009FD0] text-white font-extrabold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-[#00BAF2]/10"
+                      className="flex-1 bg-[#0066c0] hover:bg-[#0055a5] text-white font-extrabold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-[#0066c0]/10"
                     >
                       <Plus className="w-4.5 h-4.5" />
                       <span>{t("add_customer")}</span>
                     </button>
                     <button
                       onClick={() => showToast("success", "Tally & Vyapar customer ledger synchronized successfully.")}
-                      className="flex-1 border-2 border-[#E5E7EB] hover:bg-white text-[#002970] font-extrabold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95"
+                      className="flex-1 border-2 border-[#E5E7EB] hover:bg-white text-[#0e1b2f] font-extrabold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95"
                     >
                       <RefreshCw className="w-4.5 h-4.5" />
                       <span>{t("sync_ledger")}</span>
@@ -1631,7 +1646,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                     </button>
                     <button
                       onClick={() => showToast("success", "Tally & Vyapar supplier database synchronized successfully.")}
-                      className="flex-1 border-2 border-[#E5E7EB] hover:bg-white text-[#002970] font-extrabold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95"
+                      className="flex-1 border-2 border-[#E5E7EB] hover:bg-white text-[#0e1b2f] font-extrabold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95"
                     >
                       <RefreshCw className="w-4.5 h-4.5" />
                       <span>{t("sync_ledger")}</span>
@@ -1652,33 +1667,33 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
               className="flex-1 p-6 overflow-y-auto space-y-6"
             >
               <div className="border-b border-[#E5E7EB] pb-4">
-                <h2 className="text-2xl font-black text-[#002970]">AI CFO Loan Diagnostics</h2>
+                <h2 className="text-2xl font-black text-[#0e1b2f]">CFO Loan Diagnostics</h2>
                 <p className="text-xs text-[#6B7280] font-medium mt-1">Detailed evaluation of store revenue logs, payment recovery rates, and credit capacity.</p>
               </div>
 
               {loadingScore ? (
                 <div className="py-20 flex flex-col items-center justify-center gap-3">
-                  <div className="w-8 h-8 border-4 border-[#00BAF2]/20 border-t-[#00BAF2] rounded-full animate-spin"></div>
+                  <div className="w-8 h-8 border-4 border-[#c83226]/20 border-t-[#c83226] rounded-full animate-spin"></div>
                   <span className="text-xs text-[#6B7280]">Calculating analytics...</span>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="md:col-span-2 bg-[#F8F9FB] border border-[#E5E7EB] rounded-3xl p-6 shadow-sm space-y-6">
-                    <h3 className="text-sm font-extrabold uppercase tracking-widest text-[#002970]">Credit Matrix Breakdown</h3>
+                    <h3 className="text-sm font-extrabold uppercase tracking-widest text-[#0e1b2f]">Credit Matrix Breakdown</h3>
                     
                     <div className="space-y-4">
                       <div>
-                        <div className="flex justify-between items-center text-xs font-bold text-[#002970] mb-1.5">
+                        <div className="flex justify-between items-center text-xs font-bold text-[#0e1b2f] mb-1.5">
                           <span>Revenue Turnover Consistency</span>
                           <span>{loanData?.breakdown.revenue_score} / 100</span>
                         </div>
                         <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
-                          <div className="h-full bg-[#00BAF2]" style={{ width: `${loanData?.breakdown.revenue_score || 80}%` }} />
+                          <div className="h-full bg-[#c83226]" style={{ width: `${loanData?.breakdown.revenue_score || 80}%` }} />
                         </div>
                       </div>
 
                       <div>
-                        <div className="flex justify-between items-center text-xs font-bold text-[#002970] mb-1.5">
+                        <div className="flex justify-between items-center text-xs font-bold text-[#0e1b2f] mb-1.5">
                           <span>Ledger Repayment Consistency</span>
                           <span>{loanData?.breakdown.consistency_score} / 100</span>
                         </div>
@@ -1688,45 +1703,45 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                       </div>
 
                       <div>
-                        <div className="flex justify-between items-center text-xs font-bold text-[#002970] mb-1.5">
+                        <div className="flex justify-between items-center text-xs font-bold text-[#0e1b2f] mb-1.5">
                           <span>Store Growth Velocity</span>
                           <span>{loanData?.breakdown.growth_score} / 100</span>
                         </div>
                         <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
-                          <div className="h-full bg-[#00BAF2]" style={{ width: `${loanData?.breakdown.growth_score || 75}%` }} />
+                          <div className="h-full bg-[#c83226]" style={{ width: `${loanData?.breakdown.growth_score || 75}%` }} />
                         </div>
                       </div>
                     </div>
 
                     <div className="p-4 bg-white border border-[#E5E7EB] rounded-2xl">
-                      <span className="text-[10px] font-extrabold uppercase text-[#6B7280]">AI Assessment Reason</span>
-                      <p className="text-xs font-semibold text-[#002970] mt-2 leading-relaxed italic">"{loanData?.reason}"</p>
+                      <span className="text-[10px] font-extrabold uppercase text-[#6B7280]">Underwriter Assessment Notes</span>
+                      <p className="text-xs font-semibold text-[#0e1b2f] mt-2 leading-relaxed italic">"{loanData?.reason}"</p>
                     </div>
                   </div>
 
-                  <div className="md:col-span-1 bg-[#081A38] text-white rounded-3xl p-6 shadow-xl flex flex-col justify-between">
+                  <div className="md:col-span-1 bg-white border border-[#E5E7EB] rounded-3xl p-6 shadow-sm flex flex-col justify-between">
                     <div>
-                      <span className="text-[9px] font-extrabold uppercase tracking-widest text-[#00BAF2]">Eligible Loan Capital</span>
-                      <h2 className="text-2xl font-black mt-2 text-[#00BAF2]">
+                      <span className="text-[9px] font-extrabold uppercase tracking-widest text-[#c83226] bg-[#c83226]/10 px-2.5 py-0.5 rounded">Eligible Loan Capital</span>
+                      <h2 className="text-3xl font-black mt-3 text-[#0e1b2f]">
                         ₹{(loanData?.estimated_amount || 250000).toLocaleString("en-IN")}
                       </h2>
-                      <p className="text-white/60 text-xs mt-3 leading-relaxed">
+                      <p className="text-slate-500 text-xs mt-3 leading-relaxed">
                         Pre-approved credit line limit calculated automatically based on your daily cashflow variance and transaction records.
                       </p>
                     </div>
                     
-                    <div className="mt-8 border-t border-white/5 pt-4">
+                    <div className="mt-8 border-t border-slate-100 pt-4">
                       <div className="flex justify-between items-center text-xs">
-                        <span className="text-white/40">Interest Rate</span>
+                        <span className="text-slate-400 font-semibold">Interest Rate</span>
                         <span className="font-extrabold text-[#00C853]">12.5% p.a.</span>
                       </div>
                       <div className="flex justify-between items-center text-xs mt-2">
-                        <span className="text-white/40">Repayment Period</span>
-                        <span className="font-extrabold text-white">12 Months</span>
+                        <span className="text-slate-400 font-semibold">Repayment Period</span>
+                        <span className="font-extrabold text-slate-700">12 Months</span>
                       </div>
                       <button 
                         onClick={() => showToast("success", "Loan application submitted! Our team will contact you shortly.")}
-                        className="w-full mt-6 bg-[#00BAF2] hover:bg-[#009FD0] text-white font-extrabold text-xs py-3 rounded-xl transition-all cursor-pointer text-center"
+                        className="w-full mt-6 bg-[#c83226] hover:bg-[#b0281e] text-white font-extrabold text-xs py-3 rounded-xl transition-all cursor-pointer text-center shadow-md shadow-[#c83226]/10 active:scale-95"
                       >
                         Apply Capital Now
                       </button>
@@ -1747,8 +1762,8 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
               className="flex-1 p-6 overflow-y-auto space-y-6 flex flex-col h-full"
             >
               <div className="border-b border-[#E5E7EB] pb-4 shrink-0">
-                <h2 className="text-2xl font-black text-[#002970]">Voice CFO Assistant</h2>
-                <p className="text-xs text-[#6B7280] font-medium mt-1">Talk to AI Munshi in Hindi or Hinglish. Add ledger transactions, verify cash flow balance, or trigger collections.</p>
+                <h2 className="text-2xl font-black text-[#0e1b2f]">Voice CFO Assistant</h2>
+                <p className="text-xs text-[#6B7280] font-medium mt-1">Talk to CFO Assistant in Hindi or Hinglish. Add ledger transactions, verify cash flow balance, or trigger collections.</p>
               </div>
 
               <div className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-3xl p-8 shadow-sm flex flex-col items-center justify-center flex-1 max-w-xl mx-auto w-full gap-6">
@@ -1763,7 +1778,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                         ? "bg-[#D32F2F] text-white shadow-[#D32F2F]/20 border-2 border-rose-300"
                         : voiceStatus === "processing"
                         ? "bg-slate-300 text-slate-500 cursor-not-allowed"
-                        : "bg-[#00BAF2] text-white shadow-[#00BAF2]/20 hover:scale-105 active:scale-95"
+                        : "bg-[#c83226] text-white shadow-[#c83226]/20 hover:scale-105 active:scale-95"
                     }`}
                   >
                     {voiceStatus === "processing" ? (
@@ -1776,7 +1791,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
 
                 <div className="text-center">
                   <span className={`text-sm font-extrabold uppercase tracking-widest ${
-                    voiceStatus === "recording" ? "text-rose-600 animate-pulse" : "text-[#002970]"
+                    voiceStatus === "recording" ? "text-rose-600 animate-pulse" : "text-[#0e1b2f]"
                   }`}>
                     {voiceStatus === "recording" ? "Listening to audio..." : voiceStatus === "processing" ? "Parsing speech..." : "Tap to speak"}
                   </span>
@@ -1799,7 +1814,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                       placeholder="e.g. Ramesh ko ₹200 udhaar..."
                       value={voiceInputText}
                       onChange={(e) => setVoiceInputText(e.target.value)}
-                      className="flex-1 bg-white border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#00BAF2] shadow-sm font-semibold"
+                      className="flex-1 bg-white border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#c83226] shadow-sm font-semibold"
                     />
                     <button
                       onClick={() => {
@@ -1808,7 +1823,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                           setVoiceInputText("");
                         }
                       }}
-                      className="bg-[#00BAF2] hover:bg-[#009FD0] text-white font-extrabold text-xs px-5 py-2.5 rounded-xl transition-all cursor-pointer active:scale-95"
+                      className="bg-[#c83226] hover:bg-[#b0281e] text-white font-extrabold text-xs px-5 py-2.5 rounded-xl transition-all cursor-pointer active:scale-95"
                     >
                       Send
                     </button>
@@ -1825,17 +1840,17 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                       <div className="flex justify-between items-start">
                         <div>
                           <span className="text-[9px] font-extrabold text-[#6B7280] uppercase tracking-wider block">Speech Transcript</span>
-                          <p className="text-xs font-bold text-[#002970] italic mt-1">"{voiceTranscript}"</p>
+                          <p className="text-xs font-bold text-[#0e1b2f] italic mt-1">"{voiceTranscript}"</p>
                         </div>
                         {voiceIntent && (
-                          <span className="bg-[#00BAF2]/15 border border-[#00BAF2]/30 text-[#00BAF2] text-[9px] font-extrabold uppercase px-2.5 py-1 rounded-lg tracking-wider">
+                          <span className="bg-[#c83226]/15 border border-[#c83226]/30 text-[#c83226] text-[9px] font-extrabold uppercase px-2.5 py-1 rounded-lg tracking-wider">
                             Intent: {voiceIntent}
                           </span>
                         )}
                       </div>
                       <div>
                         <span className="text-[9px] font-extrabold text-[#6B7280] uppercase tracking-wider block">AI Response</span>
-                        <div className="bg-[#EEF3F7] border border-[#E5E7EB] p-4 rounded-xl text-xs font-semibold text-[#002970] mt-1.5 leading-relaxed">
+                        <div className="bg-[#EEF3F7] border border-[#E5E7EB] p-4 rounded-xl text-xs font-semibold text-[#0e1b2f] mt-1.5 leading-relaxed">
                           "{voiceResponse}"
                         </div>
                       </div>
@@ -1856,13 +1871,13 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
               className="flex-1 p-6 overflow-y-auto space-y-6"
             >
               <div className="border-b border-[#E5E7EB] pb-4">
-                <h2 className="text-2xl font-black text-[#002970]">System Seeders & Tools</h2>
+                <h2 className="text-2xl font-black text-[#0e1b2f]">System Seeders & Tools</h2>
                 <p className="text-xs text-[#6B7280] font-medium mt-1">Manage system databases, reset transactions, and simulate live environments.</p>
               </div>
 
               <div className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-3xl p-8 max-w-xl shadow-sm space-y-6">
                 <div>
-                  <h3 className="text-base font-extrabold text-[#002970]">Reset Store Data</h3>
+                  <h3 className="text-base font-extrabold text-[#0e1b2f]">Reset Store Data</h3>
                   <p className="text-xs text-[#6B7280] mt-1 leading-relaxed">
                     This triggers a clean wipe of the database. It recreates default schemas and generates a mock history of 180 days containing daily credit, sales, and repayment records.
                   </p>
@@ -1878,7 +1893,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                   </button>
                   
                   {resetResult && (
-                    <div className="p-4 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#002970]">
+                    <div className="p-4 bg-white border border-[#E5E7EB] rounded-2xl text-xs font-semibold text-[#0e1b2f]">
                       📊 {resetResult}
                     </div>
                   )}
@@ -1971,7 +1986,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
       {/* ============================================================== */}
       {/* 3. RIGHT COLUMN (Credit / Supplier Intelligence Workspace)    */}
       {/* ============================================================== */}
-      {currentView !== "expenses" && currentView !== "cashbook" && currentView !== "staff" && currentView !== "reports" && currentView !== "customers" && currentView !== "terminal" && (
+      {currentView === "ledger" && (
         <div className="w-[420px] h-full flex flex-col bg-[#F8F9FB] shrink-0 overflow-y-auto relative z-10 border-l border-[#E5E7EB]">
         
         {/* TAB: CUSTOMER DETAIL PANEL */}
@@ -1981,17 +1996,17 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
               <div className="p-6 border-b border-[#E5E7EB] bg-white shrink-0 relative">
                 <button
                   onClick={() => setSelectedCustomer(null)}
-                  className="absolute top-6 right-6 text-[#6B7280] hover:text-[#002970] text-xs font-bold uppercase tracking-widest cursor-pointer"
+                  className="absolute top-6 right-6 text-[#6B7280] hover:text-[#0e1b2f] text-xs font-bold uppercase tracking-widest cursor-pointer"
                 >
                   Close
                 </button>
                 
                 <div className="flex items-center gap-4 mt-2">
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-lg border uppercase bg-slate-100 text-[#002970]`}>
+                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-lg border uppercase bg-slate-100 text-[#0e1b2f]`}>
                     {selectedCustomer.customer_name.substring(0, 2)}
                   </div>
                   <div>
-                    <h3 className="text-lg font-black text-[#002970]">{selectedCustomer.customer_name}</h3>
+                    <h3 className="text-lg font-black text-[#0e1b2f]">{selectedCustomer.customer_name}</h3>
                     <div className="flex items-center gap-2 mt-1">
                       <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wide border ${
                         selectedCustomer.relationship_type === "loyal" ? "bg-[#00C853]/10 border-[#00C853]/20 text-[#00C853]" :
@@ -2013,7 +2028,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                     {!editingPhone && (
                       <button
                         onClick={() => setEditingPhone(true)}
-                        className="text-[#00BAF2] hover:text-[#009FD0] cursor-pointer"
+                        className="text-[#c83226] hover:text-[#b0281e] cursor-pointer"
                       >
                         Edit Number
                       </button>
@@ -2026,12 +2041,12 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                         value={phoneInput}
                         onChange={(e) => setPhoneInput(e.target.value)}
                         placeholder="+919876543210"
-                        className="flex-1 bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-3 py-2 text-xs font-semibold outline-none focus:border-[#00BAF2]"
+                        className="flex-1 bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-3 py-2 text-xs font-semibold outline-none focus:border-[#c83226]"
                       />
                       <button
                         onClick={handleSavePhone}
                         disabled={savingPhone}
-                        className="bg-[#00BAF2] hover:bg-[#009FD0] text-white font-extrabold text-xs px-4 py-2 rounded-xl cursor-pointer"
+                        className="bg-[#c83226] hover:bg-[#b0281e] text-white font-extrabold text-xs px-4 py-2 rounded-xl cursor-pointer"
                       >
                         {savingPhone ? "..." : "Save"}
                       </button>
@@ -2043,8 +2058,8 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                       </button>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#002970]">
-                      <Phone className="w-3.5 h-3.5 text-[#00BAF2]" />
+                    <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#0e1b2f]">
+                      <Phone className="w-3.5 h-3.5 text-[#c83226]" />
                       <span>{selectedCustomer.phone_number || "Not set"}</span>
                     </div>
                   )}
@@ -2054,7 +2069,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
               <div className="p-6 border-b border-[#E5E7EB] bg-[#F8F9FB] shrink-0 space-y-4">
                 <div className="bg-white border border-[#E5E7EB] rounded-2xl p-4 shadow-sm flex items-center justify-between">
                   <div>
-                    <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#6B7280]">AI Credit Score</span>
+                    <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#6B7280]">Credit Rating Score</span>
                     <div className="flex items-baseline gap-1.5 mt-1">
                       <span className={`text-2xl font-black ${
                         selectedCustomer.risk_level === "low" ? "text-[#00C853]" :
@@ -2082,7 +2097,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-white border border-[#E5E7EB] rounded-2xl p-3.5 shadow-sm text-center">
                     <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#6B7280]">Total repayments</span>
-                    <h4 className="text-base font-black text-[#002970] mt-1">{selectedCustomer.total_repayments}</h4>
+                    <h4 className="text-base font-black text-[#0e1b2f] mt-1">{selectedCustomer.total_repayments}</h4>
                   </div>
                   <div className="bg-white border border-[#E5E7EB] rounded-2xl p-3.5 shadow-sm text-center">
                     <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#6B7280]">Late repayments</span>
@@ -2100,7 +2115,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                     className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-md transition-all cursor-pointer ${
                       voiceStatus === "recording"
                         ? "bg-[#D32F2F] text-white animate-pulse"
-                        : "bg-[#00BAF2] hover:bg-[#009FD0] text-white shadow-[#00BAF2]/20 active:scale-95"
+                        : "bg-[#c83226] hover:bg-[#b0281e] text-white shadow-[#c83226]/20 active:scale-95"
                     }`}
                   >
                     {voiceStatus === "processing" ? (
@@ -2113,13 +2128,13 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                   <div className="flex-1 flex flex-wrap gap-2">
                     <button
                       onClick={() => handleTextSubmit("500 chukaya", selectedCustomer.customer_name)}
-                      className="text-[10px] bg-[#F8F9FB] border border-[#E5E7EB] hover:bg-[#EEF3F7] rounded-lg px-2.5 py-1.5 text-[#002970] font-extrabold cursor-pointer"
+                      className="text-[10px] bg-[#F8F9FB] border border-[#E5E7EB] hover:bg-[#EEF3F7] rounded-lg px-2.5 py-1.5 text-[#0e1b2f] font-extrabold cursor-pointer"
                     >
                       "₹500 chukaya"
                     </button>
                     <button
                       onClick={() => handleTextSubmit("200 udhaar diya", selectedCustomer.customer_name)}
-                      className="text-[10px] bg-[#F8F9FB] border border-[#E5E7EB] hover:bg-[#EEF3F7] rounded-lg px-2.5 py-1.5 text-[#002970] font-extrabold cursor-pointer"
+                      className="text-[10px] bg-[#F8F9FB] border border-[#E5E7EB] hover:bg-[#EEF3F7] rounded-lg px-2.5 py-1.5 text-[#0e1b2f] font-extrabold cursor-pointer"
                     >
                       "₹200 udhaar"
                     </button>
@@ -2129,7 +2144,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                 {voiceTranscript && (
                   <div className="bg-[#F8F9FB] border border-[#E5E7EB] p-3 rounded-xl text-xs">
                     <span className="text-[8px] uppercase tracking-wider font-extrabold text-[#6B7280]">AI Processed</span>
-                    <p className="font-bold text-[#002970] leading-snug mt-1">"{voiceResponse}"</p>
+                    <p className="font-bold text-[#0e1b2f] leading-snug mt-1">"{voiceResponse}"</p>
                   </div>
                 )}
               </div>
@@ -2187,11 +2202,11 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
           ) : (
             <div className="flex-1 flex flex-col justify-between p-6 h-full">
               <div className="space-y-6 flex-1 flex flex-col justify-center text-center">
-                <div className="w-16 h-16 rounded-3xl bg-[#00BAF2]/10 border border-[#00BAF2]/25 flex items-center justify-center mx-auto shadow-sm">
-                  <Shield className="w-8 h-8 text-[#00BAF2]" />
+                <div className="w-16 h-16 rounded-3xl bg-[#c83226]/10 border border-[#c83226]/25 flex items-center justify-center mx-auto shadow-sm">
+                  <Shield className="w-8 h-8 text-[#c83226]" />
                 </div>
                 <div>
-                  <h3 className="text-base font-black text-[#002970]">AI Credit Workspace</h3>
+                  <h3 className="text-base font-black text-[#0e1b2f]">Credit Underwriting Workspace</h3>
                   <p className="text-xs text-[#6B7280] mt-1 max-w-[240px] mx-auto leading-relaxed">
                     Select a merchant customer from the ledger list to analyze repayment consistency, edit numbers, or trigger WhatsApp recovery reminders.
                   </p>
@@ -2216,11 +2231,11 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
 
               {!loadingHealth && udharHealth && udharHealth.insights && (
                 <div className="bg-white border border-[#E5E7EB] rounded-3xl p-6 shadow-sm space-y-3 shrink-0">
-                  <span className="text-[9px] font-extrabold uppercase text-[#6B7280] block">AI Credit Insights</span>
+                  <span className="text-[9px] font-extrabold uppercase text-[#6B7280] block">Credit Assessment Insights</span>
                   <div className="space-y-2 max-h-[140px] overflow-y-auto">
                     {udharHealth.insights.map((insight, idx) => (
-                      <div key={idx} className="flex gap-2 items-start text-xs font-semibold text-[#002970] leading-snug">
-                        <Sparkles className="w-3.5 h-3.5 text-[#00BAF2] shrink-0 mt-0.5" />
+                      <div key={idx} className="flex gap-2 items-start text-xs font-semibold text-[#0e1b2f] leading-snug">
+                        <Sparkles className="w-3.5 h-3.5 text-[#c83226] shrink-0 mt-0.5" />
                         <span>{insight}</span>
                       </div>
                     ))}
@@ -2239,7 +2254,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
               <div className="p-6 border-b border-[#E5E7EB] bg-white shrink-0 relative">
                 <button
                   onClick={() => setSelectedSupplier(null)}
-                  className="absolute top-6 right-6 text-[#6B7280] hover:text-[#002970] text-xs font-bold uppercase tracking-widest cursor-pointer"
+                  className="absolute top-6 right-6 text-[#6B7280] hover:text-[#0e1b2f] text-xs font-bold uppercase tracking-widest cursor-pointer"
                 >
                   Close
                 </button>
@@ -2249,7 +2264,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                     {selectedSupplier.name.substring(0, 2)}
                   </div>
                   <div>
-                    <h3 className="text-lg font-black text-[#002970]">{selectedSupplier.name}</h3>
+                    <h3 className="text-lg font-black text-[#0e1b2f]">{selectedSupplier.name}</h3>
                     <div className="flex items-center gap-2 mt-1">
                       <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wide border bg-[#00C853]/10 border-[#00C853]/20 text-[#00C853]`}>
                         {selectedSupplier.category}
@@ -2297,7 +2312,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                       </button>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#002970]">
+                    <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#0e1b2f]">
                       <Phone className="w-3.5 h-3.5 text-[#00C853]" />
                       <span>{selectedSupplier.phone}</span>
                     </div>
@@ -2313,12 +2328,12 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                     <div>
                       <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#6B7280]">AI Reliability Score</span>
                       <div className="flex items-baseline gap-1 mt-1">
-                        <span className="text-2xl font-black text-[#00BAF2]">{selectedSupplier.reliability_score}</span>
+                        <span className="text-2xl font-black text-[#c83226]">{selectedSupplier.reliability_score}</span>
                         <span className="text-xs font-extrabold text-[#6B7280]">/ 100</span>
                       </div>
                     </div>
-                    <div className="w-9 h-9 rounded-full bg-[#00BAF2]/10 flex items-center justify-center shrink-0">
-                      <Shield className="w-4 h-4 text-[#00BAF2]" />
+                    <div className="w-9 h-9 rounded-full bg-[#c83226]/10 flex items-center justify-center shrink-0">
+                      <Shield className="w-4 h-4 text-[#c83226]" />
                     </div>
                   </div>
 
@@ -2336,14 +2351,14 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                   <span className="text-[9px] font-extrabold uppercase text-[#6B7280] block">AI Inventory & Ordering Insights</span>
                   <div className="space-y-2">
                     {selectedSupplier.insights.map((insight, idx) => (
-                      <div key={idx} className="flex gap-2 items-start text-xs font-semibold text-[#002970] leading-snug">
+                      <div key={idx} className="flex gap-2 items-start text-xs font-semibold text-[#0e1b2f] leading-snug">
                         <Sparkles className="w-3.5 h-3.5 text-[#00C853] shrink-0 mt-0.5" />
                         <span>{insight}</span>
                       </div>
                     ))}
                     <div className="text-xs font-semibold text-[#6B7280] mt-1 flex justify-between border-t border-[#E5E7EB] pt-2">
                       <span>Recommended Reorder Quantity:</span>
-                      <span className="font-extrabold text-[#002970]">{selectedSupplier.reorder_qty}</span>
+                      <span className="font-extrabold text-[#0e1b2f]">{selectedSupplier.reorder_qty}</span>
                     </div>
                   </div>
                 </div>
@@ -2357,7 +2372,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                   {/* Purchase Trend SVG Chart */}
                   <div className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl p-3.5 text-center">
                     <span className="text-[8px] font-extrabold uppercase text-[#6B7280] tracking-wider flex items-center gap-1 justify-center">
-                      <LineChart className="w-3 h-3 text-[#00BAF2]" /> Purchase Trend (₹)
+                      <LineChart className="w-3 h-3 text-[#c83226]" /> Purchase Trend (₹)
                     </span>
                     <div className="mt-3 h-20 w-full flex items-end">
                       <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
@@ -2370,7 +2385,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                         <path
                           d={`M0,${40 - (selectedSupplier.purchase_trend[0] / 120000) * 30} L20,${40 - (selectedSupplier.purchase_trend[1] / 120000) * 30} L40,${40 - (selectedSupplier.purchase_trend[2] / 120000) * 30} L60,${40 - (selectedSupplier.purchase_trend[3] / 120000) * 30} L80,${40 - (selectedSupplier.purchase_trend[4] / 120000) * 30} L100,${40 - (selectedSupplier.purchase_trend[5] / 120000) * 30}`}
                           fill="none"
-                          stroke="#00BAF2"
+                          stroke="#c83226"
                           strokeWidth="2.5"
                           strokeLinecap="round"
                         />
@@ -2426,7 +2441,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                   <div className="flex-1 flex flex-col gap-2">
                     <button
                       onClick={() => handleTextSubmit("kitna dena hai", selectedSupplier.name)}
-                      className="text-[10px] bg-white border border-[#E5E7EB] hover:bg-[#EEF3F7] rounded-lg px-2.5 py-1.5 text-[#002970] font-extrabold cursor-pointer text-left w-full truncate"
+                      className="text-[10px] bg-white border border-[#E5E7EB] hover:bg-[#EEF3F7] rounded-lg px-2.5 py-1.5 text-[#0e1b2f] font-extrabold cursor-pointer text-left w-full truncate"
                     >
                       "Chawal wale supplier ko kitna dena hai?"
                     </button>
@@ -2436,7 +2451,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                 {voiceTranscript && (
                   <div className="bg-white border border-[#E5E7EB] p-3 rounded-xl text-xs shadow-sm">
                     <span className="text-[8px] uppercase tracking-wider font-extrabold text-[#6B7280]">AI Response</span>
-                    <p className="font-bold text-[#002970] leading-snug mt-1">"{voiceResponse}"</p>
+                    <p className="font-bold text-[#0e1b2f] leading-snug mt-1">"{voiceResponse}"</p>
                   </div>
                 )}
               </div>
@@ -2479,14 +2494,14 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                       navigator.clipboard.writeText(text);
                       showToast("success", "Purchase reminder message copied to clipboard!");
                     }}
-                    className="flex-1 bg-white border border-[#E5E7EB] hover:bg-slate-50 text-[#002970] py-2 px-3 rounded-lg shadow-sm cursor-pointer text-center"
+                    className="flex-1 bg-white border border-[#E5E7EB] hover:bg-slate-50 text-[#0e1b2f] py-2 px-3 rounded-lg shadow-sm cursor-pointer text-center"
                   >
                     📝 Generate PO/Reminder
                   </button>
 
                   <a
                     href={`tel:${selectedSupplier.phone}`}
-                    className="flex-1 bg-white border border-[#E5E7EB] hover:bg-slate-50 text-[#002970] py-2 px-3 rounded-lg shadow-sm text-center"
+                    className="flex-1 bg-white border border-[#E5E7EB] hover:bg-slate-50 text-[#0e1b2f] py-2 px-3 rounded-lg shadow-sm text-center"
                   >
                     📞 Call Supplier
                   </a>
@@ -2495,7 +2510,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                     href={`https://wa.me/${selectedSupplier.phone.replace(/\D/g, "")}?text=${encodeURIComponent(`Dear ${selectedSupplier.name}, regarding pending balance of Rs. ${selectedSupplier.pending_amount}...`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 bg-white border border-[#E5E7EB] hover:bg-slate-50 text-[#002970] py-2 px-3 rounded-lg shadow-sm text-center"
+                    className="flex-1 bg-white border border-[#E5E7EB] hover:bg-slate-50 text-[#0e1b2f] py-2 px-3 rounded-lg shadow-sm text-center"
                   >
                     💬 WhatsApp Supplier
                   </a>
@@ -2536,7 +2551,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                   <Shield className="w-8 h-8 text-[#00C853]" />
                 </div>
                 <div>
-                  <h3 className="text-base font-black text-[#002970]">AI Supplier Workspace</h3>
+                  <h3 className="text-base font-black text-[#0e1b2f]">AI Supplier Workspace</h3>
                   <p className="text-xs text-[#6B7280] mt-1 max-w-[240px] mx-auto leading-relaxed">
                     Select a supplier from the list to analyze purchase trends, reliability scores, reorder recommendations, and manage purchase accounts.
                   </p>
@@ -2562,11 +2577,11 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
               <div className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-3xl p-6 shadow-sm space-y-3 shrink-0">
                 <span className="text-[9px] font-extrabold uppercase text-[#6B7280] block">AI Supplier Diagnostics</span>
                 <div className="space-y-2">
-                  <div className="flex gap-2 items-start text-xs font-semibold text-[#002970] leading-snug">
+                  <div className="flex gap-2 items-start text-xs font-semibold text-[#0e1b2f] leading-snug">
                     <Sparkles className="w-3.5 h-3.5 text-[#00C853] shrink-0 mt-0.5" />
                     <span>Average payment delay to suppliers is 12 days.</span>
                   </div>
-                  <div className="flex gap-2 items-start text-xs font-semibold text-[#002970] leading-snug">
+                  <div className="flex gap-2 items-start text-xs font-semibold text-[#0e1b2f] leading-snug">
                     <Sparkles className="w-3.5 h-3.5 text-[#00C853] shrink-0 mt-0.5" />
                     <span>Recommend paying Masale Vendor (₹12,000) by 8th June to maintain score.</span>
                   </div>
@@ -2596,7 +2611,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
             onClick={(e) => e.stopPropagation()}
           >
             <div className="text-center mb-5">
-              <div className="text-5xl mb-3">{paymentInsight.is_milestone ? "🎉" : "🧠"}</div>
+              <div className="text-5xl mb-3">{paymentInsight.is_milestone ? "🎉" : "📊"}</div>
               <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#64748b]">
                 {paymentInsight.is_milestone ? "Milestone!" : "AI Customer Insight"}
               </span>
@@ -2653,12 +2668,12 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
           >
             <button
               onClick={() => setShowAddCustomerModal(false)}
-              className="absolute top-6 right-6 text-[#6B7280] hover:text-[#002970] cursor-pointer"
+              className="absolute top-6 right-6 text-[#6B7280] hover:text-[#0e1b2f] cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="text-lg font-black text-[#002970] mb-6">Create Customer Profile</h3>
+            <h3 className="text-lg font-black text-[#0e1b2f] mb-6">Create Customer Profile</h3>
             
             <form onSubmit={handleAddCustomerSubmit} className="space-y-4">
               <div>
@@ -2669,7 +2684,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                   placeholder="e.g. Mohan Das"
                   value={newCustName}
                   onChange={(e) => setNewCustName(e.target.value)}
-                  className="w-full bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#00BAF2] text-[#111827]"
+                  className="w-full bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#c83226] text-[#111827]"
                 />
               </div>
 
@@ -2680,7 +2695,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                   placeholder="e.g. +919876543210"
                   value={newCustPhone}
                   onChange={(e) => setNewCustPhone(e.target.value)}
-                  className="w-full bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#00BAF2] text-[#111827]"
+                  className="w-full bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#c83226] text-[#111827]"
                 />
               </div>
 
@@ -2694,7 +2709,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                     placeholder="e.g. 500"
                     value={newCustAmount}
                     onChange={(e) => setNewCustAmount(e.target.value)}
-                    className="w-full bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#00BAF2] text-[#111827]"
+                    className="w-full bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#c83226] text-[#111827]"
                   />
                 </div>
                 <div>
@@ -2704,7 +2719,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                       type="button"
                       onClick={() => setNewCustType("give")}
                       className={`flex-1 py-2 rounded-lg text-center cursor-pointer transition-all ${
-                        newCustType === "give" ? "bg-white text-[#D32F2F] shadow-sm" : "hover:text-[#002970]"
+                        newCustType === "give" ? "bg-white text-[#D32F2F] shadow-sm" : "hover:text-[#0e1b2f]"
                       }`}
                     >
                       You Gave
@@ -2713,7 +2728,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                       type="button"
                       onClick={() => setNewCustType("got")}
                       className={`flex-1 py-2 rounded-lg text-center cursor-pointer transition-all ${
-                        newCustType === "got" ? "bg-white text-[#00C853] shadow-sm" : "hover:text-[#002970]"
+                        newCustType === "got" ? "bg-white text-[#00C853] shadow-sm" : "hover:text-[#0e1b2f]"
                       }`}
                     >
                       You Got
@@ -2728,14 +2743,14 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                   type="date"
                   value={newCustDate}
                   onChange={(e) => setNewCustDate(e.target.value)}
-                  className="w-full bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#00BAF2] text-[#111827]"
+                  className="w-full bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#c83226] text-[#111827]"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={submittingCustomer}
-                className="w-full bg-[#00BAF2] hover:bg-[#009FD0] text-white font-extrabold text-xs py-3.5 rounded-xl cursor-pointer mt-4"
+                className="w-full bg-[#c83226] hover:bg-[#b0281e] text-white font-extrabold text-xs py-3.5 rounded-xl cursor-pointer mt-4"
               >
                 {submittingCustomer ? "Creating account..." : "Save Customer"}
               </button>
@@ -2754,12 +2769,12 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
           >
             <button
               onClick={() => setShowAddSupplierModal(false)}
-              className="absolute top-6 right-6 text-[#6B7280] hover:text-[#002970] cursor-pointer"
+              className="absolute top-6 right-6 text-[#6B7280] hover:text-[#0e1b2f] cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="text-lg font-black text-[#002970] mb-6">Register Supplier Profile</h3>
+            <h3 className="text-lg font-black text-[#0e1b2f] mb-6">Register Supplier Profile</h3>
             
             <form onSubmit={handleAddSupplierSubmit} className="space-y-4">
               <div>
@@ -2860,13 +2875,13 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
           >
             <button
               onClick={() => setShowAddTransactionModal(false)}
-              className="absolute top-6 right-6 text-[#6B7280] hover:text-[#002970] cursor-pointer"
+              className="absolute top-6 right-6 text-[#6B7280] hover:text-[#0e1b2f] cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="text-lg font-black text-[#002970] mb-2">New Ledger Log</h3>
-            <p className="text-xs text-[#6B7280] font-semibold mb-6">Record credit or repayment for <span className="text-[#00BAF2]">{selectedCustomer.customer_name}</span></p>
+            <h3 className="text-lg font-black text-[#0e1b2f] mb-2">New Ledger Log</h3>
+            <p className="text-xs text-[#6B7280] font-semibold mb-6">Record credit or repayment for <span className="text-[#c83226]">{selectedCustomer.customer_name}</span></p>
             
             <form onSubmit={handleAddTxSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -2879,7 +2894,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                     placeholder="e.g. 500"
                     value={newTxAmount}
                     onChange={(e) => setNewTxAmount(e.target.value)}
-                    className="w-full bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#00BAF2] text-[#111827]"
+                    className="w-full bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#c83226] text-[#111827]"
                   />
                 </div>
                 <div>
@@ -2889,7 +2904,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                       type="button"
                       onClick={() => setNewTxType("give")}
                       className={`flex-1 py-2 rounded-lg text-center cursor-pointer transition-all ${
-                        newTxType === "give" ? "bg-white text-[#D32F2F] shadow-sm" : "hover:text-[#002970]"
+                        newTxType === "give" ? "bg-white text-[#D32F2F] shadow-sm" : "hover:text-[#0e1b2f]"
                       }`}
                     >
                       Gave credit
@@ -2898,7 +2913,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                       type="button"
                       onClick={() => setNewTxType("got")}
                       className={`flex-1 py-2 rounded-lg text-center cursor-pointer transition-all ${
-                        newTxType === "got" ? "bg-white text-[#00C853] shadow-sm" : "hover:text-[#002970]"
+                        newTxType === "got" ? "bg-white text-[#00C853] shadow-sm" : "hover:text-[#0e1b2f]"
                       }`}
                     >
                       Got payment
@@ -2913,7 +2928,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                   type="date"
                   value={newTxDate}
                   onChange={(e) => setNewTxDate(e.target.value)}
-                  className="w-full bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#00BAF2] text-[#111827]"
+                  className="w-full bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#c83226] text-[#111827]"
                 />
               </div>
 
@@ -2939,12 +2954,12 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
           >
             <button
               onClick={() => setShowAddSupplierEntryModal(false)}
-              className="absolute top-6 right-6 text-[#6B7280] hover:text-[#002970] cursor-pointer"
+              className="absolute top-6 right-6 text-[#6B7280] hover:text-[#0e1b2f] cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="text-lg font-black text-[#002970] mb-2">Record Supplier Ledger Log</h3>
+            <h3 className="text-lg font-black text-[#0e1b2f] mb-2">Record Supplier Ledger Log</h3>
             <p className="text-xs text-[#6B7280] font-semibold mb-6">Log purchase or repayment transaction for <span className="text-[#00C853]">{selectedSupplier.name}</span></p>
             
             <form onSubmit={handleAddSupplierTxSubmit} className="space-y-4">
@@ -2968,7 +2983,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                       type="button"
                       onClick={() => { setNewSuppTxType("give"); setNewSuppTxDesc("Ledger Payment Repayment"); }}
                       className={`flex-1 py-2 rounded-lg text-center cursor-pointer transition-all ${
-                        newSuppTxType === "give" ? "bg-white text-[#D32F2F] shadow-sm" : "hover:text-[#002970]"
+                        newSuppTxType === "give" ? "bg-white text-[#D32F2F] shadow-sm" : "hover:text-[#0e1b2f]"
                       }`}
                     >
                       You Gave ₹
@@ -2977,7 +2992,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                       type="button"
                       onClick={() => { setNewSuppTxType("got"); setNewSuppTxDesc("Goods Purchase Batch"); }}
                       className={`flex-1 py-2 rounded-lg text-center cursor-pointer transition-all ${
-                        newSuppTxType === "got" ? "bg-white text-[#00C853] shadow-sm" : "hover:text-[#002970]"
+                        newSuppTxType === "got" ? "bg-white text-[#00C853] shadow-sm" : "hover:text-[#0e1b2f]"
                       }`}
                     >
                       You Got ₹
@@ -3029,12 +3044,12 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
           >
             <button
               onClick={() => setShowLoanDetailsModal(false)}
-              className="absolute top-6 right-6 text-[#6B7280] hover:text-[#002970] cursor-pointer"
+              className="absolute top-6 right-6 text-[#6B7280] hover:text-[#0e1b2f] cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="text-lg font-black text-[#002970] mb-2">AI CFO Credit Diagnoses Report</h3>
+            <h3 className="text-lg font-black text-[#0e1b2f] mb-2">CFO Credit Assessment Report</h3>
             <p className="text-xs text-[#6B7280] font-semibold mb-6">Comprehensive scoring metrics calculations.</p>
 
             {loadingScore ? (
@@ -3043,7 +3058,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
               <div className="space-y-6">
                 <div className="flex flex-col items-center justify-center py-4 bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl">
                   <span className="text-[10px] font-extrabold uppercase text-[#6B7280]">Credit Eligibility Grade</span>
-                  <h1 className="text-4xl font-black mt-2 text-[#00BAF2] flex items-baseline gap-1">
+                  <h1 className="text-4xl font-black mt-2 text-[#c83226] flex items-baseline gap-1">
                     <span>{loanData.score}</span>
                     <span className="text-xs font-semibold text-[#6B7280]">/ 900 ({loanData.label})</span>
                   </h1>
@@ -3052,21 +3067,21 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                 <div className="space-y-3.5">
                   <div className="flex justify-between items-center text-xs font-semibold">
                     <span className="text-[#6B7280]">Revenue volume indicator score</span>
-                    <span className="font-extrabold text-[#002970]">{loanData.breakdown.revenue_score} / 100</span>
+                    <span className="font-extrabold text-[#0e1b2f]">{loanData.breakdown.revenue_score} / 100</span>
                   </div>
                   <div className="flex justify-between items-center text-xs font-semibold">
                     <span className="text-[#6B7280]">Daily repayment regularity score</span>
-                    <span className="font-extrabold text-[#002970]">{loanData.breakdown.consistency_score} / 100</span>
+                    <span className="font-extrabold text-[#0e1b2f]">{loanData.breakdown.consistency_score} / 100</span>
                   </div>
                   <div className="flex justify-between items-center text-xs font-semibold">
                     <span className="text-[#6B7280]">Monthly business expansion score</span>
-                    <span className="font-extrabold text-[#002970]">{loanData.breakdown.growth_score} / 100</span>
+                    <span className="font-extrabold text-[#0e1b2f]">{loanData.breakdown.growth_score} / 100</span>
                   </div>
                 </div>
 
                 <div className="p-4 bg-[#081A38] text-white rounded-2xl flex justify-between items-center shadow-lg">
                   <div>
-                    <span className="text-[8px] uppercase tracking-widest text-[#00BAF2] font-extrabold">Estimated Pre-Approved Capital</span>
+                    <span className="text-[8px] uppercase tracking-widest text-[#c83226] font-extrabold">Estimated Pre-Approved Capital</span>
                     <h3 className="text-lg font-black text-white mt-0.5">₹{Math.round(loanData.estimated_amount).toLocaleString("en-IN")}</h3>
                   </div>
                   <button 
@@ -3074,7 +3089,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                       setShowLoanDetailsModal(false);
                       showToast("success", "Loan request submitted to partners.");
                     }}
-                    className="bg-[#00BAF2] text-white text-[10px] font-extrabold py-2 px-3 rounded-lg shadow-md shadow-[#00BAF2]/10"
+                    className="bg-[#c83226] text-white text-[10px] font-extrabold py-2 px-3 rounded-lg shadow-md shadow-[#c83226]/10"
                   >
                     Apply
                   </button>

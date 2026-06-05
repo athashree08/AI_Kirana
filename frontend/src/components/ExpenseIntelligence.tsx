@@ -585,7 +585,7 @@ export default function ExpenseIntelligence() {
   // Color mapping functions
   const getCategoryColor = (_cat: string, index: number) => {
     const colors = [
-      "#00BAF2", // Paytm Cyan/Blue
+      "#c83226", // Paytm Cyan/Blue
       "#00C853", // Green
       "#D32F2F", // Red
       "#FF9100", // Orange
@@ -618,15 +618,15 @@ export default function ExpenseIntelligence() {
       <div className="p-6 pb-2 shrink-0">
         <div className="flex justify-between items-center mb-5 border-b border-[#E5E7EB] pb-3">
           <div>
-            <h2 className="text-xl font-black text-[#002970] flex items-center gap-2">
+            <h2 className="text-xl font-black text-[#0e1b2f] flex items-center gap-2">
               {t("exp_intel_title")}
-              <span className="bg-[#00BAF2]/10 text-[#00BAF2] text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">AI Powered</span>
+              <span className="bg-[#c83226]/10 text-[#c83226] text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">CFO Tracked</span>
             </h2>
             <p className="text-[11px] text-[#6B7280] font-semibold mt-0.5">Real-time expense diagnostic audit, cash burn ratios, and inventory analysis.</p>
           </div>
           <button
             onClick={openAddModal}
-            className="bg-[#00BAF2] hover:bg-[#009FD0] text-white font-extrabold text-xs py-2.5 px-4 rounded-xl flex items-center gap-2 shadow-lg shadow-[#00BAF2]/15 transition-all cursor-pointer active:scale-95 shrink-0"
+            className="bg-[#c83226] hover:bg-[#b0281e] text-white font-extrabold text-xs py-2.5 px-4 rounded-xl flex items-center gap-2 shadow-lg shadow-[#c83226]/15 transition-all cursor-pointer active:scale-95 shrink-0"
           >
             <Plus className="w-4 h-4" />
             <span>{t("add_expense")}</span>
@@ -641,7 +641,7 @@ export default function ExpenseIntelligence() {
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-[9px] font-extrabold uppercase text-[#6B7280] tracking-wider block">Today's Expenses</span>
-                <h3 className="text-xl font-black text-[#002970] mt-1">₹{summaries.todayExpenses.toLocaleString("en-IN")}</h3>
+                <h3 className="text-xl font-black text-[#0e1b2f] mt-1">₹{summaries.todayExpenses.toLocaleString("en-IN")}</h3>
               </div>
               <div className="w-8 h-8 rounded-xl bg-rose-50 flex items-center justify-center text-[#D32F2F]">
                 <ArrowUpRight className="w-4.5 h-4.5" />
@@ -655,13 +655,13 @@ export default function ExpenseIntelligence() {
 
           {/* Card 2: Monthly Expenses */}
           <div className="bg-white border border-[#E5E7EB] rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-            <div className="absolute top-0 left-0 w-1 h-full bg-[#00BAF2]" />
+            <div className="absolute top-0 left-0 w-1 h-full bg-[#c83226]" />
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-[9px] font-extrabold uppercase text-[#6B7280] tracking-wider block">June Outflows MTD</span>
-                <h3 className="text-xl font-black text-[#002970] mt-1">₹{summaries.monthlyExpenses.toLocaleString("en-IN")}</h3>
+                <h3 className="text-xl font-black text-[#0e1b2f] mt-1">₹{summaries.monthlyExpenses.toLocaleString("en-IN")}</h3>
               </div>
-              <div className="w-8 h-8 rounded-xl bg-sky-50 flex items-center justify-center text-[#00BAF2]">
+              <div className="w-8 h-8 rounded-xl bg-sky-50 flex items-center justify-center text-[#c83226]">
                 <Wallet className="w-4.5 h-4.5" />
               </div>
             </div>
@@ -677,7 +677,7 @@ export default function ExpenseIntelligence() {
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-[9px] font-extrabold uppercase text-[#6B7280] tracking-wider block">Largest Category</span>
-                <h3 className="text-sm font-black text-[#002970] mt-2 truncate w-40">{summaries.largestCategory}</h3>
+                <h3 className="text-sm font-black text-[#0e1b2f] mt-2 truncate w-40">{summaries.largestCategory}</h3>
               </div>
               <div className="w-8 h-8 rounded-xl bg-amber-50 flex items-center justify-center text-[#FF9100]">
                 <Info className="w-4.5 h-4.5" />
@@ -694,7 +694,7 @@ export default function ExpenseIntelligence() {
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-[9px] font-extrabold uppercase text-[#6B7280] tracking-wider block">Expense Change %</span>
-                <h3 className="text-xl font-black text-[#002970] mt-1">{summaries.growthPct}%</h3>
+                <h3 className="text-xl font-black text-[#0e1b2f] mt-1">{summaries.growthPct}%</h3>
               </div>
               <div className="w-8 h-8 rounded-xl bg-indigo-50 flex items-center justify-center text-[#7C4DFF]">
                 <TrendingDown className="w-4.5 h-4.5" />
@@ -723,7 +723,7 @@ export default function ExpenseIntelligence() {
                   setCategoryFilter("all");
                 }}
                 className={`flex-grow h-full py-2 rounded-xl text-center cursor-pointer transition-all flex items-center justify-center gap-2 ${
-                  activeTab === "expense" ? "bg-white text-[#D32F2F] shadow-sm border border-[#E5E7EB]/50" : "hover:text-[#002970]"
+                  activeTab === "expense" ? "bg-white text-[#D32F2F] shadow-sm border border-[#E5E7EB]/50" : "hover:text-[#0e1b2f]"
                 }`}
               >
                 <ArrowUpRight className="w-4 h-4" />
@@ -735,7 +735,7 @@ export default function ExpenseIntelligence() {
                   setCategoryFilter("all");
                 }}
                 className={`flex-grow h-full py-2 rounded-xl text-center cursor-pointer transition-all flex items-center justify-center gap-2 ${
-                  activeTab === "purchase" ? "bg-white text-[#00BAF2] shadow-sm border border-[#E5E7EB]/50" : "hover:text-[#002970]"
+                  activeTab === "purchase" ? "bg-white text-[#c83226] shadow-sm border border-[#E5E7EB]/50" : "hover:text-[#0e1b2f]"
                 }`}
               >
                 <Wallet className="w-4 h-4" />
@@ -747,7 +747,7 @@ export default function ExpenseIntelligence() {
                   setCategoryFilter("all");
                 }}
                 className={`flex-grow h-full py-2 rounded-xl text-center cursor-pointer transition-all flex items-center justify-center gap-2 ${
-                  activeTab === "sale" ? "bg-white text-[#00C853] shadow-sm border border-[#E5E7EB]/50" : "hover:text-[#002970]"
+                  activeTab === "sale" ? "bg-white text-[#00C853] shadow-sm border border-[#E5E7EB]/50" : "hover:text-[#0e1b2f]"
                 }`}
               >
                 <ArrowDownLeft className="w-4 h-4" />
@@ -757,7 +757,7 @@ export default function ExpenseIntelligence() {
 
             {/* SEARCH & FILTER BAR */}
             <div className="flex gap-2">
-              <div className="flex-1 bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl px-4 flex items-center gap-2.5 h-11 focus-within:border-[#00BAF2] transition-colors">
+              <div className="flex-1 bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl px-4 flex items-center gap-2.5 h-11 focus-within:border-[#c83226] transition-colors">
                 <Search className="w-4 h-4 text-[#6B7280] shrink-0" />
                 <input
                   type="text"
@@ -774,7 +774,7 @@ export default function ExpenseIntelligence() {
                 <select
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl px-3 py-2 text-[10px] font-extrabold text-[#002970] outline-none cursor-pointer focus:border-[#00BAF2]"
+                  className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl px-3 py-2 text-[10px] font-extrabold text-[#0e1b2f] outline-none cursor-pointer focus:border-[#c83226]"
                 >
                   <option value="all">Categories: All</option>
                   {(activeTab === "expense" ? EXPENSE_CATEGORIES : 
@@ -788,7 +788,7 @@ export default function ExpenseIntelligence() {
                 <select
                   value={dateFilter}
                   onChange={(e) => setDateFilter(e.target.value)}
-                  className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl px-3 py-2 text-[10px] font-extrabold text-[#002970] outline-none cursor-pointer focus:border-[#00BAF2]"
+                  className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl px-3 py-2 text-[10px] font-extrabold text-[#0e1b2f] outline-none cursor-pointer focus:border-[#c83226]"
                 >
                   <option value="all">Date: All History</option>
                   <option value="today">Today (June 5)</option>
@@ -800,7 +800,7 @@ export default function ExpenseIntelligence() {
                 <select
                   value={amountFilter}
                   onChange={(e) => setAmountFilter(e.target.value)}
-                  className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl px-3 py-2 text-[10px] font-extrabold text-[#002970] outline-none cursor-pointer focus:border-[#00BAF2]"
+                  className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl px-3 py-2 text-[10px] font-extrabold text-[#0e1b2f] outline-none cursor-pointer focus:border-[#c83226]"
                 >
                   <option value="all">Amount: All</option>
                   <option value="under_1k">Under ₹1,000</option>
@@ -827,13 +827,13 @@ export default function ExpenseIntelligence() {
                     key={item.id}
                     onClick={() => setSelectedTxId(item.id)}
                     className={`flex items-center justify-between p-4 cursor-pointer transition-all ${
-                      isSelected ? "bg-white border-l-4 border-[#00BAF2] shadow-sm relative z-10" : "hover:bg-white/50"
+                      isSelected ? "bg-white border-l-4 border-[#c83226] shadow-sm relative z-10" : "hover:bg-white/50"
                     }`}
                   >
                     <div className="flex items-center gap-3.5 min-w-0">
                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
                         item.type === "expense" ? "bg-rose-50 text-[#D32F2F]" :
-                        item.type === "purchase" ? "bg-sky-50 text-[#00BAF2]" :
+                        item.type === "purchase" ? "bg-sky-50 text-[#c83226]" :
                         "bg-emerald-50 text-[#00C853]"
                       }`}>
                         {item.type === "expense" ? <ArrowUpRight className="w-5 h-5" /> :
@@ -841,7 +841,7 @@ export default function ExpenseIntelligence() {
                          <ArrowDownLeft className="w-5 h-5" />}
                       </div>
                       <div className="min-w-0">
-                        <h4 className="text-xs font-extrabold text-[#002970] truncate">{item.name}</h4>
+                        <h4 className="text-xs font-extrabold text-[#0e1b2f] truncate">{item.name}</h4>
                         <div className="flex items-center gap-1.5 mt-1">
                           <span className="text-[9px] font-bold text-[#6B7280]">{formattedDate}</span>
                           <span className="w-1 h-1 rounded-full bg-slate-300"></span>
@@ -853,7 +853,7 @@ export default function ExpenseIntelligence() {
                     <div className="flex items-center gap-2">
                       <span className={`text-xs font-black shrink-0 ${
                         item.type === "expense" ? "text-[#D32F2F]" :
-                        item.type === "purchase" ? "text-[#00BAF2]" :
+                        item.type === "purchase" ? "text-[#c83226]" :
                         "text-[#00C853]"
                       }`}>
                         {item.type === "sale" ? "+" : "-"} ₹{item.amount.toLocaleString("en-IN")}
@@ -866,7 +866,7 @@ export default function ExpenseIntelligence() {
             ) : (
               <div className="py-20 flex flex-col items-center justify-center text-center p-6 bg-white h-full">
                 <AlertTriangle className="w-10 h-10 text-slate-300 mb-3" />
-                <h4 className="text-xs font-extrabold text-[#002970]">No transaction records found</h4>
+                <h4 className="text-xs font-extrabold text-[#0e1b2f]">No transaction records found</h4>
                 <p className="text-[10px] text-[#6B7280] mt-1 max-w-[200px] leading-relaxed">Try adjusting your filters, search term, or select another tab to seed fresh records.</p>
               </div>
             )}
@@ -883,7 +883,7 @@ export default function ExpenseIntelligence() {
                 <div className="flex justify-between items-start">
                   <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider border ${
                     selectedTx.type === "expense" ? "bg-rose-50 border-rose-100 text-[#D32F2F]" :
-                    selectedTx.type === "purchase" ? "bg-sky-50 border-sky-100 text-[#00BAF2]" :
+                    selectedTx.type === "purchase" ? "bg-sky-50 border-sky-100 text-[#c83226]" :
                     "bg-emerald-50 border-emerald-100 text-[#00C853]"
                   }`}>
                     {selectedTx.type} ID: #{selectedTx.id.split("_")[1] || "5001"}
@@ -893,7 +893,7 @@ export default function ExpenseIntelligence() {
                   <div className="flex gap-2.5">
                     <button
                       onClick={startEditMode}
-                      className="text-[#00BAF2] hover:text-[#009FD0] text-[10px] font-extrabold uppercase flex items-center gap-1 cursor-pointer transition-colors"
+                      className="text-[#c83226] hover:text-[#b0281e] text-[10px] font-extrabold uppercase flex items-center gap-1 cursor-pointer transition-colors"
                     >
                       <Edit className="w-3 h-3" /> Edit
                     </button>
@@ -909,13 +909,13 @@ export default function ExpenseIntelligence() {
                 <div className="flex items-center gap-4 mt-4">
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-sm border uppercase ${
                     selectedTx.type === "expense" ? "bg-rose-50 border-rose-100 text-[#D32F2F]" :
-                    selectedTx.type === "purchase" ? "bg-sky-50 border-sky-100 text-[#00BAF2]" :
+                    selectedTx.type === "purchase" ? "bg-sky-50 border-sky-100 text-[#c83226]" :
                     "bg-emerald-50 border-emerald-100 text-[#00C853]"
                   }`}>
                     {selectedTx.name.substring(0, 2)}
                   </div>
                   <div>
-                    <h3 className="text-sm font-black text-[#002970] leading-snug">{selectedTx.name}</h3>
+                    <h3 className="text-sm font-black text-[#0e1b2f] leading-snug">{selectedTx.name}</h3>
                     <p className="text-[10px] text-[#6B7280] font-semibold mt-0.5">
                       {new Date(selectedTx.date).toLocaleDateString("en-IN", {
                         day: "2-digit",
@@ -930,15 +930,15 @@ export default function ExpenseIntelligence() {
                 <div className="grid grid-cols-3 gap-3.5 mt-5 bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl p-3.5">
                   <div>
                     <span className="text-[8px] font-extrabold uppercase text-[#6B7280] tracking-wider block">Category</span>
-                    <span className="text-[10px] font-extrabold text-[#002970] block mt-0.5 truncate">{selectedTx.category}</span>
+                    <span className="text-[10px] font-extrabold text-[#0e1b2f] block mt-0.5 truncate">{selectedTx.category}</span>
                   </div>
                   <div>
                     <span className="text-[8px] font-extrabold uppercase text-[#6B7280] tracking-wider block">Gross Total</span>
-                    <span className="text-[10px] font-black text-[#002970] block mt-0.5">₹{selectedTx.amount.toLocaleString("en-IN")}</span>
+                    <span className="text-[10px] font-black text-[#0e1b2f] block mt-0.5">₹{selectedTx.amount.toLocaleString("en-IN")}</span>
                   </div>
                   <div>
                     <span className="text-[8px] font-extrabold uppercase text-[#6B7280] tracking-wider block">Payment Method</span>
-                    <span className="text-[10px] font-extrabold text-[#002970] block mt-0.5 flex items-center gap-1">
+                    <span className="text-[10px] font-extrabold text-[#0e1b2f] block mt-0.5 flex items-center gap-1">
                       {selectedTx.paymentMethod === "UPI" ? <Activity className="w-3 h-3 text-emerald-500" /> : <CreditCard className="w-3 h-3 text-slate-500" />}
                       {selectedTx.paymentMethod}
                     </span>
@@ -949,13 +949,13 @@ export default function ExpenseIntelligence() {
               {/* SECTION 2: AI ANALYSIS CARD */}
               {aiAnalysis && (
                 <div className="p-5 border-b border-[#E5E7EB] bg-gradient-to-tr from-sky-50/20 to-indigo-50/20 shrink-0">
-                  <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#00BAF2] flex items-center gap-1 mb-2.5">
-                    <Sparkles className="w-3.5 h-3.5 text-[#00BAF2]" /> AI Diagnostics & Recommendations
+                  <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#c83226] flex items-center gap-1 mb-2.5">
+                    <Sparkles className="w-3.5 h-3.5 text-[#c83226]" /> Expense Performance Diagnostics
                   </span>
                   
                   <div className="space-y-3">
-                    <div className="bg-white/80 border border-[#E5E7EB] rounded-2xl p-3.5 shadow-sm text-xs font-semibold text-[#002970] leading-relaxed relative overflow-hidden">
-                      <div className="absolute left-0 top-0 h-full w-1.5 bg-[#00BAF2]" />
+                    <div className="bg-white/80 border border-[#E5E7EB] rounded-2xl p-3.5 shadow-sm text-xs font-semibold text-[#0e1b2f] leading-relaxed relative overflow-hidden">
+                      <div className="absolute left-0 top-0 h-full w-1.5 bg-[#c83226]" />
                       <span className="font-extrabold block text-[9px] uppercase text-[#6B7280] tracking-wider mb-1">Observation</span>
                       {aiAnalysis.observation}
                     </div>
@@ -991,7 +991,7 @@ export default function ExpenseIntelligence() {
                         <path
                           d={`M0,${40 - (chartData.monthlyValues[0] / 60000) * 32} L20,${40 - (chartData.monthlyValues[1] / 60000) * 32} L40,${40 - (chartData.monthlyValues[2] / 60000) * 32} L60,${40 - (chartData.monthlyValues[3] / 60000) * 32} L80,${40 - (chartData.monthlyValues[4] / 60000) * 32} L100,${40 - (chartData.monthlyValues[5] / 60000) * 32}`}
                           fill="none"
-                          stroke="#00BAF2"
+                          stroke="#c83226"
                           strokeWidth="2.5"
                           strokeLinecap="round"
                         />
@@ -1001,7 +1001,7 @@ export default function ExpenseIntelligence() {
                       {chartData.monthLabels.map((lbl, idx) => (
                         <div key={idx} className="flex flex-col items-center">
                           <span>{lbl}</span>
-                          <span className="text-[7px] text-[#002970] mt-0.5">₹{(chartData.monthlyValues[idx] / 1000).toFixed(0)}k</span>
+                          <span className="text-[7px] text-[#0e1b2f] mt-0.5">₹{(chartData.monthlyValues[idx] / 1000).toFixed(0)}k</span>
                         </div>
                       ))}
                     </div>
@@ -1037,7 +1037,7 @@ export default function ExpenseIntelligence() {
                       )}
                       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
                         <span className="text-[8px] font-extrabold text-[#6B7280] uppercase tracking-wider">Total</span>
-                        <span className="text-[9px] font-black text-[#002970] mt-0.5">₹{(transactions.filter(t => t.type === activeTab).reduce((sum, t) => sum + t.amount, 0) / 1000).toFixed(0)}k</span>
+                        <span className="text-[9px] font-black text-[#0e1b2f] mt-0.5">₹{(transactions.filter(t => t.type === activeTab).reduce((sum, t) => sum + t.amount, 0) / 1000).toFixed(0)}k</span>
                       </div>
                     </div>
 
@@ -1049,7 +1049,7 @@ export default function ExpenseIntelligence() {
                             <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: seg.color }} />
                             <span className="text-[#6B7280] truncate">{seg.name}</span>
                           </div>
-                          <span className="text-[#002970] shrink-0">{seg.percentage}%</span>
+                          <span className="text-[#0e1b2f] shrink-0">{seg.percentage}%</span>
                         </div>
                       ))}
                     </div>
@@ -1064,7 +1064,7 @@ export default function ExpenseIntelligence() {
                     {chartData.categoryBreakdown.slice(0, 3).map((cat, idx) => (
                       <div key={idx} className="space-y-1">
                         <div className="flex justify-between text-[10px] font-extrabold">
-                          <span className="text-[#002970]">{cat.name}</span>
+                          <span className="text-[#0e1b2f]">{cat.name}</span>
                           <span className="text-[#6B7280]">₹{cat.value.toLocaleString("en-IN")} ({cat.percentage}%)</span>
                         </div>
                         <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
@@ -1085,8 +1085,8 @@ export default function ExpenseIntelligence() {
 
               {/* SECTION 4: AI PREDICTIONS & HEALTH SCORE DIAL */}
               <div className="p-5 bg-gradient-to-tr from-sky-50/10 to-emerald-50/10 shrink-0">
-                <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#002970] flex items-center gap-1 mb-4">
-                  <Activity className="w-3.5 h-3.5 text-[#00BAF2]" /> AI Predictions & Diagnostics
+                <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#0e1b2f] flex items-center gap-1 mb-4">
+                  <Activity className="w-3.5 h-3.5 text-[#c83226]" /> Future Expense Forecasts
                 </span>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -1108,7 +1108,7 @@ export default function ExpenseIntelligence() {
                         />
                       </svg>
                       <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className="text-base font-black text-[#002970]">{predictionMetrics.healthScore}</span>
+                        <span className="text-base font-black text-[#0e1b2f]">{predictionMetrics.healthScore}</span>
                         <span className="text-[7px] text-[#6B7280] font-extrabold uppercase tracking-wide">
                           {predictionMetrics.healthScore >= 75 ? "Healthy" : predictionMetrics.healthScore >= 60 ? "Warning" : "Critical"}
                         </span>
@@ -1120,13 +1120,13 @@ export default function ExpenseIntelligence() {
                   <div className="bg-white border border-[#E5E7EB] rounded-2xl p-4 space-y-4">
                     <div>
                       <span className="text-[8px] font-extrabold uppercase text-[#6B7280] tracking-wider block">Expected Next Month</span>
-                      <h4 className="text-sm font-black text-[#002970] mt-0.5">₹{predictionMetrics.expectedExpenses.toLocaleString("en-IN")}</h4>
+                      <h4 className="text-sm font-black text-[#0e1b2f] mt-0.5">₹{predictionMetrics.expectedExpenses.toLocaleString("en-IN")}</h4>
                       <p className="text-[8px] text-[#6B7280] font-semibold mt-0.5">Based on June run rate</p>
                     </div>
 
                     <div>
                       <span className="text-[8px] font-extrabold uppercase text-[#6B7280] tracking-wider block">Daily Cash Burn Rate</span>
-                      <h4 className="text-sm font-black text-[#002970] mt-0.5">₹{predictionMetrics.burnRate.toLocaleString("en-IN")} / day</h4>
+                      <h4 className="text-sm font-black text-[#0e1b2f] mt-0.5">₹{predictionMetrics.burnRate.toLocaleString("en-IN")} / day</h4>
                       <p className="text-[8px] text-[#6B7280] font-semibold mt-0.5">Average operational outflows</p>
                     </div>
                   </div>
@@ -1136,8 +1136,8 @@ export default function ExpenseIntelligence() {
             </div>
           ) : (
             <div className="flex-1 flex flex-col justify-center text-center p-6 bg-white min-h-[400px]">
-              <Sparkles className="w-12 h-12 text-[#00BAF2]/20 border border-[#00BAF2]/10 rounded-2xl p-2.5 mx-auto mb-4 animate-pulse" />
-              <h3 className="text-xs font-black text-[#002970]">AI Analytics Workspace</h3>
+              <Sparkles className="w-12 h-12 text-[#c83226]/20 border border-[#c83226]/10 rounded-2xl p-2.5 mx-auto mb-4 animate-pulse" />
+              <h3 className="text-xs font-black text-[#0e1b2f]">Expense Analysis Workspace</h3>
               <p className="text-[10px] text-[#6B7280] mt-1 max-w-[220px] mx-auto leading-relaxed">
                 Add a new record or select a transaction item from the list on the left to audit cost structures, retrieve recommendations, and review predictions.
               </p>
@@ -1158,12 +1158,12 @@ export default function ExpenseIntelligence() {
             >
               <button
                 onClick={() => setShowAddModal(false)}
-                className="absolute top-6 right-6 text-[#6B7280] hover:text-[#002970] cursor-pointer"
+                className="absolute top-6 right-6 text-[#6B7280] hover:text-[#0e1b2f] cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
 
-              <h3 className="text-base font-black text-[#002970] mb-2">{isEditing ? "Edit" : "Record"} Transaction Entry</h3>
+              <h3 className="text-base font-black text-[#0e1b2f] mb-2">{isEditing ? "Edit" : "Record"} Transaction Entry</h3>
               <p className="text-[10px] text-[#6B7280] font-semibold mb-6">Store transactional details for diagnostics reporting audits.</p>
               
               <form onSubmit={handleFormSubmit} className="space-y-4">
@@ -1176,7 +1176,7 @@ export default function ExpenseIntelligence() {
                       disabled={isEditing}
                       onClick={() => setFormType("expense")}
                       className={`flex-grow py-1.5 rounded-lg text-center cursor-pointer transition-all ${
-                        formType === "expense" ? "bg-white text-[#D32F2F] shadow-sm" : "hover:text-[#002970] disabled:opacity-40"
+                        formType === "expense" ? "bg-white text-[#D32F2F] shadow-sm" : "hover:text-[#0e1b2f] disabled:opacity-40"
                       }`}
                     >
                       Expense
@@ -1186,7 +1186,7 @@ export default function ExpenseIntelligence() {
                       disabled={isEditing}
                       onClick={() => setFormType("purchase")}
                       className={`flex-grow py-1.5 rounded-lg text-center cursor-pointer transition-all ${
-                        formType === "purchase" ? "bg-white text-[#00BAF2] shadow-sm" : "hover:text-[#002970] disabled:opacity-40"
+                        formType === "purchase" ? "bg-white text-[#c83226] shadow-sm" : "hover:text-[#0e1b2f] disabled:opacity-40"
                       }`}
                     >
                       Purchase
@@ -1196,7 +1196,7 @@ export default function ExpenseIntelligence() {
                       disabled={isEditing}
                       onClick={() => setFormType("sale")}
                       className={`flex-grow py-1.5 rounded-lg text-center cursor-pointer transition-all ${
-                        formType === "sale" ? "bg-white text-[#00C853] shadow-sm" : "hover:text-[#002970] disabled:opacity-40"
+                        formType === "sale" ? "bg-white text-[#00C853] shadow-sm" : "hover:text-[#0e1b2f] disabled:opacity-40"
                       }`}
                     >
                       Sale
@@ -1213,7 +1213,7 @@ export default function ExpenseIntelligence() {
                     placeholder="e.g. Rice Purchase / Rent / Electricity Bill"
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
-                    className="w-full bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#00BAF2] text-[#111827]"
+                    className="w-full bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#c83226] text-[#111827]"
                   />
                 </div>
 
@@ -1224,7 +1224,7 @@ export default function ExpenseIntelligence() {
                     <select
                       value={formCategory}
                       onChange={(e) => setFormCategory(e.target.value)}
-                      className="w-full bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#00BAF2] text-[#111827] cursor-pointer"
+                      className="w-full bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#c83226] text-[#111827] cursor-pointer"
                     >
                       {(formType === "expense" ? EXPENSE_CATEGORIES : 
                         formType === "purchase" ? PURCHASE_CATEGORIES : 
@@ -1242,7 +1242,7 @@ export default function ExpenseIntelligence() {
                       placeholder="e.g. 15000"
                       value={formAmount}
                       onChange={(e) => setFormAmount(e.target.value)}
-                      className="w-full bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#00BAF2] text-[#111827]"
+                      className="w-full bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#c83226] text-[#111827]"
                     />
                   </div>
                 </div>
@@ -1256,7 +1256,7 @@ export default function ExpenseIntelligence() {
                       required
                       value={formDate}
                       onChange={(e) => setFormDate(e.target.value)}
-                      className="w-full bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#00BAF2] text-[#111827]"
+                      className="w-full bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#c83226] text-[#111827]"
                     />
                   </div>
                   <div>
@@ -1264,7 +1264,7 @@ export default function ExpenseIntelligence() {
                     <select
                       value={formPaymentMethod}
                       onChange={(e) => setFormPaymentMethod(e.target.value as any)}
-                      className="w-full bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#00BAF2] text-[#111827] cursor-pointer"
+                      className="w-full bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#c83226] text-[#111827] cursor-pointer"
                     >
                       <option value="UPI">UPI Payment</option>
                       <option value="Cash">Cash Ledger</option>
@@ -1277,7 +1277,7 @@ export default function ExpenseIntelligence() {
                 {/* Submit button */}
                 <button
                   type="submit"
-                  className="w-full bg-[#00BAF2] hover:bg-[#009FD0] text-white font-extrabold text-xs py-3.5 rounded-xl cursor-pointer mt-4 shadow-lg shadow-[#00BAF2]/10 transition-transform active:scale-95"
+                  className="w-full bg-[#c83226] hover:bg-[#b0281e] text-white font-extrabold text-xs py-3.5 rounded-xl cursor-pointer mt-4 shadow-lg shadow-[#c83226]/10 transition-transform active:scale-95"
                 >
                   {isEditing ? "Save Changes" : "Record Transaction Entry"}
                 </button>

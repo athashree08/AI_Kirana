@@ -85,6 +85,7 @@ def generate_merchant_data(db: Session):
     """
     Seeds Ramesh Kirana Store.
     """
+    from app.services.auth import hash_password
     merchant = db.query(models.Merchant).filter(models.Merchant.id == "merchant_001").first()
     if not merchant:
         merchant = models.Merchant(
@@ -92,8 +93,14 @@ def generate_merchant_data(db: Session):
             name="Ramesh Kirana Store",
             language="Hindi",
             business_type="Kirana",
-            city="Jaipur"
+            city="Jaipur",
+            password_hash=hash_password("password")
         )
+        db.add(merchant)
+        db.commit()
+        db.refresh(merchant)
+    elif not merchant.password_hash:
+        merchant.password_hash = hash_password("password")
         db.add(merchant)
         db.commit()
         db.refresh(merchant)

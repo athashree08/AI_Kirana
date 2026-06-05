@@ -140,26 +140,28 @@ def calculate_loan_score(db: Session, merchant_id: str) -> schemas.LoanScoreResp
     else:
         estimated_amount = max(10000.0, min(500000.0, estimated_amount))
 
-    # 7. Explainable AI Reason
+    # 7. Professional Underwriting Credit Assessment Notes
     reasons = []
     if growth_rate > 0.05:
-        reasons.append(f"steady revenue growth of {growth_rate*100:.1f}% over the last month")
+        reasons.append(f"a positive month-over-month growth trend (+{growth_rate*100:.1f}%)")
     elif growth_rate < -0.05:
-        reasons.append(f"a recent decline in month-over-month revenue")
+        reasons.append(f"a recent contraction in sales (-{abs(growth_rate)*100:.1f}%)")
     else:
-        reasons.append("stable and consistent sales patterns")
+        reasons.append("highly stable transaction volumes")
 
     if cv < 0.35:
-        reasons.append("exceptionally low volatility in daily sales")
+        reasons.append("consistent daily cash flow velocity")
     else:
-        reasons.append("moderate fluctuations in daily customer traffic")
+        reasons.append("moderate daily sales variations")
         
     if avg_monthly_rev > 80000:
-        reasons.append("healthy monthly volume exceeding Rs. 80,000")
+        reasons.append(f"strong monthly average turnover of ₹{int(avg_monthly_rev):,}")
+    else:
+        reasons.append(f"steady monthly average turnover of ₹{int(avg_monthly_rev):,}")
         
-    # Join into a clean explainable sentence
+    # Join into a professional, human-like underwriting sentence
     reason_details = ", ".join(reasons)
-    reason = f"Your readiness score is '{label}' due to {reason_details}."
+    reason = f"Merchant ledger shows {reason_details}. Daily cash flow velocity and transaction history satisfy criteria for credit terms."
 
     return schemas.LoanScoreResponse(
         score=score,

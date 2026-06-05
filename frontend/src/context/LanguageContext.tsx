@@ -13,12 +13,12 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 export const translations: Record<string, Record<Language, string>> = {
   // Sidebar items
   "app_title": {
-    en: "AI Munshi",
-    hinglish: "AI Munshi"
+    en: "Vyapar Saathi",
+    hinglish: "Vyapar Saathi"
   },
   "sub_title": {
-    en: "Hindi Voice CFO",
-    hinglish: "Hindi Voice CFO"
+    en: "Business hua easy",
+    hinglish: "Business hua easy"
   },
   "mgmt_header": {
     en: "Business Management",
@@ -185,8 +185,8 @@ export const translations: Record<string, Record<Language, string>> = {
     hinglish: "Average Kharch / Chakkar"
   },
   "ai_cust_insights": {
-    en: "AI Customer Insights",
-    hinglish: "AI Grahak Insights"
+    en: "Customer Insights & Analytics",
+    hinglish: "Customer Analytics Insights"
   },
   "tier_dist": {
     en: "Customer Tier Distribution",
@@ -263,7 +263,7 @@ export const translations: Record<string, Record<Language, string>> = {
 
   // Staff Management
   "staff_title": {
-    en: "AI Staff & Access Management",
+    en: "Staff Access & Permissions",
     hinglish: "Naukar (Staff) aur Permissions Center"
   },
   "total_staff": {
@@ -281,8 +281,8 @@ export const translations: Record<string, Record<Language, string>> = {
 
   // Reports
   "reports_title": {
-    en: "AI Business Reports",
-    hinglish: "Dhandha Reports (AI)"
+    en: "CFO Business Reports",
+    hinglish: "Dhandha Reports"
   },
 
   // Live QR Terminal

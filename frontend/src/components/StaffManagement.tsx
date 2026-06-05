@@ -334,7 +334,7 @@ export default function StaffManagement() {
       <div className="p-6 pb-2 shrink-0">
         <div className="flex justify-between items-center mb-5 border-b border-[#E5E7EB] pb-3">
           <div>
-            <h2 className="text-xl font-black text-[#002970] flex items-center gap-2">
+            <h2 className="text-xl font-black text-[#0e1b2f] flex items-center gap-2">
               {t("staff_title")}
               <span className="bg-[#FF9100]/10 text-[#FF9100] text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">Store ERP</span>
             </h2>
@@ -342,7 +342,7 @@ export default function StaffManagement() {
           </div>
           <button
             onClick={openAddModal}
-            className="bg-[#00BAF2] hover:bg-[#009FD0] text-white font-extrabold text-xs py-2.5 px-4 rounded-xl flex items-center gap-2 shadow-lg shadow-[#00BAF2]/15 transition-all cursor-pointer active:scale-95 shrink-0"
+            className="bg-[#c83226] hover:bg-[#b0281e] text-white font-extrabold text-xs py-2.5 px-4 rounded-xl flex items-center gap-2 shadow-lg shadow-[#c83226]/15 transition-all cursor-pointer active:scale-95 shrink-0"
           >
             <Plus className="w-4 h-4" />
             <span>{language === "hinglish" ? "Naya Staff Jodein" : "Add Staff Member"}</span>
@@ -352,13 +352,13 @@ export default function StaffManagement() {
         {/* METRICS ROW */}
         <div className="grid grid-cols-4 gap-4">
           <div className="bg-white border border-[#E5E7EB] rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-            <div className="absolute top-0 left-0 w-1 h-full bg-[#00BAF2]" />
+            <div className="absolute top-0 left-0 w-1 h-full bg-[#c83226]" />
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-[9px] font-extrabold uppercase text-[#6B7280] tracking-wider block">{t("total_staff")}</span>
-                <h3 className="text-xl font-black text-[#002970] mt-1">{metrics.total}</h3>
+                <h3 className="text-xl font-black text-[#0e1b2f] mt-1">{metrics.total}</h3>
               </div>
-              <div className="w-8 h-8 rounded-xl bg-sky-50 flex items-center justify-center text-[#00BAF2]">
+              <div className="w-8 h-8 rounded-xl bg-sky-50 flex items-center justify-center text-[#c83226]">
                 <User className="w-4.5 h-4.5" />
               </div>
             </div>
@@ -372,7 +372,7 @@ export default function StaffManagement() {
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-[9px] font-extrabold uppercase text-[#6B7280] tracking-wider block">{t("active_staff")}</span>
-                <h3 className="text-xl font-black text-[#002970] mt-1">{metrics.active}</h3>
+                <h3 className="text-xl font-black text-[#0e1b2f] mt-1">{metrics.active}</h3>
               </div>
               <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center text-[#00C853]">
                 <CheckCircle className="w-4.5 h-4.5" />
@@ -389,7 +389,7 @@ export default function StaffManagement() {
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-[9px] font-extrabold uppercase text-[#6B7280] tracking-wider block">{t("pending_approvals")}</span>
-                <h3 className="text-xl font-black text-[#002970] mt-1">{metrics.pending}</h3>
+                <h3 className="text-xl font-black text-[#0e1b2f] mt-1">{metrics.pending}</h3>
               </div>
               <div className="w-8 h-8 rounded-xl bg-amber-50 flex items-center justify-center text-[#FF9100]">
                 <Clock className="w-4.5 h-4.5" />
@@ -409,7 +409,7 @@ export default function StaffManagement() {
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-[9px] font-extrabold uppercase text-[#6B7280] tracking-wider block">Avg Productivity</span>
-                <h3 className="text-xl font-black text-[#002970] mt-1">{metrics.avgScore}%</h3>
+                <h3 className="text-xl font-black text-[#0e1b2f] mt-1">{metrics.avgScore}%</h3>
               </div>
               <div className="w-8 h-8 rounded-xl bg-indigo-50 flex items-center justify-center text-[#7C4DFF]">
                 <Activity className="w-4.5 h-4.5" />
@@ -431,7 +431,7 @@ export default function StaffManagement() {
           {/* List Search & Filters */}
           <div className="p-4 border-b border-[#E5E7EB] bg-white space-y-4 shrink-0">
             <div className="flex gap-2">
-              <div className="flex-grow bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl px-4 flex items-center gap-2.5 h-11 focus-within:border-[#00BAF2] transition-colors">
+              <div className="flex-grow bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl px-4 flex items-center gap-2.5 h-11 focus-within:border-[#c83226] transition-colors">
                 <Search className="w-4 h-4 text-[#6B7280] shrink-0" />
                 <input
                   type="text"
@@ -447,7 +447,7 @@ export default function StaffManagement() {
                 <select
                   value={roleFilter}
                   onChange={(e) => setRoleFilter(e.target.value)}
-                  className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl px-3 py-2 text-[10px] font-extrabold text-[#002970] outline-none cursor-pointer focus:border-[#00BAF2]"
+                  className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl px-3 py-2 text-[10px] font-extrabold text-[#0e1b2f] outline-none cursor-pointer focus:border-[#c83226]"
                 >
                   <option value="all">Roles: All</option>
                   <option value="Store Manager">Store Manager</option>
@@ -460,7 +460,7 @@ export default function StaffManagement() {
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl px-3 py-2 text-[10px] font-extrabold text-[#002970] outline-none cursor-pointer focus:border-[#00BAF2]"
+                  className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl px-3 py-2 text-[10px] font-extrabold text-[#0e1b2f] outline-none cursor-pointer focus:border-[#c83226]"
                 >
                   <option value="all">Status: All</option>
                   <option value="Online">Online</option>
@@ -482,13 +482,13 @@ export default function StaffManagement() {
                     key={staff.id}
                     onClick={() => setSelectedStaffId(staff.id)}
                     className={`flex items-center justify-between p-4 cursor-pointer transition-all ${
-                      isSelected ? "bg-white border-l-4 border-[#00BAF2] shadow-sm relative z-10" : "hover:bg-white/50"
+                      isSelected ? "bg-white border-l-4 border-[#c83226] shadow-sm relative z-10" : "hover:bg-white/50"
                     }`}
                   >
                     <div className="flex items-center gap-3.5 min-w-0">
                       {/* Avatar with Status indicator */}
                       <div className="relative shrink-0">
-                        <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-xs text-[#002970] border border-[#E5E7EB] uppercase">
+                        <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-xs text-[#0e1b2f] border border-[#E5E7EB] uppercase">
                           {staff.name.substring(0, 2)}
                         </div>
                         <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${
@@ -499,7 +499,7 @@ export default function StaffManagement() {
                       </div>
 
                       <div className="min-w-0">
-                        <h4 className="text-xs font-extrabold text-[#002970] flex items-center gap-1.5">
+                        <h4 className="text-xs font-extrabold text-[#0e1b2f] flex items-center gap-1.5">
                           {staff.name}
                           {staff.status === "Pending Approval" && (
                             <span className="text-[7px] font-black uppercase bg-amber-50 border border-amber-200 text-amber-600 px-1 rounded-sm">KYC</span>
@@ -529,7 +529,7 @@ export default function StaffManagement() {
             ) : (
               <div className="py-20 flex flex-col items-center justify-center text-center p-6 bg-white h-full">
                 <AlertTriangle className="w-10 h-10 text-slate-300 mb-3" />
-                <h4 className="text-xs font-extrabold text-[#002970]">No staff members found</h4>
+                <h4 className="text-xs font-extrabold text-[#0e1b2f]">No staff members found</h4>
                 <p className="text-[10px] text-[#6B7280] mt-1">Try resetting your filters or search keywords.</p>
               </div>
             )}
@@ -545,7 +545,7 @@ export default function StaffManagement() {
               <div className="p-5 border-b border-[#E5E7EB] shrink-0">
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-1.5">
-                    <Shield className="w-4 h-4 text-[#00BAF2]" />
+                    <Shield className="w-4 h-4 text-[#c83226]" />
                     <span className="text-[8px] font-black text-[#6B7280] uppercase tracking-widest">Employee Security Profile</span>
                   </div>
 
@@ -559,18 +559,18 @@ export default function StaffManagement() {
                 </div>
 
                 <div className="flex items-center gap-4 mt-4">
-                  <div className="w-14 h-14 rounded-2xl bg-slate-50 border border-[#E5E7EB] flex items-center justify-center font-black text-[#002970] text-lg uppercase">
+                  <div className="w-14 h-14 rounded-2xl bg-slate-50 border border-[#E5E7EB] flex items-center justify-center font-black text-[#0e1b2f] text-lg uppercase">
                     {selectedStaff.name.substring(0, 2)}
                   </div>
                   <div className="min-w-0">
-                    <h3 className="text-base font-black text-[#002970] truncate leading-tight">{selectedStaff.name}</h3>
+                    <h3 className="text-base font-black text-[#0e1b2f] truncate leading-tight">{selectedStaff.name}</h3>
                     
                     {/* Role changer dropdown */}
                     <div className="flex items-center gap-2 mt-1.5">
                       <select
                         value={selectedStaff.role}
                         onChange={(e) => handleRoleChange(e.target.value as any)}
-                        className="bg-slate-50 border border-[#E5E7EB] rounded-lg px-2 py-0.5 text-[9px] font-extrabold text-[#002970] cursor-pointer outline-none focus:border-[#00BAF2]"
+                        className="bg-slate-50 border border-[#E5E7EB] rounded-lg px-2 py-0.5 text-[9px] font-extrabold text-[#0e1b2f] cursor-pointer outline-none focus:border-[#c83226]"
                       >
                         <option value="Store Manager">Store Manager</option>
                         <option value="Billing Operator">Billing Operator</option>
@@ -594,7 +594,7 @@ export default function StaffManagement() {
                 <div className="grid grid-cols-3 gap-3.5 mt-5 bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl p-3.5">
                   <div>
                     <span className="text-[8px] font-extrabold uppercase text-[#6B7280] tracking-wider block">Join Date</span>
-                    <span className="text-[10px] font-extrabold text-[#002970] block mt-0.5 truncate">
+                    <span className="text-[10px] font-extrabold text-[#0e1b2f] block mt-0.5 truncate">
                       {new Date(selectedStaff.joinDate).toLocaleDateString("en-IN", {
                         day: "2-digit",
                         month: "short",
@@ -614,7 +614,7 @@ export default function StaffManagement() {
                   </div>
                   <div>
                     <span className="text-[8px] font-extrabold uppercase text-[#6B7280] tracking-wider block">WhatsApp Logs</span>
-                    <span className="text-[10px] font-extrabold text-[#002970] block mt-0.5 flex items-center gap-1">
+                    <span className="text-[10px] font-extrabold text-[#0e1b2f] block mt-0.5 flex items-center gap-1">
                       <Phone className="w-3 h-3 text-[#6B7280]" /> Verified
                     </span>
                   </div>
@@ -634,17 +634,17 @@ export default function StaffManagement() {
                         key={cat.id}
                         onClick={() => handleTogglePermission(cat.id as any)}
                         className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
-                          hasAccess ? "bg-sky-50/20 border-[#00BAF2]/30" : "bg-white border-slate-100 hover:border-slate-200"
+                          hasAccess ? "bg-sky-50/20 border-[#c83226]/30" : "bg-white border-slate-100 hover:border-slate-200"
                         }`}
                       >
                         <div className="min-w-0">
-                          <span className="text-[10px] font-extrabold text-[#002970] block">{cat.label}</span>
+                          <span className="text-[10px] font-extrabold text-[#0e1b2f] block">{cat.label}</span>
                           <span className="text-[8.5px] text-[#6B7280] font-semibold block mt-0.5 leading-snug">{cat.description}</span>
                         </div>
                         
                         {/* Checkbox circle element */}
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
-                          hasAccess ? "bg-[#00BAF2] border-[#00BAF2] text-white" : "border-slate-300 bg-white"
+                          hasAccess ? "bg-[#c83226] border-[#c83226] text-white" : "border-slate-300 bg-white"
                         }`}>
                           {hasAccess && (
                             <svg className="w-3 h-3 stroke-current stroke-3 fill-none" viewBox="0 0 24 24">
@@ -661,18 +661,18 @@ export default function StaffManagement() {
               {/* SECTION 3: AI STAFF INSIGHTS & RECOM */}
               {aiInsights && (
                 <div className="p-5 border-b border-[#E5E7EB] bg-gradient-to-tr from-sky-50/20 to-indigo-50/20 shrink-0">
-                  <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#00BAF2] flex items-center gap-1 mb-2.5">
-                    <Sparkles className="w-3.5 h-3.5 text-[#00BAF2]" /> AI Productivity Audit
+                  <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#c83226] flex items-center gap-1 mb-2.5">
+                    <Sparkles className="w-3.5 h-3.5 text-[#c83226]" /> Productivity Assessment Audit
                   </span>
 
                   <div className="space-y-3">
-                    <div className="bg-white border border-[#E5E7EB] rounded-2xl p-3.5 shadow-sm text-xs font-semibold text-[#002970] leading-relaxed relative overflow-hidden">
-                      <div className="absolute left-0 top-0 h-full w-1.5 bg-[#00BAF2]" />
+                    <div className="bg-white border border-[#E5E7EB] rounded-2xl p-3.5 shadow-sm text-xs font-semibold text-[#0e1b2f] leading-relaxed relative overflow-hidden">
+                      <div className="absolute left-0 top-0 h-full w-1.5 bg-[#c83226]" />
                       <span className="font-extrabold block text-[9px] uppercase text-[#6B7280] tracking-wider mb-1">Weekly Activity</span>
                       {aiInsights.observation}
                     </div>
 
-                    <div className="bg-white border border-[#E5E7EB] rounded-2xl p-3.5 shadow-sm text-xs font-semibold text-[#002970] leading-relaxed relative overflow-hidden">
+                    <div className="bg-white border border-[#E5E7EB] rounded-2xl p-3.5 shadow-sm text-xs font-semibold text-[#0e1b2f] leading-relaxed relative overflow-hidden">
                       <div className="absolute left-0 top-0 h-full w-1.5 bg-[#FF9100]" />
                       <span className="font-extrabold block text-[9px] uppercase text-[#6B7280] tracking-wider mb-1">Peak Hours</span>
                       {aiInsights.trend}
@@ -698,13 +698,13 @@ export default function StaffManagement() {
                     {selectedStaff.activities.map((act, idx) => (
                       <div key={idx} className="relative">
                         {/* Timeline dot */}
-                        <div className="absolute -left-[26px] top-0.5 w-3.5 h-3.5 rounded-full bg-white border-2 border-[#00BAF2] flex items-center justify-center">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#00BAF2]" />
+                        <div className="absolute -left-[26px] top-0.5 w-3.5 h-3.5 rounded-full bg-white border-2 border-[#c83226] flex items-center justify-center">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#c83226]" />
                         </div>
                         
                         <div className="text-xs">
                           <span className="font-extrabold text-[#6B7280] block text-[9px]">{act.time}</span>
-                          <span className="text-[#002970] font-semibold mt-0.5 block leading-normal">{act.action}</span>
+                          <span className="text-[#0e1b2f] font-semibold mt-0.5 block leading-normal">{act.action}</span>
                         </div>
                       </div>
                     ))}
@@ -720,7 +720,7 @@ export default function StaffManagement() {
           ) : (
             <div className="flex-1 flex flex-col justify-center text-center p-6 bg-white min-h-[400px]">
               <User className="w-12 h-12 text-[#FF9100]/20 border border-[#FF9100]/10 rounded-2xl p-2.5 mx-auto mb-4 animate-pulse" />
-              <h3 className="text-xs font-black text-[#002970]">ERP Staff Workspace</h3>
+              <h3 className="text-xs font-black text-[#0e1b2f]">ERP Staff Workspace</h3>
               <p className="text-[10px] text-[#6B7280] mt-1 max-w-[220px] mx-auto leading-relaxed">
                 Add a new operator or select an employee from the directory list on the left to check credentials, assign roles, audit permissions, and view timelog actions.
               </p>
@@ -741,12 +741,12 @@ export default function StaffManagement() {
             >
               <button
                 onClick={() => setShowAddModal(false)}
-                className="absolute top-6 right-6 text-[#6B7280] hover:text-[#002970] cursor-pointer"
+                className="absolute top-6 right-6 text-[#6B7280] hover:text-[#0e1b2f] cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
 
-              <h3 className="text-base font-black text-[#002970] mb-2">Create Staff Profile</h3>
+              <h3 className="text-base font-black text-[#0e1b2f] mb-2">Create Staff Profile</h3>
               <p className="text-[10px] text-[#6B7280] font-semibold mb-6">Assign workspace credentials and auto-preset default roles access permissions.</p>
 
               <form onSubmit={handleAddStaffSubmit} className="space-y-4">
@@ -759,7 +759,7 @@ export default function StaffManagement() {
                     placeholder="e.g. Aarti Sharma"
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
-                    className="w-full bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#00BAF2] text-[#111827]"
+                    className="w-full bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#c83226] text-[#111827]"
                   />
                 </div>
 
@@ -772,7 +772,7 @@ export default function StaffManagement() {
                     placeholder="e.g. +91 98765 43210"
                     value={formPhone}
                     onChange={(e) => setFormPhone(e.target.value)}
-                    className="w-full bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#00BAF2] text-[#111827]"
+                    className="w-full bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#c83226] text-[#111827]"
                   />
                 </div>
 
@@ -782,7 +782,7 @@ export default function StaffManagement() {
                   <select
                     value={formRole}
                     onChange={(e) => setFormRole(e.target.value as any)}
-                    className="w-full bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#00BAF2] text-[#111827] cursor-pointer"
+                    className="w-full bg-[#F8F9FB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#c83226] text-[#111827] cursor-pointer"
                   >
                     <option value="Store Manager">Store Manager</option>
                     <option value="Billing Operator">Billing Operator</option>
@@ -799,7 +799,7 @@ export default function StaffManagement() {
                 {/* Submit */}
                 <button
                   type="submit"
-                  className="w-full bg-[#00BAF2] hover:bg-[#009FD0] text-white font-extrabold text-xs py-3.5 rounded-xl cursor-pointer mt-4 shadow-lg shadow-[#00BAF2]/10 transition-transform active:scale-95"
+                  className="w-full bg-[#c83226] hover:bg-[#b0281e] text-white font-extrabold text-xs py-3.5 rounded-xl cursor-pointer mt-4 shadow-lg shadow-[#c83226]/10 transition-transform active:scale-95"
                 >
                   Create Staff Profile
                 </button>

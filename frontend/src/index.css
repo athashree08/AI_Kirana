@@ -1,17 +1,17 @@
 @import "tailwindcss";
 
 @theme {
-  --color-fintech-dark: #0F172A;
-  --color-fintech-card: #1E293B;
-  --color-fintech-accent: #3B82F6;
+  --color-fintech-dark: #0e1b2f;
+  --color-fintech-card: #ffffff;
+  --color-fintech-accent: #c83226;
   --color-fintech-success: #10B981;
   --color-fintech-warning: #F59E0B;
   --color-fintech-danger: #EF4444;
-  --color-fintech-border: #334155;
+  --color-fintech-border: #E5E7EB;
 }
 
 body {
-  @apply bg-slate-950 text-slate-100 font-sans antialiased;
+  @apply bg-[#F8F9FB] text-[#111827] font-sans antialiased;
 }
 
 /* Custom CSS for Gauge Animation */
@@ -26,4 +26,30 @@ body {
 
 .gauge-path {
   transition: stroke-dashoffset 1s ease-in-out;
+}
+
+/* Custom Sleek Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.45);
+  border-radius: 10px;
+  border: 1px solid transparent;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.7);
+}
+
+/* Firefox support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.45) transparent;
 }

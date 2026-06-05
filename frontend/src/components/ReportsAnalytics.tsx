@@ -338,7 +338,7 @@ export default function ReportsAnalytics() {
       <div className="p-6 pb-2 shrink-0 bg-white border-b border-[#E5E7EB]">
         <div className="flex justify-between items-center flex-wrap gap-4">
           <div>
-            <h2 className="text-xl font-black text-[#002970] flex items-center gap-2">
+            <h2 className="text-xl font-black text-[#0e1b2f] flex items-center gap-2">
               {t("reports_title")}
               <span className="bg-[#D32F2F]/10 text-[#D32F2F] text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">AI Intelligence</span>
             </h2>
@@ -355,7 +355,7 @@ export default function ReportsAnalytics() {
                 value={voiceInput}
                 onChange={(e) => setVoiceInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleVoiceQuery(voiceInput)}
-                className="w-transparent flex-grow text-xs font-semibold outline-none bg-transparent text-[#002970]"
+                className="w-transparent flex-grow text-xs font-semibold outline-none bg-transparent text-[#0e1b2f]"
               />
               <button
                 onClick={() => handleVoiceQuery(voiceInput)}
@@ -411,7 +411,7 @@ export default function ReportsAnalytics() {
                 </div>
                 <div className="min-w-0">
                   <span className={`text-[11px] font-black block leading-none ${
-                    isSelected ? "text-[#D32F2F]" : "text-[#002970]"
+                    isSelected ? "text-[#D32F2F]" : "text-[#0e1b2f]"
                   }`}>{cat.title}</span>
                   <span className="text-[9px] font-semibold text-[#6B7280] mt-1 block leading-snug">{cat.desc}</span>
                 </div>
@@ -434,7 +434,7 @@ export default function ReportsAnalytics() {
               <div className="flex justify-between items-start">
                 <div>
                   <span className="text-[8.5px] font-extrabold uppercase text-[#6B7280] tracking-wider">Total Sales (June)</span>
-                  <h3 className="text-lg font-black text-[#002970] mt-1">₹{summaryKPIs.salesTotal.toLocaleString("en-IN")}</h3>
+                  <h3 className="text-lg font-black text-[#0e1b2f] mt-1">₹{summaryKPIs.salesTotal.toLocaleString("en-IN")}</h3>
                 </div>
                 <span className="text-[9px] font-black text-[#00C853] bg-emerald-50 px-1.5 py-0.5 rounded-full flex items-center gap-0.5 shrink-0">
                   +18% <ArrowDownLeft className="w-2.5 h-2.5" />
@@ -456,7 +456,7 @@ export default function ReportsAnalytics() {
               <div className="flex justify-between items-start">
                 <div>
                   <span className="text-[8.5px] font-extrabold uppercase text-[#6B7280] tracking-wider">Total Expenses</span>
-                  <h3 className="text-lg font-black text-[#002970] mt-1">₹{summaryKPIs.expenseTotal.toLocaleString("en-IN")}</h3>
+                  <h3 className="text-lg font-black text-[#0e1b2f] mt-1">₹{summaryKPIs.expenseTotal.toLocaleString("en-IN")}</h3>
                 </div>
                 <span className="text-[9px] font-black text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded-full flex items-center gap-0.5 shrink-0">
                   +24% <ArrowUpRight className="w-2.5 h-2.5" />
@@ -477,7 +477,7 @@ export default function ReportsAnalytics() {
               <div className="flex justify-between items-start">
                 <div>
                   <span className="text-[8.5px] font-extrabold uppercase text-[#6B7280] tracking-wider">Pending Collects</span>
-                  <h3 className="text-lg font-black text-[#002970] mt-1">₹{summaryKPIs.collections.toLocaleString("en-IN")}</h3>
+                  <h3 className="text-lg font-black text-[#0e1b2f] mt-1">₹{summaryKPIs.collections.toLocaleString("en-IN")}</h3>
                 </div>
                 <span className="text-[9px] font-black text-[#6B7280] bg-slate-50 px-1.5 py-0.5 rounded-full flex items-center gap-0.5 shrink-0">
                   -5% <ArrowDownLeft className="w-2.5 h-2.5 text-emerald-500" />
@@ -498,7 +498,7 @@ export default function ReportsAnalytics() {
               <div className="flex justify-between items-start">
                 <div>
                   <span className="text-[8.5px] font-extrabold uppercase text-[#6B7280] tracking-wider">Loan readiness score</span>
-                  <h3 className="text-lg font-black text-[#002970] mt-1">{summaryKPIs.loanScore} <span className="text-[10px] text-[#6B7280] font-bold">/ 900</span></h3>
+                  <h3 className="text-lg font-black text-[#0e1b2f] mt-1">{summaryKPIs.loanScore} <span className="text-[10px] text-[#6B7280] font-bold">/ 900</span></h3>
                 </div>
                 <span className="text-[9px] font-black text-[#7C4DFF] bg-indigo-50 px-1.5 py-0.5 rounded-full flex items-center gap-0.5 shrink-0">
                   Good
@@ -522,7 +522,7 @@ export default function ReportsAnalytics() {
               
               {activeCategory === "transactions" && (
                 <div className="space-y-2">
-                  <span className="text-xs font-black text-[#002970] block">Monthly Revenue Growth Spline</span>
+                  <span className="text-xs font-black text-[#0e1b2f] block">Monthly Revenue Growth Spline</span>
                   <div className="h-44 w-full flex items-end">
                     <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
                       <path d="M0,40 L0,32 L20,35 L40,24 L60,28 L80,14 L100,10 L100,40 Z" fill="rgba(0, 200, 83, 0.12)" />
@@ -537,11 +537,11 @@ export default function ReportsAnalytics() {
 
               {activeCategory === "cashbook" && (
                 <div className="space-y-2">
-                  <span className="text-xs font-black text-[#002970] block">Daily Cash Balance spline (Past week)</span>
+                  <span className="text-xs font-black text-[#0e1b2f] block">Daily Cash Balance spline (Past week)</span>
                   <div className="h-44 w-full flex items-end">
                     <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
                       <path d="M0,40 L0,28 L16,30 L33,26 L50,32 L66,20 L83,24 L100,12 L100,40 Z" fill="rgba(0, 186, 242, 0.12)" />
-                      <path d="M0,28 L16,30 L33,26 L50,32 L66,20 L83,24 L100,12" fill="none" stroke="#00BAF2" strokeWidth="2.5" strokeLinecap="round" />
+                      <path d="M0,28 L16,30 L33,26 L50,32 L66,20 L83,24 L100,12" fill="none" stroke="#c83226" strokeWidth="2.5" strokeLinecap="round" />
                     </svg>
                   </div>
                   <div className="flex justify-between text-[8px] font-bold text-[#6B7280] pt-1">
@@ -552,7 +552,7 @@ export default function ReportsAnalytics() {
 
               {activeCategory === "customer" && (
                 <div className="space-y-2">
-                  <span className="text-xs font-black text-[#002970] block">Active Debt Customer Acquisition Growth</span>
+                  <span className="text-xs font-black text-[#0e1b2f] block">Active Debt Customer Acquisition Growth</span>
                   <div className="h-44 w-full flex items-end">
                     <svg className="w-full h-full animate-pulse" viewBox="0 0 100 40" preserveAspectRatio="none">
                       <path d="M0,35 L20,35 L20,28 L40,28 L40,20 L60,20 L60,15 L80,15 L80,10 L100,10" fill="none" stroke="#FF9100" strokeWidth="2.5" strokeLinecap="round" />
@@ -566,19 +566,19 @@ export default function ReportsAnalytics() {
 
               {activeCategory === "expense" && (
                 <div className="space-y-2">
-                  <span className="text-xs font-black text-[#002970] block">Overheads cost category distribution</span>
+                  <span className="text-xs font-black text-[#0e1b2f] block">Overheads cost category distribution</span>
                   <div className="h-44 flex items-center justify-around gap-4">
                     <div className="relative w-28 h-28">
                       <svg className="w-full h-full -rotate-90" viewBox="0 0 42 42">
                         <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#E5E7EB" strokeWidth="4.5" />
                         <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#D32F2F" strokeWidth="4.5" strokeDasharray="55 45" strokeDashoffset="0" />
-                        <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#00BAF2" strokeWidth="4.5" strokeDasharray="25 75" strokeDashoffset="-55" />
+                        <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#c83226" strokeWidth="4.5" strokeDasharray="25 75" strokeDashoffset="-55" />
                         <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#FF9100" strokeWidth="4.5" strokeDasharray="20 80" strokeDashoffset="-80" />
                       </svg>
                     </div>
                     <div className="space-y-1 text-[8.5px] font-bold text-[#6B7280]">
                       <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#D32F2F]" /><span>Rent & Utilities (55%)</span></div>
-                      <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#00BAF2]" /><span>Staff Salary (25%)</span></div>
+                      <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#c83226]" /><span>Staff Salary (25%)</span></div>
                       <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#FF9100]" /><span>Logistics (20%)</span></div>
                     </div>
                   </div>
@@ -587,7 +587,7 @@ export default function ReportsAnalytics() {
 
               {activeCategory === "gst" && (
                 <div className="space-y-2">
-                  <span className="text-xs font-black text-[#002970] block">GST Registration Threshold Limit Turnover Progress</span>
+                  <span className="text-xs font-black text-[#0e1b2f] block">GST Registration Threshold Limit Turnover Progress</span>
                   <div className="h-44 flex flex-col justify-center items-center relative">
                     {/* Radial progress circle */}
                     <div className="relative w-28 h-28 flex items-center justify-center">
@@ -596,7 +596,7 @@ export default function ReportsAnalytics() {
                         <circle cx="18" cy="18" r="14" fill="transparent" stroke="#D32F2F" strokeWidth="3" strokeDasharray="35 65" />
                       </svg>
                       <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className="text-sm font-black text-[#002970]">₹6.9L</span>
+                        <span className="text-sm font-black text-[#0e1b2f]">₹6.9L</span>
                         <span className="text-[7px] text-[#6B7280] font-extrabold uppercase">Out of ₹20L</span>
                       </div>
                     </div>
@@ -606,7 +606,7 @@ export default function ReportsAnalytics() {
 
               {activeCategory === "loan" && (
                 <div className="space-y-2">
-                  <span className="text-xs font-black text-[#002970] block">Loan readiness diagnostics dial</span>
+                  <span className="text-xs font-black text-[#0e1b2f] block">Loan readiness diagnostics dial</span>
                   <div className="h-44 flex items-center justify-center">
                     <div className="relative w-28 h-28 flex items-center justify-center">
                       <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
@@ -614,7 +614,7 @@ export default function ReportsAnalytics() {
                         <circle cx="18" cy="18" r="14" fill="transparent" stroke="#7C4DFF" strokeWidth="3.5" strokeDasharray="80 20" />
                       </svg>
                       <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className="text-lg font-black text-[#002970]">720</span>
+                        <span className="text-lg font-black text-[#0e1b2f]">720</span>
                         <span className="text-[7.5px] text-indigo-500 font-extrabold uppercase">Credit Score</span>
                       </div>
                     </div>
@@ -624,7 +624,7 @@ export default function ReportsAnalytics() {
 
               {activeCategory === "supplier" && (
                 <div className="space-y-2">
-                  <span className="text-xs font-black text-[#002970] block">Distributors Outstanding balances</span>
+                  <span className="text-xs font-black text-[#0e1b2f] block">Distributors Outstanding balances</span>
                   <div className="h-44 flex flex-col justify-around py-2">
                     <div className="space-y-1">
                       <div className="flex justify-between text-[8px] font-bold"><span>Rice Supplier</span><span>₹15,000 (Pending)</span></div>
@@ -640,7 +640,7 @@ export default function ReportsAnalytics() {
 
               {activeCategory === "ai_insights" && (
                 <div className="space-y-2">
-                  <span className="text-xs font-black text-[#002970] block">Working Capital Cash Burn vs Sales Ratio</span>
+                  <span className="text-xs font-black text-[#0e1b2f] block">Working Capital Cash Burn vs Sales Ratio</span>
                   <div className="h-44 w-full flex items-end justify-center gap-6 pb-2">
                     <div className="flex flex-col items-center gap-1.5">
                       <div className="w-6 bg-[#00C853] rounded-t-sm" style={{ height: "78%" }} />
@@ -660,14 +660,14 @@ export default function ReportsAnalytics() {
             <div className="bg-white border border-[#E5E7EB] rounded-3xl p-5 shadow-sm space-y-3.5 flex flex-col justify-between">
               <div>
                 <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#D32F2F] flex items-center gap-1.5 mb-3">
-                  <Sparkles className="w-3.5 h-3.5" /> AI CFO Audit Report
+                  <Sparkles className="w-3.5 h-3.5" /> CFO Performance Audit Report
                 </span>
                 
                 <div className="space-y-2.5">
                   {aiInsights.map((insight, idx) => (
                     <div
                       key={idx}
-                      className="p-3 bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl text-[10.5px] font-semibold text-[#002970] flex items-start gap-2.5 leading-snug"
+                      className="p-3 bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl text-[10.5px] font-semibold text-[#0e1b2f] flex items-start gap-2.5 leading-snug"
                     >
                       <Sparkles className="w-3.5 h-3.5 text-[#D32F2F] shrink-0 mt-0.5" />
                       <span>{insight.text}</span>
@@ -690,7 +690,7 @@ export default function ReportsAnalytics() {
             <div className="p-4 border-b border-[#E5E7EB] bg-white space-y-4 shrink-0 flex justify-between items-center flex-wrap gap-4">
               <div className="flex gap-2 flex-wrap items-center">
                 {/* Search */}
-                <div className="w-48 bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl px-3 flex items-center gap-2 h-9 focus-within:border-[#00BAF2] transition-colors">
+                <div className="w-48 bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl px-3 flex items-center gap-2 h-9 focus-within:border-[#c83226] transition-colors">
                   <Search className="w-3.5 h-3.5 text-[#6B7280] shrink-0" />
                   <input
                     type="text"
@@ -705,7 +705,7 @@ export default function ReportsAnalytics() {
                 <select
                   value={dateRange}
                   onChange={(e) => setDateRange(e.target.value)}
-                  className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl px-2.5 py-1.5 text-[9px] font-extrabold text-[#002970] cursor-pointer focus:border-[#00BAF2]"
+                  className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl px-2.5 py-1.5 text-[9px] font-extrabold text-[#0e1b2f] cursor-pointer focus:border-[#c83226]"
                 >
                   <option value="all">Date: All</option>
                   <option value="today">Today (June 5)</option>
@@ -718,7 +718,7 @@ export default function ReportsAnalytics() {
                 <select
                   value={txType}
                   onChange={(e) => setTxType(e.target.value)}
-                  className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl px-2.5 py-1.5 text-[9px] font-extrabold text-[#002970] cursor-pointer focus:border-[#00BAF2]"
+                  className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl px-2.5 py-1.5 text-[9px] font-extrabold text-[#0e1b2f] cursor-pointer focus:border-[#c83226]"
                 >
                   <option value="all">Flow: All</option>
                   <option value="in">Money In (+)</option>
@@ -729,7 +729,7 @@ export default function ReportsAnalytics() {
                 <select
                   value={amountRange}
                   onChange={(e) => setAmountRange(e.target.value)}
-                  className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl px-2.5 py-1.5 text-[9px] font-extrabold text-[#002970] cursor-pointer focus:border-[#00BAF2]"
+                  className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl px-2.5 py-1.5 text-[9px] font-extrabold text-[#0e1b2f] cursor-pointer focus:border-[#c83226]"
                 >
                   <option value="all">Amount: All</option>
                   <option value="under_2k">Under ₹2,000</option>
@@ -742,7 +742,7 @@ export default function ReportsAnalytics() {
               <div className="flex gap-2">
                 <button
                   onClick={handleExportCSV}
-                  className="border-2 border-[#E5E7EB] hover:bg-slate-50 text-[#002970] font-extrabold text-[10px] py-2 px-3 rounded-xl flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all"
+                  className="border-2 border-[#E5E7EB] hover:bg-slate-50 text-[#0e1b2f] font-extrabold text-[10px] py-2 px-3 rounded-xl flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all"
                 >
                   <Download className="w-3.5 h-3.5" /> Export CSV
                 </button>
@@ -763,7 +763,7 @@ export default function ReportsAnalytics() {
                     <th className="py-3 px-4">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#E5E7EB] text-[10.5px] font-semibold text-[#002970]">
+                <tbody className="divide-y divide-[#E5E7EB] text-[10.5px] font-semibold text-[#0e1b2f]">
                   {paginatedRecords.length > 0 ? (
                     paginatedRecords.map((rec) => (
                       <tr key={rec.id} className="hover:bg-slate-50/50 transition-colors">
@@ -778,7 +778,7 @@ export default function ReportsAnalytics() {
                         <td className="py-3 px-4">
                           <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wide border ${
                             rec.type === "Sale" ? "bg-emerald-50 border-emerald-100 text-[#00C853]" :
-                            rec.type === "Repayment" ? "bg-sky-50 border-sky-100 text-[#00BAF2]" :
+                            rec.type === "Repayment" ? "bg-sky-50 border-sky-100 text-[#c83226]" :
                             rec.type === "Purchase" ? "bg-amber-50 border-amber-100 text-amber-600" :
                             "bg-rose-50 border-rose-100 text-[#D32F2F]"
                           }`}>{rec.type}</span>

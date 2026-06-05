@@ -36,7 +36,7 @@ interface PaymentInsightModal {
 function TierBadge({ tier }: { tier: string }) {
   const styles: Record<string, string> = {
     VIP: "bg-amber-500/20 text-amber-300 border border-amber-500/30",
-    Regular: "bg-blue-500/20 text-blue-300 border border-blue-500/30",
+    Regular: "bg-[#0066c0]/20 text-[#0066c0] border border-[#0066c0]/30",
     New: "bg-slate-700/50 text-slate-300 border border-slate-600/40",
   };
   const icons: Record<string, string> = { VIP: "👑", Regular: "⭐", New: "🆕" };
@@ -77,7 +77,7 @@ function MilestonePopup({ data, onClose }: { data: PaymentInsightModal; onClose:
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div
-        className="bg-[#0c1526] border border-[#1e3a5a] rounded-3xl p-8 max-w-sm w-full shadow-2xl shadow-blue-900/30"
+        className="bg-[#0c1526] border border-[#1e3a5a] rounded-3xl p-8 max-w-sm w-full shadow-2xl shadow-[#0e1b2f]/30"
         onClick={(e) => e.stopPropagation()}
       >
         {data.is_milestone ? (
@@ -87,8 +87,8 @@ function MilestonePopup({ data, onClose }: { data: PaymentInsightModal; onClose:
           </div>
         ) : (
           <div className="text-center mb-6">
-            <div className="text-5xl mb-3">🧠</div>
-            <div className="text-blue-400 text-xs font-extrabold uppercase tracking-widest mb-1">AI Customer Insight</div>
+            <div className="text-5xl mb-3">📊</div>
+            <div className="text-[#0066c0] text-xs font-extrabold uppercase tracking-widest mb-1">AI Customer Insight</div>
           </div>
         )}
 
@@ -112,7 +112,7 @@ function MilestonePopup({ data, onClose }: { data: PaymentInsightModal; onClose:
 
         <button
           onClick={onClose}
-          className="w-full bg-[#1a56db] hover:bg-[#1e40af] text-white font-bold py-3 rounded-xl transition-all text-sm cursor-pointer"
+          className="w-full bg-[#c83226] hover:bg-[#b0281e] text-white font-bold py-3 rounded-xl transition-all text-sm cursor-pointer"
         >
           Got it!
         </button>
@@ -177,7 +177,7 @@ export default function CustomerIntelligence({ merchantId = "merchant_001" }: Cu
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-4">
-        <div className="w-10 h-10 border-4 border-[#1a56db]/20 border-t-[#1a56db] rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 border-[#c83226]/20 border-t-[#c83226] rounded-full animate-spin" />
         <p className="text-sm text-[#64748b] font-medium">Loading Customer Intelligence...</p>
       </div>
     );
@@ -210,11 +210,11 @@ export default function CustomerIntelligence({ merchantId = "merchant_001" }: Cu
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-extrabold text-white tracking-tight flex items-center gap-2">
-            <span className="text-2xl">🧠</span>
+            <span className="text-2xl">📊</span>
             {t("cust_intel_title")}
           </h2>
           <p className="text-xs text-[#64748b] mt-1 font-medium">
-            AI-powered customer analytics — automatically updated on every payment.
+            Automated customer analytics — updated on every transaction.
           </p>
         </div>
         <button
@@ -234,7 +234,7 @@ export default function CustomerIntelligence({ merchantId = "merchant_001" }: Cu
         <div className="bg-[#0c1526] border border-[#1e3a5a]/50 rounded-2xl p-5 flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-extrabold text-[#64748b] uppercase tracking-widest">{t("total_customers")}</span>
-            <span className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-base">👥</span>
+            <span className="w-8 h-8 rounded-lg bg-[#0066c0]/10 flex items-center justify-center text-base">👥</span>
           </div>
           <span className="text-3xl font-black text-white">{data.total_customers}</span>
           <p className="text-[10px] text-[#64748b]">All-time unique buyers</p>
@@ -254,14 +254,14 @@ export default function CustomerIntelligence({ merchantId = "merchant_001" }: Cu
         </div>
 
         {/* Regular */}
-        <div className="bg-[#0c1526] border border-blue-500/20 rounded-2xl p-5 flex flex-col gap-3">
+        <div className="bg-[#0c1526] border border-[#0066c0]/20 rounded-2xl p-5 flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-extrabold text-blue-500/70 uppercase tracking-widest">{t("regular_customers")}</span>
-            <span className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-base">⭐</span>
+            <span className="w-8 h-8 rounded-lg bg-[#0066c0]/10 flex items-center justify-center text-base">⭐</span>
           </div>
-          <span className="text-3xl font-black text-blue-400">{data.regular_customers}</span>
+          <span className="text-3xl font-black text-[#0066c0]">{data.regular_customers}</span>
           <div className="flex items-center gap-1.5">
-            <MiniBar value={regularPct} max={100} color="bg-blue-500" />
+            <MiniBar value={regularPct} max={100} color="bg-[#0066c0]" />
             <span className="text-[10px] text-blue-500/70 font-bold w-8">{regularPct}%</span>
           </div>
         </div>
@@ -291,7 +291,7 @@ export default function CustomerIntelligence({ merchantId = "merchant_001" }: Cu
               <div className="bg-amber-500 h-full transition-all duration-700" style={{ width: `${vipPct}%` }} title={`VIP: ${vipPct}%`} />
             )}
             {regularPct > 0 && (
-              <div className="bg-blue-500 h-full transition-all duration-700" style={{ width: `${regularPct}%` }} title={`Regular: ${regularPct}%`} />
+              <div className="bg-[#0066c0] h-full transition-all duration-700" style={{ width: `${regularPct}%` }} title={`Regular: ${regularPct}%`} />
             )}
             {newPct > 0 && (
               <div className="bg-slate-600 h-full transition-all duration-700" style={{ width: `${newPct}%` }} title={`New: ${newPct}%`} />
@@ -311,7 +311,7 @@ export default function CustomerIntelligence({ merchantId = "merchant_001" }: Cu
             </div>
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                <div className="w-2.5 h-2.5 rounded-full bg-[#0066c0]" />
                 <span className="text-xs text-[#94a3b8] font-medium">{t("regular_desc")}</span>
               </div>
               <div className="flex items-center gap-2">
@@ -341,8 +341,8 @@ export default function CustomerIntelligence({ merchantId = "merchant_001" }: Cu
         {/* AI Insights */}
         <div className="lg:col-span-2 bg-[#0c1526] border border-[#1e3a5a]/50 rounded-2xl p-6">
           <h3 className="text-sm font-extrabold text-white mb-4 flex items-center gap-2">
-            <span className="text-base">🤖</span> {t("ai_cust_insights")}
-            <span className="ml-2 text-[10px] bg-blue-500/10 border border-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+            <span className="text-base">📈</span> {t("ai_cust_insights")}
+            <span className="ml-2 text-[10px] bg-[#0066c0]/10 border border-[#0066c0]/20 text-[#0066c0] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
               Live
             </span>
           </h3>
@@ -374,7 +374,7 @@ export default function CustomerIntelligence({ merchantId = "merchant_001" }: Cu
                 onClick={() => setActiveTab(tab)}
                 className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
                   activeTab === tab
-                    ? "bg-[#1a56db] text-white shadow-md"
+                    ? "bg-[#c83226] text-white shadow-md"
                     : "text-[#64748b] hover:text-white"
                 }`}
               >
@@ -419,12 +419,12 @@ export default function CustomerIntelligence({ merchantId = "merchant_001" }: Cu
                     {/* Name */}
                     <td className="py-3 pr-4">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500/30 to-purple-500/30 flex items-center justify-center flex-shrink-0 border border-blue-500/20">
-                          <span className="text-xs font-extrabold text-blue-300">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500/30 to-purple-500/30 flex items-center justify-center flex-shrink-0 border border-[#0066c0]/20">
+                          <span className="text-xs font-extrabold text-[#0066c0]">
                             {c.customer_name.charAt(0).toUpperCase()}
                           </span>
                         </div>
-                        <span className="text-sm font-semibold text-white group-hover:text-blue-300 transition-colors">
+                        <span className="text-sm font-semibold text-white group-hover:text-[#0066c0] transition-colors">
                           {c.customer_name}
                         </span>
                       </div>
@@ -441,7 +441,7 @@ export default function CustomerIntelligence({ merchantId = "merchant_001" }: Cu
                         <div>
                           <span className="text-sm font-extrabold text-white">{c.visit_count}</span>
                           <span className="text-[10px] text-[#64748b] ml-1">visits</span>
-                          <MiniBar value={c.visit_count} max={maxValue} color="bg-blue-500" />
+                          <MiniBar value={c.visit_count} max={maxValue} color="bg-[#0066c0]" />
                         </div>
                       ) : (
                         <div>
@@ -492,7 +492,7 @@ export default function CustomerIntelligence({ merchantId = "merchant_001" }: Cu
           ].map((q) => (
             <span
               key={q}
-              className="text-[11px] bg-[#1e2a3a] border border-[#2a3f5a] text-[#94a3b8] px-3 py-1.5 rounded-lg font-medium cursor-default hover:text-white hover:border-blue-500/40 transition-colors"
+              className="text-[11px] bg-[#1e2a3a] border border-[#2a3f5a] text-[#94a3b8] px-3 py-1.5 rounded-lg font-medium cursor-default hover:text-white hover:border-[#0066c0]/40 transition-colors"
             >
               "{q}"
             </span>

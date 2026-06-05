@@ -13,10 +13,27 @@ from app.config import settings
 # This is fine for a hackathon/demo database setup
 Base.metadata.create_all(bind=engine)
 
+# Dynamic Migration: Check if password_hash column exists in SQLite table and add it if missing
+try:
+    from sqlalchemy import text
+    with engine.connect() as conn:
+        res = conn.execute(text("PRAGMA table_info(merchants)"))
+        columns = [row[1] for row in res]
+        if "password_hash" not in columns:
+            conn.execute(text("ALTER TABLE merchants ADD COLUMN password_hash VARCHAR"))
+            conn.commit()
+            print("[Migration] Added password_hash column to merchants table successfully.")
+        if "phone_number" not in columns:
+            conn.execute(text("ALTER TABLE merchants ADD COLUMN phone_number VARCHAR"))
+            conn.commit()
+            print("[Migration] Added phone_number column to merchants table successfully.")
+except Exception as e:
+    print(f"[Migration] Error checking/altering merchants table: {e}")
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="Hindi Voice CFO backend - Paytm Hackathon Project (AI Munshi)"
+    description="Hindi Voice CFO backend - Vyapar Saathi Backend"
 )
 
 # CORS Middleware config
@@ -31,10 +48,79 @@ app.add_middleware(
 @app.get("/")
 def read_root():
     return {
-        "message": "Welcome to AI Munshi API - Hindi Voice CFO Backend",
+        "message": "Welcome to Vyapar Saathi API Backend",
         "docs_url": "/docs",
         "status": "Running"
     }
+
+# --- AUTHENTICATION ENDPOINTS ---
+
+@app.post("/api/auth/register", response_model=schemas.AuthResponse)
+def register_merchant(merchant_in: schemas.MerchantRegister, db: Session = Depends(get_db)):
+    from app.services.auth import hash_password
+    # Check if merchant already exists
+    existing = db.query(models.Merchant).filter(models.Merchant.id == merchant_in.id).first()
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Merchant ID already exists"
+        )
+    
+    new_merchant = models.Merchant(
+        id=merchant_in.id,
+        name=merchant_in.name,
+        language=merchant_in.language,
+        business_type=merchant_in.business_type,
+        city=merchant_in.city,
+        phone_number=merchant_in.phone_number,
+        password_hash=hash_password(merchant_in.password)
+    )
+    db.add(new_merchant)
+    db.commit()
+    db.refresh(new_merchant)
+    
+    # Auto-seed initial demo data for new merchants so they don't start with empty screen
+    try:
+        generator.generate_mock_transactions(db, merchant_id=new_merchant.id, days=180)
+        generator.generate_mock_udhar(db, merchant_id=new_merchant.id)
+    except Exception as e:
+        print(f"[Auth] Error seeding new merchant data: {e}")
+        
+    return schemas.AuthResponse(
+        success=True,
+        message="Registration successful",
+        merchant=new_merchant
+    )
+
+@app.post("/api/auth/login", response_model=schemas.AuthResponse)
+def login_merchant(credentials: schemas.MerchantLogin, db: Session = Depends(get_db)):
+    from app.services.auth import verify_password
+    merchant = db.query(models.Merchant).filter(models.Merchant.id == credentials.id).first()
+    if not merchant:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid Merchant ID or password"
+        )
+    
+    if not merchant.password_hash:
+        # Fallback: if password is not set (e.g. legacy data), let any password pass
+        # and set it to whatever they typed
+        from app.services.auth import hash_password
+        merchant.password_hash = hash_password(credentials.password)
+        db.add(merchant)
+        db.commit()
+        db.refresh(merchant)
+    elif not verify_password(credentials.password, merchant.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid Merchant ID or password"
+        )
+        
+    return schemas.AuthResponse(
+        success=True,
+        message="Login successful",
+        merchant=merchant
+    )
 
 
 

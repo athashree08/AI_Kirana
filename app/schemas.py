@@ -9,13 +9,26 @@ class MerchantBase(BaseModel):
     language: str = Field(..., description="Language preference of the merchant (e.g. Hindi)")
     business_type: str = Field(..., description="Business type (e.g. Kirana)")
     city: str = Field(..., description="City of operation")
+    phone_number: Optional[str] = Field(None, description="Phone number of the merchant")
 
 class MerchantCreate(MerchantBase):
     pass
 
+class MerchantRegister(MerchantBase):
+    password: str = Field(..., min_length=4, description="Merchant password")
+
+class MerchantLogin(BaseModel):
+    id: str = Field(..., description="Merchant ID")
+    password: str = Field(..., description="Merchant password")
+
 class MerchantResponse(MerchantBase):
     class Config:
         from_attributes = True
+
+class AuthResponse(BaseModel):
+    success: bool
+    message: str
+    merchant: Optional[MerchantResponse] = None
 
 
 # --- TRANSACTION SCHEMAS ---
