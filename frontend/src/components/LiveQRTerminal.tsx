@@ -15,6 +15,138 @@ import {
   Sparkles
 } from "lucide-react";
 
+// --- TRANSLATIONS DICTIONARY ---
+type SupportedLang = 'en' | 'hi' | 'mr';
+
+const translations = {
+  en: {
+    terminalTitle: "AI Munshi Live Terminal",
+    terminalSubtitle: "Simulate real-time UPI QR payments and test the CFO voice metrics & customer analytics.",
+    merchantName: "Ramesh Kirana Store",
+    upiId: "UPI ID: merchant_001@ybl",
+    qrInstruct: "Accept mock payments from any simulated UPI provider. Use the simulator tool below to scan.",
+    scanQrBtn: "Scan QR (Demo Flow)",
+    download: "Download",
+    share: "Share Link",
+    soundboxTitle: "Soundbox Audio Alerts",
+    soundboxSubtitle: "Play payment voice confirmations",
+    alertsOn: "ALERTS ON",
+    alertsOff: "ALERTS OFF",
+    logTitle: "Live Transactions Terminal Log",
+    syncActive: "Live Connection Active",
+    noPayments: "No QR payments logged yet.",
+    clickInstruct: "Click \"Scan QR (Demo Flow)\" to simulate a customer scanning your merchant code!",
+    customerCol: "Customer",
+    amountCol: "Amount",
+    modeCol: "Mode",
+    categoryCol: "Category",
+    dateTimeCol: "Date & Time",
+    sandboxTitle: "Quick Simulation Trigger Sandbox",
+    sandboxSubtitle: "Instant mock triggers bypassing the UPI pin keyboard",
+    payingTo: "Paying To",
+    amountToPay: "Amount to Pay",
+    customerName: "Customer Name",
+    customerMobile: "Customer Mobile Number",
+    proceedPay: "Proceed to Pay",
+    enterPin: "ENTER 4-DIGIT UPI PIN",
+    cancel: "CANCEL",
+    confirmPay: "Confirm Payment",
+    processing: "Processing UPI Payment...",
+    secureUpi: "Secure BHIM UPI",
+    successMsg: "Payment Successful",
+    recipient: "Recipient",
+    modeUpi: "UPI QR Code",
+    done: "Done",
+    merchantPayee: "Verified Merchant Payee",
+    presetLabel: "Preset",
+    soundboxLang: "Soundbox Language"
+  },
+  hi: {
+    terminalTitle: "एआई मुंशी लाइव टर्मिनल",
+    terminalSubtitle: "रीअल-टाइम यूपीआई क्यूआर भुगतान का अनुकरण करें और सीएफओ वॉयस मेट्रिक्स और ग्राहक विश्लेषण का परीक्षण करें।",
+    merchantName: "रमेश किराना स्टोर",
+    upiId: "यूपीआई आईडी: merchant_001@ybl",
+    qrInstruct: "किसी भी नकली यूपीआई प्रदाता से भुगतान स्वीकार करें। स्कैन करने के लिए नीचे दिए गए सिम्युलेटर टूल का उपयोग करें।",
+    scanQrBtn: "क्यूआर स्कैन करें (डेमो)",
+    download: "डाउनलोड",
+    share: "लिंक साझा करें",
+    soundboxTitle: "साउंडबॉक्स ऑडियो अलर्ट",
+    soundboxSubtitle: "भुगतान की आवाज़ घोषणाएं बजाएं",
+    alertsOn: "अलर्ट चालू",
+    alertsOff: "अलर्ट बंद",
+    logTitle: "लाइव ट्रांजैक्शन टर्मिनल लॉग",
+    syncActive: "लाइव सिंक सक्रिय",
+    noPayments: "अभी तक कोई क्यूआर भुगतान दर्ज नहीं किया गया है।",
+    clickInstruct: "अपने मर्चेंट कोड को स्कैन करने वाले ग्राहक का अनुकरण करने के लिए \"क्यूआर स्कैन करें (डेमो)\" पर क्लिक करें!",
+    customerCol: "ग्राहक",
+    amountCol: "राशि",
+    modeCol: "माध्यम",
+    categoryCol: "श्रेणी",
+    dateTimeCol: "दिनांक और समय",
+    sandboxTitle: "त्वरित सिमुलेशन ट्रिगर सैंडबॉक्स",
+    sandboxSubtitle: "यूपीआई पिन कीबोर्ड को दरकिनार करते हुए त्वरित नकली ट्रिगर",
+    payingTo: "भुगतान प्राप्तकर्ता",
+    amountToPay: "भुगतान की राशि",
+    customerName: "ग्राहक का नाम",
+    customerMobile: "ग्राहक का मोबाइल नंबर",
+    proceedPay: "भुगतान के लिए आगे बढ़ें",
+    enterPin: "४-अंकीय यूपीआई पिन दर्ज करें",
+    cancel: "रद्द करें",
+    confirmPay: "भुगतान की पुष्टि करें",
+    processing: "यूपीआई भुगतान संसाधित हो रहा है...",
+    secureUpi: "सुरक्षित भीम यूपीआई",
+    successMsg: "भुगतान सफल रहा",
+    recipient: "प्राप्तकर्ता",
+    modeUpi: "यूपीआई क्यूआर कोड",
+    done: "पूर्ण",
+    merchantPayee: "सत्यापित मर्चेंट प्राप्तकर्ता",
+    presetLabel: "प्रीसेट",
+    soundboxLang: "साउंडबॉक्स भाषा"
+  },
+  mr: {
+    terminalTitle: "आय मुन्शी लाइव्ह टर्मिनल",
+    terminalSubtitle: "रिअल-टाइम यूपीआय क्यूआर पेमेंटचे सिम्युलेशन करा आणि सीएफओ व्हॉइस मेट्रिक्स आणि ग्राहक विश्लेषणाची चाचणी घ्या.",
+    merchantName: "रमेश किराणा स्टोअर्स",
+    upiId: "यूपीआय आयडी: merchant_001@ybl",
+    qrInstruct: "कोणत्याही सिम्युलेटेड यूपीआय ॲपवरून पेमेंट स्वीकारा. स्कॅन करण्यासाठी खालील सिम्युलेटर टूल वापरा.",
+    scanQrBtn: "क्यूआर स्कॅन करा (डेमो)",
+    download: "डाउनलोड",
+    share: "लिंक शेअर करा",
+    soundboxTitle: "साउंडबॉक्स ऑडिओ अलर्ट",
+    soundboxSubtitle: "पेमेंटची व्हॉइस घोषणा वाजवा",
+    alertsOn: "अलर्ट चालू",
+    alertsOff: "अलर्ट बंद",
+    logTitle: "लाइव्ह ट्रान्झॅक्शन टर्मिनल लॉग",
+    syncActive: "लाइव्ह सिंक सक्रिय",
+    noPayments: "अद्याप कोणतेही क्यूआर पेमेंट नोंदवले गेले नाही.",
+    clickInstruct: "तुमचा मर्चेंट कोड स्कॅन करणाऱ्या ग्राहकाचे सिम्युलेशन करण्यासाठी \"क्यूआर स्कॅन करा (डेमो)\" वर क्लिक करा!",
+    customerCol: "ग्राहक",
+    amountCol: "रक्कम",
+    modeCol: "माध्यम",
+    categoryCol: "श्रेणी",
+    dateTimeCol: "दिनांक आणि वेळ",
+    sandboxTitle: "त्वरित सिम्युलेशन ट्रिगर सँडबॉक्स",
+    sandboxSubtitle: "यूपीआय पिन कीबोर्ड न वापरता त्वरित नकली ट्रिगर्स",
+    payingTo: "पेमेंट प्राप्तकर्ता",
+    amountToPay: "पेमेंटची रक्कम",
+    customerName: "ग्राहकाचे नाव",
+    customerMobile: "ग्राहकाचा मोबाईल नंबर",
+    proceedPay: "पेमेंटसाठी पुढे जा",
+    enterPin: "४-अंकी यूपीआय पिन प्रविष्ट करा",
+    cancel: "रद्द करा",
+    confirmPay: "पेमेंटची पुष्टी करा",
+    processing: "यूपीआय पेमेंट प्रक्रियेत आहे...",
+    secureUpi: "सुरक्षित भीम यूपीआय",
+    successMsg: "पेमेंट यशस्वी झाले",
+    recipient: "प्राप्तकर्ता",
+    modeUpi: "यूपीआय क्यूआर कोड",
+    done: "पूर्ण",
+    merchantPayee: "सत्यापित मर्चेंट प्राप्तकर्ता",
+    presetLabel: "प्रीसेट",
+    soundboxLang: "साउंडबॉक्स भाषा"
+  }
+};
+
 // --- HELPERS ---
 const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat('en-IN', {
@@ -39,8 +171,8 @@ const formatDate = (dateString: string): { date: string; time: string } => {
   return { date: dateStr, time: timeStr };
 };
 
-// Speech Alert function
-const playVoiceAlert = (text: string, lang: 'en' | 'hi' = 'hi') => {
+// Speech Alert function supporting English, Hindi, and Marathi
+const playVoiceAlert = (text: string, lang: SupportedLang = 'hi') => {
   if (!('speechSynthesis' in window)) {
     console.warn('Speech synthesis not supported in this browser.');
     return;
@@ -58,6 +190,14 @@ const playVoiceAlert = (text: string, lang: 'en' | 'hi' = 'hi') => {
       utterance.lang = 'hi-IN';
     } else {
       utterance.lang = 'hi-IN';
+    }
+  } else if (lang === 'mr') {
+    const mrVoice = voices.find(v => v.lang.includes('mr-IN') || v.lang.includes('mr'));
+    if (mrVoice) {
+      utterance.voice = mrVoice;
+      utterance.lang = 'mr-IN';
+    } else {
+      utterance.lang = 'mr-IN';
     }
   } else {
     const enVoice = voices.find(v => v.lang.includes('en-IN')) || voices.find(v => v.lang.includes('en'));
@@ -95,7 +235,7 @@ export default function LiveQRTerminal({
   const [loading, setLoading] = useState(true);
   const [showCustomerSim, setShowCustomerSim] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
-  const [voiceLang, setVoiceLang] = useState<'hi' | 'en'>('hi');
+  const [voiceLang, setVoiceLang] = useState<SupportedLang>('hi');
 
   // Customer Sim Fields
   const [simStep, setSimStep] = useState<'FORM' | 'PIN' | 'PROCESSING' | 'SUCCESS'>('FORM');
@@ -104,6 +244,8 @@ export default function LiveQRTerminal({
   const [amount, setAmount] = useState('');
   const [pin, setPin] = useState('');
   const [createdTxn, setCreatedTxn] = useState<any>(null);
+
+  const t = translations[voiceLang];
 
   const qrData = `http://localhost:5173/pay?merchant=${merchantId}&name=${encodeURIComponent("Ramesh Kirana Store")}`;
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrData)}&color=0f172a`;
@@ -159,7 +301,9 @@ export default function LiveQRTerminal({
       if (res.ok) {
         if (voiceEnabled) {
           const speechText = voiceLang === 'hi' 
-            ? `${name} se ${amt} rupaye prapt hue hain.` 
+            ? `${name} से ${amt} रुपये प्राप्त हुए हैं।` 
+            : voiceLang === 'mr'
+            ? `${name} कडून ${amt} रुपये प्राप्त झाले आहेत।`
             : `Payment of ${amt} rupees received from ${name}.`;
           playVoiceAlert(speechText, voiceLang);
         }
@@ -223,7 +367,6 @@ export default function LiveQRTerminal({
       if (!res.ok) throw new Error("Payment rejection by backend");
       
       const txn = await res.json();
-      // Generate standard transaction_id if not present
       txn.transaction_id = txn.transaction_id || `TXN-2026-${Math.floor(100+Math.random()*900)}-${Math.floor(10+Math.random()*90)}`;
       setCreatedTxn(txn);
       setSimStep('SUCCESS');
@@ -231,7 +374,9 @@ export default function LiveQRTerminal({
       // Trigger Soundbox alert
       if (voiceEnabled) {
         const speechText = voiceLang === 'hi' 
-          ? `${customerName} se ${amount} rupaye prapt hue hain.` 
+          ? `${customerName} से ${amount} रुपये प्राप्त हुए हैं।` 
+          : voiceLang === 'mr'
+          ? `${customerName} कडून ${amount} रुपये प्राप्त झाले आहेत।`
           : `Payment received. Amount ${amount} rupees from ${customerName}.`;
         playVoiceAlert(speechText, voiceLang);
       }
@@ -267,10 +412,10 @@ export default function LiveQRTerminal({
         <div>
           <h2 className="text-2xl font-black text-white flex items-center gap-2">
             <QrCode className="w-7 h-7 text-[#00BAF2]" />
-            AI Munshi Live Terminal
+            {t.terminalTitle}
           </h2>
           <p className="text-slate-400 text-xs mt-1">
-            Simulate real-time UPI QR payments and test the CFO voice metrics & customer analytics.
+            {t.terminalSubtitle}
           </p>
         </div>
         <button 
@@ -290,8 +435,8 @@ export default function LiveQRTerminal({
           <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl flex flex-col items-center text-center shadow-lg relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-[#00BAF2]/10 rounded-full blur-3xl pointer-events-none"></div>
             
-            <h3 className="text-white font-extrabold text-lg">Ramesh Kirana Store</h3>
-            <p className="text-[#00BAF2] text-xs font-semibold">UPI ID: {merchantId}@ybl</p>
+            <h3 className="text-white font-extrabold text-lg">{t.merchantName}</h3>
+            <p className="text-[#00BAF2] text-xs font-semibold">{t.upiId}</p>
             
             {/* Real visual QR container */}
             <div className="my-6 p-4 bg-white rounded-3xl shadow-inner relative group border-4 border-slate-800">
@@ -307,7 +452,7 @@ export default function LiveQRTerminal({
             </div>
 
             <p className="text-slate-400 text-[11px] max-w-xs leading-relaxed mb-6">
-              Accept mock payments from any simulated UPI provider. Use the simulator tool below to scan.
+              {t.qrInstruct}
             </p>
 
             <div className="w-full space-y-3">
@@ -316,7 +461,7 @@ export default function LiveQRTerminal({
                 className="w-full py-3 bg-[#00BAF2] hover:bg-[#009bd0] text-white font-bold rounded-2xl shadow-lg shadow-[#00BAF2]/20 flex items-center justify-center gap-2 transition cursor-pointer"
               >
                 <Scan className="w-4.5 h-4.5" />
-                Scan QR (Demo Flow)
+                {t.scanQrBtn}
               </button>
               
               <div className="grid grid-cols-2 gap-3">
@@ -325,14 +470,14 @@ export default function LiveQRTerminal({
                   className="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs font-semibold rounded-2xl transition cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <Download className="w-3.5 h-3.5" />
-                  Download
+                  {t.download}
                 </button>
                 <button 
                   onClick={handleShare}
                   className="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs font-semibold rounded-2xl transition cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <Share2 className="w-3.5 h-3.5" />
-                  Share Link
+                  {t.share}
                 </button>
               </div>
             </div>
@@ -349,43 +494,54 @@ export default function LiveQRTerminal({
                 )}
               </div>
               <div>
-                <h4 className="text-white font-bold text-sm">Soundbox Audio Alerts</h4>
-                <p className="text-slate-400 text-[10px]">Play payment voice confirmations</p>
+                <h4 className="text-white font-bold text-sm">{t.soundboxTitle}</h4>
+                <p className="text-slate-400 text-[10px]">{t.soundboxSubtitle}</p>
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-2">
-              {/* Language Switch */}
-              <div className="bg-slate-800 p-1 rounded-2xl flex border border-slate-700">
+            <div className="flex flex-col gap-3">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">{t.soundboxLang}</span>
+              <div className="flex items-center justify-between">
+                {/* Language Switch */}
+                <div className="bg-slate-800 p-1 rounded-2xl flex border border-slate-700">
+                  <button 
+                    onClick={() => setVoiceLang('hi')}
+                    className={`px-3 py-1.5 text-xs font-bold rounded-xl transition cursor-pointer ${
+                      voiceLang === 'hi' ? 'bg-[#D32F2F] text-white' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    हिन्दी
+                  </button>
+                  <button 
+                    onClick={() => setVoiceLang('mr')}
+                    className={`px-3 py-1.5 text-xs font-bold rounded-xl transition cursor-pointer ${
+                      voiceLang === 'mr' ? 'bg-[#D32F2F] text-white' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    मराठी
+                  </button>
+                  <button 
+                    onClick={() => setVoiceLang('en')}
+                    className={`px-3 py-1.5 text-xs font-bold rounded-xl transition cursor-pointer ${
+                      voiceLang === 'en' ? 'bg-[#D32F2F] text-white' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    English
+                  </button>
+                </div>
+
+                {/* Speaker Toggle Switch */}
                 <button 
-                  onClick={() => setVoiceLang('hi')}
-                  className={`px-3 py-1.5 text-xs font-bold rounded-xl transition cursor-pointer ${
-                    voiceLang === 'hi' ? 'bg-[#D32F2F] text-white' : 'text-slate-400 hover:text-white'
+                  onClick={() => setVoiceEnabled(!voiceEnabled)}
+                  className={`px-3 py-2 rounded-2xl text-[10px] font-black border transition cursor-pointer ${
+                    voiceEnabled 
+                      ? "bg-[#D32F2F]/10 text-[#D32F2F] border-[#D32F2F]/30" 
+                      : "bg-slate-800 text-slate-500 border-slate-700"
                   }`}
                 >
-                  Hindi
-                </button>
-                <button 
-                  onClick={() => setVoiceLang('en')}
-                  className={`px-3 py-1.5 text-xs font-bold rounded-xl transition cursor-pointer ${
-                    voiceLang === 'en' ? 'bg-[#D32F2F] text-white' : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  English
+                  {voiceEnabled ? t.alertsOn : t.alertsOff}
                 </button>
               </div>
-
-              {/* Speaker Toggle Switch */}
-              <button 
-                onClick={() => setVoiceEnabled(!voiceEnabled)}
-                className={`px-4 py-2 rounded-2xl text-xs font-black border transition cursor-pointer ${
-                  voiceEnabled 
-                    ? "bg-[#D32F2F]/10 text-[#D32F2F] border-[#D32F2F]/30" 
-                    : "bg-slate-800 text-slate-500 border-slate-700"
-                }`}
-              >
-                {voiceEnabled ? "ALERTS ON" : "ALERTS OFF"}
-              </button>
             </div>
           </div>
         </div>
@@ -397,11 +553,11 @@ export default function LiveQRTerminal({
             <div className="p-6 border-b border-slate-800 flex items-center justify-between shrink-0">
               <h3 className="text-white font-extrabold text-sm flex items-center gap-2">
                 <CreditCard className="w-4 h-4 text-[#00BAF2]" />
-                Live Transactions Terminal Log
+                {t.logTitle}
               </h3>
               <div className="flex items-center gap-2 text-[10px] text-slate-400">
                 <span className="w-2 h-2 rounded-full bg-[#00C853] animate-ping"></span>
-                <span className="font-extrabold tracking-wider uppercase">Live Connection Active</span>
+                <span className="font-extrabold tracking-wider uppercase">{t.syncActive}</span>
               </div>
             </div>
             
@@ -413,18 +569,18 @@ export default function LiveQRTerminal({
               ) : transactions.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-2 text-slate-500">
                   <Scan className="w-12 h-12 text-slate-700" />
-                  <p className="text-sm font-semibold">No QR payments logged yet.</p>
-                  <p className="text-[11px] max-w-xs">Click "Scan QR (Demo Flow)" to simulate a customer scanning your merchant code!</p>
+                  <p className="text-sm font-semibold">{t.noPayments}</p>
+                  <p className="text-[11px] max-w-xs">{t.clickInstruct}</p>
                 </div>
               ) : (
                 <table className="w-full border-collapse">
                   <thead>
                     <tr className="border-b border-slate-800 text-left text-slate-500 text-[10px] uppercase font-bold tracking-wider">
-                      <th className="px-6 py-3">Customer</th>
-                      <th className="px-6 py-3">Amount</th>
-                      <th className="px-6 py-3">Mode</th>
-                      <th className="px-6 py-3">Category</th>
-                      <th className="px-6 py-3">Date & Time</th>
+                      <th className="px-6 py-3">{t.customerCol}</th>
+                      <th className="px-6 py-3">{t.amountCol}</th>
+                      <th className="px-6 py-3">{t.modeCol}</th>
+                      <th className="px-6 py-3">{t.categoryCol}</th>
+                      <th className="px-6 py-3">{t.dateTimeCol}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/50">
@@ -441,7 +597,7 @@ export default function LiveQRTerminal({
                           <td className="px-6 py-4">
                             <div>
                               <div className="font-bold text-white">{txn.customer_name}</div>
-                              <div className="text-[10px] text-slate-500 font-medium">Verified Merchant Payee</div>
+                              <div className="text-[10px] text-slate-500 font-medium">{t.merchantPayee}</div>
                             </div>
                           </td>
                           <td className="px-6 py-4 font-extrabold text-white">
@@ -449,7 +605,7 @@ export default function LiveQRTerminal({
                           </td>
                           <td className="px-6 py-4">
                             <span className="bg-[#00BAF2]/10 text-[#00BAF2] px-2 py-0.5 rounded-full text-[9px] font-black uppercase">
-                              UPI QR
+                              {t.modeUpi}
                             </span>
                           </td>
                           <td className="px-6 py-4 text-slate-400 font-medium">
@@ -474,9 +630,9 @@ export default function LiveQRTerminal({
               <div>
                 <h4 className="text-white font-bold text-sm flex items-center gap-1.5">
                   <Sparkles className="w-4 h-4 text-[#FF9100]" />
-                  Quick Simulation Trigger Sandbox
+                  {t.sandboxTitle}
                 </h4>
-                <p className="text-slate-400 text-[10px]">Instant mock triggers bypassing the UPI pin keyboard</p>
+                <p className="text-slate-400 text-[10px]">{t.sandboxSubtitle}</p>
               </div>
             </div>
 
@@ -485,25 +641,25 @@ export default function LiveQRTerminal({
                 onClick={() => handleTriggerPreset("Kiran Rao", 1500)}
                 className="py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white rounded-2xl text-xs font-bold transition cursor-pointer"
               >
-                + ₹1,500 (Kiran)
+                + ₹1,500 ({voiceLang === 'hi' ? 'किरण' : voiceLang === 'mr' ? 'किरण' : 'Kiran'})
               </button>
               <button 
                 onClick={() => handleTriggerPreset("Sunil Joshi", 800)}
                 className="py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white rounded-2xl text-xs font-bold transition cursor-pointer"
               >
-                + ₹800 (Sunil)
+                + ₹800 ({voiceLang === 'hi' ? 'सुनील' : voiceLang === 'mr' ? 'सुनील' : 'Sunil'})
               </button>
               <button 
                 onClick={() => handleTriggerPreset("Sandeep Gupta", 5000)}
                 className="py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white rounded-2xl text-xs font-bold transition cursor-pointer"
               >
-                + ₹5,000 (Sandeep)
+                + ₹5,000 ({voiceLang === 'hi' ? 'संदीप' : voiceLang === 'mr' ? 'संदीप' : 'Sandeep'})
               </button>
               <button 
                 onClick={() => handleTriggerPreset("Rahul Sharma", 2500)}
                 className="py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white rounded-2xl text-xs font-bold transition cursor-pointer"
               >
-                + ₹2,500 (Rahul)
+                + ₹2,500 ({voiceLang === 'hi' ? 'राहुल' : voiceLang === 'mr' ? 'राहुल' : 'Rahul'})
               </button>
             </div>
           </div>
@@ -523,10 +679,10 @@ export default function LiveQRTerminal({
                     onClick={handleCloseSim}
                     className="flex items-center gap-1 text-slate-500 hover:text-slate-800 text-xs font-bold cursor-pointer"
                   >
-                    <ChevronLeft className="w-4 h-4" /> Back
+                    <ChevronLeft className="w-4 h-4" /> {t.cancel}
                   </button>
                   <div className="flex items-center gap-1 text-emerald-600 text-xs font-bold">
-                    <ShieldCheck className="w-4.5 h-4.5" /> Secure BHIM UPI
+                    <ShieldCheck className="w-4.5 h-4.5" /> {t.secureUpi}
                   </div>
                 </div>
 
@@ -534,21 +690,21 @@ export default function LiveQRTerminal({
                   <div className="w-12 h-12 rounded-2xl bg-[#002970] text-white flex items-center justify-center font-black text-xl mx-auto shadow-md">
                     M
                   </div>
-                  <h4 className="font-extrabold text-[#002970] text-base mt-2">AI Munshi Store</h4>
+                  <h4 className="font-extrabold text-[#002970] text-base mt-2">{t.merchantName}</h4>
                   <p className="text-slate-400 text-[10px]">payingto: merchant_001@ybl</p>
                 </div>
 
                 <form onSubmit={handleDetailsSubmit} className="flex-1 flex flex-col space-y-4">
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide block">Paying To</label>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide block">{t.payingTo}</label>
                     <div className="flex items-center gap-2 p-3 bg-white border border-slate-200 rounded-2xl shadow-sm">
                       <Building className="w-4 h-4 text-slate-500" />
-                      <span className="font-extrabold text-xs text-[#002970]">AI Munshi Store (Ramesh Kirana)</span>
+                      <span className="font-extrabold text-xs text-[#002970]">{t.merchantName}</span>
                     </div>
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide block">Amount to Pay</label>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide block">{t.amountToPay}</label>
                     <div className="relative">
                       <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-black text-[#002970]">₹</span>
                       <input 
@@ -563,7 +719,7 @@ export default function LiveQRTerminal({
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide block">Customer Name</label>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide block">{t.customerName}</label>
                     <input 
                       type="text"
                       placeholder="e.g. Pathu"
@@ -575,7 +731,7 @@ export default function LiveQRTerminal({
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide block">Customer Mobile Number</label>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide block">{t.customerMobile}</label>
                     <input 
                       type="tel"
                       placeholder="e.g. 9876543210"
@@ -590,7 +746,7 @@ export default function LiveQRTerminal({
                     type="submit"
                     className="w-full py-3.5 bg-[#002970] hover:bg-[#001c4e] text-white font-bold rounded-2xl shadow-lg mt-auto cursor-pointer transition"
                   >
-                    Proceed to Pay
+                    {t.proceedPay}
                   </button>
                 </form>
               </div>
@@ -601,17 +757,17 @@ export default function LiveQRTerminal({
               <div className="p-6 flex flex-col flex-1 bg-slate-900 text-white">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-6">
                   <div>
-                    <span className="text-[10px] text-slate-500 font-extrabold uppercase block">Paying To</span>
-                    <span className="font-extrabold text-sm">AI Munshi Store</span>
+                    <span className="text-[10px] text-slate-500 font-extrabold uppercase block">{t.payingTo}</span>
+                    <span className="font-extrabold text-sm">{t.merchantName}</span>
                   </div>
                   <div className="text-right">
-                    <span className="text-[10px] text-slate-500 font-extrabold uppercase block">Amount</span>
+                    <span className="text-[10px] text-slate-500 font-extrabold uppercase block">{t.amountCol}</span>
                     <span className="font-black text-[#00BAF2] text-lg">₹{amount}</span>
                   </div>
                 </div>
 
                 <div className="text-center my-6 space-y-4">
-                  <span className="text-xs font-extrabold text-slate-400 tracking-wider">ENTER 4-DIGIT UPI PIN</span>
+                  <span className="text-xs font-extrabold text-slate-400 tracking-wider">{t.enterPin}</span>
                   <div className="flex items-center justify-center gap-4">
                     {[...Array(4)].map((_, i) => (
                       <div 
@@ -638,7 +794,7 @@ export default function LiveQRTerminal({
                     onClick={handleCloseSim}
                     className="h-12 flex items-center justify-center text-[10px] font-black text-rose-500 bg-slate-800/20 hover:bg-slate-850 rounded-full border border-slate-800 transition cursor-pointer"
                   >
-                    CANCEL
+                    {t.cancel}
                   </button>
                   <button 
                     onClick={() => handleKeyPress('0')}
@@ -658,7 +814,7 @@ export default function LiveQRTerminal({
                   onClick={handlePaySubmit}
                   className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl shadow-lg transition mt-4 cursor-pointer"
                 >
-                  Confirm Payment
+                  {t.confirmPay}
                 </button>
               </div>
             )}
@@ -667,7 +823,7 @@ export default function LiveQRTerminal({
             {simStep === 'PROCESSING' && (
               <div className="p-6 flex flex-col flex-1 items-center justify-center bg-white">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00BAF2] mb-4"></div>
-                <h3 className="font-extrabold text-base text-[#002970]">Processing UPI Payment...</h3>
+                <h3 className="font-extrabold text-base text-[#002970]">{t.processing}</h3>
                 <p className="text-slate-400 text-xs mt-1">Establishing secure bank link</p>
               </div>
             )}
@@ -681,16 +837,16 @@ export default function LiveQRTerminal({
                     <ShieldCheck className="w-10 h-10 animate-bounce" />
                   </div>
                   
-                  <h3 className="text-emerald-600 font-black text-xl">Payment Successful</h3>
+                  <h3 className="text-emerald-600 font-black text-xl">{t.successMsg}</h3>
                   <h2 className="text-3xl font-black text-[#002970]">{formatCurrency(createdTxn.amount)}</h2>
                   
                   <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl text-left text-xs space-y-2.5">
                     <div className="flex justify-between">
-                      <span className="text-slate-400 font-medium">Recipient</span>
-                      <span className="text-slate-800 font-extrabold">AI Munshi Store</span>
+                      <span className="text-slate-400 font-medium">{t.recipient}</span>
+                      <span className="text-slate-800 font-extrabold">{t.merchantName}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-400 font-medium">Customer</span>
+                      <span className="text-slate-400 font-medium">{t.customerCol}</span>
                       <span className="text-slate-800 font-extrabold">{createdTxn.customer_name}</span>
                     </div>
                     <div className="flex justify-between">
@@ -698,8 +854,8 @@ export default function LiveQRTerminal({
                       <span className="text-slate-800 font-bold font-mono text-[10px]">{createdTxn.transaction_id}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-400 font-medium">Mode</span>
-                      <span className="text-slate-800 font-extrabold">UPI QR Code</span>
+                      <span className="text-slate-400 font-medium">{t.modeCol}</span>
+                      <span className="text-slate-800 font-extrabold">{t.modeUpi}</span>
                     </div>
                   </div>
                 </div>
@@ -708,7 +864,7 @@ export default function LiveQRTerminal({
                   onClick={handleCloseSim}
                   className="w-full py-3.5 bg-[#002970] hover:bg-[#001c4e] text-white font-bold rounded-2xl transition cursor-pointer mt-6"
                 >
-                  Done
+                  {t.done}
                 </button>
               </div>
             )}

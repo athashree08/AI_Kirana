@@ -281,26 +281,48 @@ async def process_voice(
                 response_text = "Mohan ka 1200 rupaye udhar baaki hai."
         else:
             # ---- CUSTOMER INTELLIGENCE VOICE INTENTS ----
+            # Detect language of the query
+            query_lang = "hinglish"
+            marathi_kws = ["सर्वात", "सगळ्यात", "किती", "दाखवा", "आहे", "येतो", "येणारा", "एकूण"]
+            hindi_kws = ["सबसे", "कितने", "दिखाओ", "है", "आता", "आया", "कौन", "किरण"]
+            if any(kw in transcript_lower for kw in marathi_kws):
+                query_lang = "mr"
+            elif any(kw in transcript_lower for kw in hindi_kws):
+                query_lang = "hi"
+
             if any(kw in transcript_lower for kw in [
                 "sabse accha customer", "best customer", "top customer", "sabse bada customer",
-                "sabse valuable", "best customer kaun hai"
+                "sabse valuable", "best customer kaun hai",
+                "सर्वात चांगला कस्टमर", "सगळ्यात चांगला कस्टमर", "सर्वात चांगला ग्राहक", "सगळ्यात चांगला ग्राहक", "सर्वात मोठा ग्राहक", "सबसे अच्छा ग्राहक", "सबसे बड़ा ग्राहक"
             ]):
                 intent = "customer_top"
                 try:
                     customers_intel = crud.get_customer_intelligence_data(db, "merchant_001")
                     if customers_intel:
                         top = max(customers_intel, key=lambda c: c["total_spent"])
-                        response_text = (
-                            f"{top['customer_name']} aapke sabse valuable customer hain. "
-                            f"Unhone kul ₹{int(top['total_spent']):,} spend kiye hain aur {top['visit_count']} baar aaye hain."
-                        )
+                        if query_lang == "mr":
+                            response_text = (
+                                f"{top['customer_name']} हे तुमचे सर्वात मौल्यवान ग्राहक आहेत. "
+                                f"त्यांनी एकूण ₹{int(top['total_spent']):,} खर्च केले आहेत आणि ते {top['visit_count']} वेळा आले आहेत."
+                            )
+                        elif query_lang == "hi":
+                            response_text = (
+                                f"{top['customer_name']} आपके सबसे मूल्यवान ग्राहक हैं। "
+                                f"उन्होंने कुल ₹{int(top['total_spent']):,} खर्च किए हैं और वे {top['visit_count']} बार आए हैं।"
+                            )
+                        else:
+                            response_text = (
+                                f"{top['customer_name']} aapke sabse valuable customer hain. "
+                                f"Unhone kul ₹{int(top['total_spent']):,} spend kiye hain aur {top['visit_count']} baar aaye hain."
+                            )
                     else:
                         response_text = "Abhi koi customer purchase data record nahi hua hai."
                 except Exception as e:
                     response_text = "Customer data fetch karne mein error aayi."
 
             elif any(kw in transcript_lower for kw in [
-                "top 5 customers", "top customers dikhao", "top customers", "top panch customer"
+                "top 5 customers", "top customers dikhao", "top customers", "top panch customer",
+                "टॉप ५", "टॉप 5", "पहिली ५", "पहिले ५", "पहिले 5", "टॉप ५ ग्राहक", "टॉप ५ कस्टमर"
             ]):
                 intent = "customer_top5"
                 try:
@@ -308,7 +330,12 @@ async def process_voice(
                     if customers_intel:
                         top5 = sorted(customers_intel, key=lambda c: c["total_spent"], reverse=True)[:5]
                         names = ", ".join([f"{c['customer_name']} (₹{int(c['total_spent']):,})" for c in top5])
-                        response_text = f"Aapke top 5 customers hain: {names}."
+                        if query_lang == "mr":
+                            response_text = f"तुमचे टॉप ५ ग्राहक आहेत: {names}."
+                        elif query_lang == "hi":
+                            response_text = f"आपके टॉप ५ ग्राहक हैं: {names}."
+                        else:
+                            response_text = f"Aapke top 5 customers hain: {names}."
                     else:
                         response_text = "Abhi koi customer purchase data record nahi hua hai."
                 except Exception as e:
@@ -316,24 +343,37 @@ async def process_voice(
 
             elif (
                 any(kw in transcript_lower for kw in ["most frequent", "frequent customer", "zyada bar aaya", "zyada baar"]) or
-                ("sabse zyada" in transcript_lower and any(x in transcript_lower for x in ["aata", "aaya", "baar", "bar", "visit"]))
+                ("sabse zyada" in transcript_lower and any(x in transcript_lower for x in ["aata", "aaya", "baar", "bar", "visit"])) or
+                (("सर्वात जास्त" in transcript_lower or "सगळ्यात जास्त" in transcript_lower) and any(x in transcript_lower for x in ["येतो", "येणारा", "वेळा", "येऊन", "फेऱ्या", "visit"]))
             ):
                 intent = "customer_frequent"
                 try:
                     customers_intel = crud.get_customer_intelligence_data(db, "merchant_001")
                     if customers_intel:
                         most_freq = max(customers_intel, key=lambda c: c["visit_count"])
-                        response_text = (
-                            f"{most_freq['customer_name']} sabse zyada {most_freq['visit_count']} baar aaye hain. "
-                            f"Unka total spend ₹{int(most_freq['total_spent']):,} hai."
-                        )
+                        if query_lang == "mr":
+                            response_text = (
+                                f"{most_freq['customer_name']} हे सर्वात जास्त {most_freq['visit_count']} वेळा आले आहेत. "
+                                f"त्यांनी एकूण ₹{int(most_freq['total_spent']):,} खर्च केले आहेत."
+                            )
+                        elif query_lang == "hi":
+                            response_text = (
+                                f"{most_freq['customer_name']} सबसे अधिक {most_freq['visit_count']} बार आए हैं। "
+                                f"उन्होंने कुल ₹{int(most_freq['total_spent']):,} खर्च किए हैं।"
+                            )
+                        else:
+                            response_text = (
+                                f"{most_freq['customer_name']} sabse zyada {most_freq['visit_count']} baar aaye hain. "
+                                f"Unka total spend ₹{int(most_freq['total_spent']):,} hai."
+                            )
                     else:
                         response_text = "Abhi koi frequent customer data nahi hai."
                 except Exception as e:
                     response_text = "Frequent customer data fetch karne mein error aayi."
 
             elif any(kw in transcript_lower for kw in [
-                "customer base", "kitne customers", "mera customer base", "customers hain"
+                "customer base", "kitne customers", "mera customer base", "customers hain",
+                "किती कस्टमर", "एकूण कस्टमर", "कस्टमर बेस", "किती ग्राहक", "एकूण ग्राहक"
             ]):
                 intent = "customer_base"
                 try:
@@ -341,10 +381,21 @@ async def process_voice(
                     total_c = len(customers_intel)
                     vip_c = sum(1 for c in customers_intel if c["relationship_type"] == "VIP")
                     regular_c = sum(1 for c in customers_intel if c["relationship_type"] == "Regular")
-                    response_text = (
-                        f"Aapke paas {total_c} active customers hain. "
-                        f"Unmein se {vip_c} VIP aur {regular_c} regular customers hain."
-                    )
+                    if query_lang == "mr":
+                        response_text = (
+                            f"तुमच्याकडे एकूण {total_c} सक्रिय ग्राहक आहेत. "
+                            f"त्यापैकी {vip_c} व्हीआयपी आणि {regular_c} नियमित ग्राहक आहेत."
+                        )
+                    elif query_lang == "hi":
+                        response_text = (
+                            f"आपके पास कुल {total_c} सक्रिय ग्राहक हैं। "
+                            f"उनमें से {vip_c} वीआईपी और {regular_c} नियमित ग्राहक हैं।"
+                        )
+                    else:
+                        response_text = (
+                            f"Aapke paas {total_c} active customers hain. "
+                            f"Unmein se {vip_c} VIP aur {regular_c} regular customers hain."
+                        )
                 except Exception as e:
                     response_text = "Aapke paas active customers hain. Customer Intelligence module check karein."
 
