@@ -7,6 +7,7 @@ import StaffManagement from "./StaffManagement";
 import ReportsAnalytics from "./ReportsAnalytics";
 import CustomerIntelligence from "./CustomerIntelligence";
 import LiveQRTerminal from "./LiveQRTerminal";
+import ImportHub from "./ImportHub";
 import {
   Search,
   QrCode,
@@ -118,7 +119,7 @@ interface SupplierLedgerEntry {
   description: string;
 }
 
-type SidebarView = "ledger" | "cfo" | "voice" | "settings" | "expenses" | "cashbook" | "staff" | "reports" | "customers" | "terminal";
+type SidebarView = "ledger" | "cfo" | "voice" | "settings" | "expenses" | "cashbook" | "staff" | "reports" | "customers" | "terminal" | "import";
 type AssistantState = "idle" | "requesting" | "recording" | "processing";
 
 export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenceCenterProps) {
@@ -369,11 +370,43 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
     }
   };
 
+  const fetchSuppliers = async () => {
+    try {
+      const response = await fetch('/api/state/suppliers');
+      if (!response.ok) throw new Error("Failed to fetch suppliers");
+      const data = await response.json();
+      if (data && data.value) {
+        setSuppliers(data.value);
+        if (selectedSupplier) {
+          const updated = data.value.find((s: Supplier) => s.id === selectedSupplier.id);
+          if (updated) setSelectedSupplier(updated);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to load suppliers:", err);
+    }
+  };
+
+  const fetchSupplierEntries = async () => {
+    try {
+      const response = await fetch('/api/state/supplier_entries');
+      if (!response.ok) throw new Error("Failed to fetch supplier entries");
+      const data = await response.json();
+      if (data && data.value) {
+        setSupplierEntries(data.value);
+      }
+    } catch (err) {
+      console.error("Failed to load supplier entries:", err);
+    }
+  };
+
   const loadAllData = () => {
     fetchCustomers();
     fetchUdharHealth();
     fetchLoanScore();
     fetchRawEntries();
+    fetchSuppliers();
+    fetchSupplierEntries();
   };
 
   useEffect(() => {
@@ -390,13 +423,23 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
   const handleSavePhone = async () => {
     if (activeLedgerTab === "suppliers" && selectedSupplier) {
       setSavingPhone(true);
-      setTimeout(() => {
-        setSuppliers(prev => prev.map(s => s.id === selectedSupplier.id ? { ...s, phone: phoneInput } : s));
+      try {
+        const updatedSuppliers = suppliers.map(s => s.id === selectedSupplier.id ? { ...s, phone: phoneInput } : s);
+        const res = await fetch('/api/state/suppliers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ value: updatedSuppliers })
+        });
+        if (!res.ok) throw new Error("Failed to save phone number");
         setSelectedSupplier(prev => prev ? { ...prev, phone: phoneInput } : null);
         showToast("success", `Phone updated for ${selectedSupplier.name}`);
         setEditingPhone(false);
+        fetchSuppliers();
+      } catch (err: any) {
+        showToast("error", err.message);
+      } finally {
         setSavingPhone(false);
-      }, 500);
+      }
       return;
     }
 
@@ -492,14 +535,14 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
     }
   };
 
-  const handleAddSupplierSubmit = (e: React.FormEvent) => {
+  const handleAddSupplierSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newSuppName || !newSuppAmount) {
       showToast("error", "Please fill in Name and Initial Outstanding.");
       return;
     }
     setSubmittingSupplier(true);
-    setTimeout(() => {
+    try {
       const parsedAmt = parseFloat(newSuppAmount);
       const newSupp: Supplier = {
         id: suppliers.length + 1,
@@ -522,8 +565,7 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
         spending_trend: [0, 0, 0, 0, 0, 0]
       };
 
-      setSuppliers(prev => [...prev, newSupp]);
-      
+      const updatedSuppliers = [...suppliers, newSupp];
       const newEntry: SupplierLedgerEntry = {
         id: supplierEntries.length + 1,
         supplier_id: newSupp.id,
@@ -531,7 +573,21 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
         date_added: newSupp.last_purchase_date,
         description: "Opening Balance Outstanding"
       };
-      setSupplierEntries(prev => [...prev, newEntry]);
+      const updatedEntries = [...supplierEntries, newEntry];
+
+      const resSupp = await fetch('/api/state/suppliers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ value: updatedSuppliers })
+      });
+      if (!resSupp.ok) throw new Error("Failed to save supplier data");
+
+      const resEnt = await fetch('/api/state/supplier_entries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ value: updatedEntries })
+      });
+      if (!resEnt.ok) throw new Error("Failed to save supplier entries data");
 
       showToast("success", `Supplier ${newSuppName} added to ledger.`);
       setShowAddSupplierModal(false);
@@ -539,8 +595,12 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
       setNewSuppPhone("");
       setNewSuppAmount("");
       setNewSuppDate("");
+      loadAllData();
+    } catch (err: any) {
+      showToast("error", err.message);
+    } finally {
       setSubmittingSupplier(false);
-    }, 500);
+    }
   };
 
   const handleAddTxSubmit = async (e: React.FormEvent) => {
@@ -607,12 +667,12 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
     }
   };
 
-  const handleAddSupplierTxSubmit = (e: React.FormEvent) => {
+  const handleAddSupplierTxSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedSupplier || !newSuppTxAmount) return;
 
     setSubmittingSuppTx(true);
-    setTimeout(() => {
+    try {
       const parsedAmt = parseFloat(newSuppTxAmount) * (newSuppTxType === "give" ? -1 : 1); // give = repayment (decreases what we owe), got = purchase (increases what we owe)
       
       const newEntry: SupplierLedgerEntry = {
@@ -623,10 +683,8 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
         description: newSuppTxDesc.trim() || (newSuppTxType === "give" ? "Payment Repayment" : "Goods Purchase")
       };
 
-      setSupplierEntries(prev => [...prev, newEntry]);
-      
-      // Update supplier outstanding amount
-      setSuppliers(prev => prev.map(s => {
+      const updatedEntries = [...supplierEntries, newEntry];
+      const updatedSuppliers = suppliers.map(s => {
         if (s.id === selectedSupplier.id) {
           const updatedAmt = s.pending_amount + parsedAmt;
           return {
@@ -636,24 +694,33 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
           };
         }
         return s;
-      }));
-
-      setSelectedSupplier(prev => {
-        if (!prev) return null;
-        return {
-          ...prev,
-          pending_amount: prev.pending_amount + parsedAmt,
-          last_purchase_date: newSuppTxType === "got" ? (newSuppTxDate || prev.last_purchase_date) : prev.last_purchase_date
-        };
       });
+
+      const resSupp = await fetch('/api/state/suppliers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ value: updatedSuppliers })
+      });
+      if (!resSupp.ok) throw new Error("Failed to save supplier data");
+
+      const resEnt = await fetch('/api/state/supplier_entries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ value: updatedEntries })
+      });
+      if (!resEnt.ok) throw new Error("Failed to save supplier entries data");
 
       showToast("success", `Supplier entry of ₹${newSuppTxAmount} saved.`);
       setShowAddSupplierEntryModal(false);
       setNewSuppTxAmount("");
       setNewSuppTxDate("");
       setNewSuppTxDesc("");
+      loadAllData();
+    } catch (err: any) {
+      showToast("error", err.message);
+    } finally {
       setSubmittingSuppTx(false);
-    }, 500);
+    }
   };
 
   const handleResetDemo = async () => {
@@ -1214,6 +1281,21 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
                   <span>{t("terminal")}</span>
                 </div>
                 <span className="bg-[#e11d48] text-white text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider animate-pulse">QR</span>
+              </button>
+
+              <button
+                onClick={() => setCurrentView("import")}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  currentView === "import"
+                    ? "bg-[#00BAF2] text-white shadow-md shadow-[#00BAF2]/25"
+                    : "text-white/70 hover:bg-white/5 hover:text-white"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-base">📥</span>
+                  <span>{t("import_hub")}</span>
+                </div>
+                <span className="bg-[#00BAF2] text-white text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider">NEW</span>
               </button>
             </nav>
           </div>
@@ -1965,13 +2047,26 @@ export default function CreditIntelligenceCenter({ onLogout }: CreditIntelligenc
             </motion.div>
           )}
 
+          {/* VIEW: IMPORT HUB */}
+          {currentView === "import" && (
+            <motion.div
+              key="import"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              className="flex-1 overflow-hidden flex flex-col"
+            >
+              <ImportHub merchantId={merchantId} setCurrentView={setCurrentView} />
+            </motion.div>
+          )}
+
         </AnimatePresence>
       </div>
 
       {/* ============================================================== */}
       {/* 3. RIGHT COLUMN (Credit / Supplier Intelligence Workspace)    */}
       {/* ============================================================== */}
-      {currentView !== "expenses" && currentView !== "cashbook" && currentView !== "staff" && currentView !== "reports" && currentView !== "customers" && currentView !== "terminal" && (
+      {currentView !== "expenses" && currentView !== "cashbook" && currentView !== "staff" && currentView !== "reports" && currentView !== "customers" && currentView !== "terminal" && currentView !== "import" && (
         <div className="w-[420px] h-full flex flex-col bg-[#F8F9FB] shrink-0 overflow-y-auto relative z-10 border-l border-[#E5E7EB]">
         
         {/* TAB: CUSTOMER DETAIL PANEL */}

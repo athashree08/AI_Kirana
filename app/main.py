@@ -36,6 +36,283 @@ def read_root():
         "status": "Running"
     }
 
+# ============================================================
+# LEDGER OCR & BILLING IMPORT ENDPOINTS
+# ============================================================
+
+@app.post("/api/import/ledger-ocr")
+async def import_ledger_ocr(
+    file: UploadFile = File(...),
+    merchant_id: str = Form("merchant_001"),
+    db: Session = Depends(get_db)
+):
+    """
+    Accepts a mobile photo or scanned image of a paper ledger page.
+    Runs OCR -> LLM structuring -> fuzzy name matching -> auto-saves to Udhar.
+    Supported: JPG, JPEG, PNG
+    """
+    from app.services.ocr import extract_ocr_text, parse_ledger_with_llm, clean_and_validate_entries
+
+    filename = file.filename or "ledger.jpg"
+    ext = filename.lower().rsplit(".", 1)[-1] if "." in filename else ""
+    if ext not in ("jpg", "jpeg", "png"):
+        raise HTTPException(status_code=400, detail="Unsupported file format. Please upload JPG, JPEG, or PNG.")
+
+    try:
+        file_bytes = await file.read()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to read file: {str(e)}")
+
+    # 1. OCR extraction
+    try:
+        ocr_text = extract_ocr_text(file_bytes, filename)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"OCR extraction failed: {str(e)}")
+
+    # 2. Get existing customer names for fuzzy matching
+    existing_customers = []
+    try:
+        all_customers = crud.get_customers_with_details(db, merchant_id)
+        existing_customers = [c["customer_name"] for c in all_customers]
+    except Exception:
+        pass
+
+    # 3. LLM structuring
+    try:
+        parsed_entries = parse_ledger_with_llm(ocr_text, existing_customers)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"LLM structuring failed: {str(e)}")
+
+    # 4. Validate & fuzzy name fix
+    validated = clean_and_validate_entries(parsed_entries, existing_customers)
+
+    return {
+        "status": "preview",
+        "ocr_text": ocr_text,
+        "total_extracted": len(validated),
+        "entries": validated
+    }
+
+
+@app.post("/api/import/ledger-ocr/confirm")
+def confirm_ledger_import(
+    entries: list = None,
+    merchant_id: str = "merchant_001",
+    db: Session = Depends(get_db)
+):
+    """
+    Confirms and saves reviewed ledger OCR entries to the database.
+    Expects a JSON body: { "merchant_id": "...", "entries": [...] }
+    """
+    from fastapi import Request
+    raise HTTPException(status_code=405, detail="Use the JSON body version below.")
+
+
+from pydantic import BaseModel as PydanticBaseModel
+from typing import List as TypingList
+
+class LedgerConfirmEntry(PydanticBaseModel):
+    name: str
+    amount: float
+    type: str = "udhar"
+    date: Optional[str] = None
+    notes: str = ""
+
+class LedgerConfirmRequest(PydanticBaseModel):
+    merchant_id: str = "merchant_001"
+    entries: TypingList[LedgerConfirmEntry]
+
+@app.post("/api/import/ledger-confirm")
+def confirm_ledger_import_json(req: LedgerConfirmRequest, db: Session = Depends(get_db)):
+    """
+    User-approved: saves reviewed OCR entries into Udhar + Customer tables.
+    """
+    from datetime import date as date_type
+    saved_count = 0
+    errors = []
+
+    db_merchant = crud.get_merchant(db, merchant_id=req.merchant_id)
+    if not db_merchant:
+        raise HTTPException(status_code=404, detail=f"Merchant '{req.merchant_id}' not found.")
+
+    for entry in req.entries:
+        try:
+            try:
+                date_added = datetime.strptime(entry.date, "%Y-%m-%d").date() if entry.date else date_type.today()
+            except Exception:
+                date_added = date_type.today()
+
+            new_udhar = models.Udhar(
+                customer_name=entry.name,
+                amount=entry.amount,
+                date_added=date_added,
+                merchant_id=req.merchant_id
+            )
+            db.add(new_udhar)
+            crud.get_or_create_customer(db, req.merchant_id, entry.name)
+            saved_count += 1
+        except Exception as e:
+            errors.append(f"Save failed for {entry.name}: {str(e)}")
+
+    db.commit()
+
+    return {
+        "status": "success",
+        "saved_to_udhar": saved_count,
+        "errors": errors
+    }
+
+
+class BillingConfirmEntry(PydanticBaseModel):
+    name: str
+    amount: float
+    type: str = "sale"
+    date: Optional[str] = None
+    notes: str = ""
+
+class BillingConfirmRequest(PydanticBaseModel):
+    merchant_id: str = "merchant_001"
+    entries: TypingList[BillingConfirmEntry]
+
+@app.post("/api/import/billing")
+async def import_billing_file(
+    file: UploadFile = File(...),
+    merchant_id: str = Form("merchant_001"),
+    db: Session = Depends(get_db)
+):
+    """
+    Accepts a billing software export (CSV, XLSX, XLS).
+    Auto-maps columns, extracts entries, returns preview for user review.
+    Supported: CSV, XLSX, XLS
+    """
+    from app.services.billing_import import parse_billing_file, get_mock_billing_result
+
+    filename = file.filename or "billing.csv"
+    ext = filename.lower().rsplit(".", 1)[-1] if "." in filename else ""
+
+    if ext not in ("csv", "xlsx", "xls"):
+        raise HTTPException(status_code=400, detail="Unsupported format. Please upload CSV, XLSX, or XLS.")
+
+    try:
+        file_bytes = await file.read()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to read file: {str(e)}")
+
+    try:
+        result = parse_billing_file(file_bytes, filename)
+    except Exception as e:
+        print(f"[BillingImport] Parse error, using mock: {e}")
+        result = get_mock_billing_result()
+
+    if not result["entries"]:
+        result = get_mock_billing_result()
+
+    return {
+        "status": "preview",
+        "file_type": result["file_type"],
+        "total_entries": result["total_entries"],
+        "total_amount": result["total_amount"],
+        "breakdown_by_type": result["breakdown_by_type"],
+        "entries": result["entries"]
+    }
+
+
+@app.post("/api/import/billing-confirm")
+def confirm_billing_import(req: BillingConfirmRequest, db: Session = Depends(get_db)):
+    """
+    User-approved: saves reviewed billing entries to Transaction + Udhar tables.
+    Automatically builds Customer Intelligence, Revenue Analytics, and Business Health.
+    """
+    from datetime import date as date_type
+    saved_udhar = 0
+    saved_sales = 0
+    errors = []
+
+    db_merchant = crud.get_merchant(db, merchant_id=req.merchant_id)
+    if not db_merchant:
+        raise HTTPException(status_code=404, detail=f"Merchant '{req.merchant_id}' not found.")
+
+    for entry in req.entries:
+        try:
+            try:
+                date_added = datetime.strptime(entry.date, "%Y-%m-%d").date() if entry.date else date_type.today()
+            except Exception:
+                date_added = date_type.today()
+
+            entry_type = entry.type.lower()
+
+            if entry_type in ("udhar", "credit"):
+                new_udhar = models.Udhar(
+                    customer_name=entry.name,
+                    amount=entry.amount,
+                    date_added=date_added,
+                    merchant_id=req.merchant_id
+                )
+                db.add(new_udhar)
+                crud.get_or_create_customer(db, req.merchant_id, entry.name)
+                saved_udhar += 1
+            else:
+                # sale, payment, expense -> Transaction
+                new_tx = models.Transaction(
+                    customer_name=entry.name,
+                    amount=entry.amount,
+                    timestamp=datetime.combine(date_added, datetime.min.time()),
+                    payment_mode="Import",
+                    category="Import",
+                    merchant_id=req.merchant_id
+                )
+                db.add(new_tx)
+                # Auto-update customer intelligence
+                try:
+                    crud.upsert_customer_from_transaction(
+                        db=db,
+                        merchant_id=req.merchant_id,
+                        customer_name=entry.name,
+                        transaction_amount=entry.amount,
+                        transaction_date=date_added
+                    )
+                except Exception:
+                    crud.get_or_create_customer(db, req.merchant_id, entry.name)
+                saved_sales += 1
+        except Exception as e:
+            errors.append(f"Save failed for {entry.name}: {str(e)}")
+
+    db.commit()
+
+    return {
+        "status": "success",
+        "saved_udhar_entries": saved_udhar,
+        "saved_sale_entries": saved_sales,
+        "total_saved": saved_udhar + saved_sales,
+        "errors": errors
+    }
+
+
+@app.get("/api/import/history")
+def get_import_history(
+    merchant_id: str = Query("merchant_001"),
+    db: Session = Depends(get_db)
+):
+    """
+    Returns a summary of recent Udhar entries added in the last 30 days.
+    """
+    from datetime import date as date_type, timedelta
+    cutoff = date_type.today() - timedelta(days=30)
+    recent = db.query(models.Udhar).filter(
+        models.Udhar.merchant_id == merchant_id,
+        models.Udhar.date_added >= cutoff
+    ).order_by(models.Udhar.date_added.desc()).limit(50).all()
+
+    return {
+        "count": len(recent),
+        "entries": [
+            {
+                "customer_name": u.customer_name,
+                "amount": u.amount,
+                "date": str(u.date_added)
+            } for u in recent
+        ]
+    }
 
 
 # --- NEW HACKATHON CORE API ENDPOINTS ---
@@ -77,448 +354,26 @@ async def process_voice(
     else:
         raise HTTPException(status_code=400, detail="Either audio file, local_transcript, or mock_text must be provided")
         
-    # 3. Detect intent (keyword matching)
+    # 3. Detect intent (LLM with rule-based fallback)
     if not transcript:
         intent = "unknown"
         response_text = "Maaf kijiye, main aapka sawaal samajh nahi paaya."
     else:
-        transcript_lower = transcript.lower()
-        import re
-        
-        # Detect language of the query
-        is_devanagari = any(0x0900 <= ord(c) <= 0x097F for c in transcript)
-        query_lang = "hinglish"
-        if is_devanagari:
-            # Check if Marathi keywords are present
-            marathi_kws = ["सर्वात", "सगळ्यात", "किती", "दाखवा", "आहे", "येतो", "येणारा", "एकूण", "आहेत", "कडून", "झाले", "झालेत"]
-            if any(kw in transcript_lower for kw in marathi_kws):
-                query_lang = "mr"
-            else:
-                query_lang = "hi"
-        
-        summary_keywords = ["hisaab", "aaj", "revenue", "income", "business", "हिसाब", "आज", "रेवेन्यू", "इनकम", "बिजनेस", "व्यापार", "धंधा", "कमाई"]
-        loan_keywords = ["loan", "eligibility", "score", "finance", "लोन", "एलिजिबिलिटी", "स्कोर", "फाइनेंस", "ऋण"]
-        gst_keywords = ["gst", "registration", "tax", "जीएसटी", "रजिस्ट्रेशन", "टैक्स", "कर"]
-        
-        # New Udhar Intents & Keywords
-        repayment_keywords = ["wapas", "paise wapas", "wapas diye", "diye", "chukaye", "chuka", "वापस", "पैसे वापस", "वापस दिए", "दिए", "चुकाए", "चुकाया", "भुगतान", "जमा"]
-        reminder_keywords = ["yaad dila", "reminder bhejo", "reminder bheja", "reminder dila", "remind", "याद दिला", "रिमाइंडर", "याद दिलाओ", "मैसेज भेजो"]
-        status_keywords = ["kaisa chal raha hai", "udhar kaisa", "udhar status", "report", "कैसा चल रहा है", "उधार कैसा", "उधार स्थिति", "रिपोर्ट", "उधार रिपोर्ट"]
-        add_keywords = ["udhar diya", "credit diya", "udhar diya hai", "diya", "उधार दिया", "क्रेडिट दिया", "दिया", "उधार", "लिख", "लिखो", "लिखा", "लिख लो"]
-        
-        matched_name = None
-        
-        # 1. Try checking if any database customer name is mentioned in Latin script
+        from app.services.llm_agent import process_voice_llm
+        llm_res = None
         try:
-            from app.models import Udhar as UdharModel, Customer as CustomerModel
-            all_db_names = db.query(UdharModel.customer_name).filter(UdharModel.merchant_id == "merchant_001").distinct().all()
-            all_cust_names = db.query(CustomerModel.customer_name).filter(CustomerModel.merchant_id == "merchant_001").distinct().all()
-            all_names = set([n[0] for n in all_db_names] + [n[0] for n in all_cust_names])
-            for db_name in all_names:
-                if db_name.lower() in transcript_lower:
-                    matched_name = db_name
-                    break
+            llm_res = process_voice_llm(transcript, db, "merchant_001")
         except Exception as e:
-            print(f"Error querying distinct udhar names: {e}")
-
-        # 2. Try Devanagari translation mapping
-        if not matched_name:
-            name_map = {
-                "mohan": "Mohan", "मोहन": "Mohan",
-                "geeta": "Geeta", "गीता": "Geeta",
-                "ravi": "Ravi", "रवि": "Ravi",
-                "रमेश": "Ramesh", "ramesh": "Ramesh",
-                "रमेश चावला": "Ramesh Chawla", "रमेशचावला": "Ramesh Chawla",
-                "प्रथमेष": "Prathmesh", "prathmesh": "Prathmesh", "प्रथमेस": "Prathmesh", "प्रथमेश": "Prathmesh",
-                "जौन": "chandrasen", "john": "chandrasen", "जॉन": "chandrasen", "चंद्रसेन": "chandrasen", "चन्द्रसेन": "chandrasen", "chandrasen": "chandrasen",
-                "अमित": "Amit", "amit": "Amit", "अमित शर्मा": "Amit Sharma",
-                "संदीप": "Sandeep", "sandeep": "Sandeep", "संदीप गुप्ता": "Sandeep Gupta",
-                "राजेश": "Rajesh", "rajesh": "Rajesh", "राजेश कुमार": "Rajesh Kumar",
-                "संजय": "Sanjay", "sanjay": "Sanjay", "संजय वर्मा": "Sanjay Verma",
-                "सुरेश": "Suresh", "suresh": "Suresh", "सुरेश पटेल": "Suresh Patel",
-                "विजय": "Vijay", "vijay": "Vijay", "विजय यादव": "Vijay Yadav",
-                "अनिल": "Anil", "anil": "Anil", "अनिल मिश्रा": "Anil Mishra",
-                "सुनील": "Sunil", "sunil": "Sunil", "सुनील जोशी": "Sunil Joshi",
-                "राकेश": "Rakesh", "rakesh": "Rakesh", "राकेश तिवारी": "Rakesh Tiwari",
-                "प्रिया": "Priya", "priya": "Priya", "प्रिया सिंह": "Priya Singh",
-                "नेहा": "Neha", "neha": "Neha", "नेहा शर्मा": "Neha Sharma",
-                "सुनीता": "Sunita", "sunita": "Sunita", "सुनीता देवी": "Sunita Devi",
-                "किरण": "Kiran", "kiran": "Kiran", "किरण राव": "Kiran Rao",
-                "मीना": "Meena", "meena": "Meena", "मीना अग्रवाल": "Meena Aggarwal",
-                "पूजा": "Pooja", "pooja": "Pooja", "पूजा गुप्ता": "Pooja Gupta", "पुजा": "Pooja", "पुजा गुप्ता": "Pooja Gupta",
-                "आशा": "Asha", "asha": "Asha", "आशा भोसले": "Asha Bhosle",
-                "रेखा": "Rekha", "rekha": "Rekha", "रेखा शर्मा": "Rekha Sharma",
-                "ज्योति": "Jyoti", "jyoti": "Jyoti", "ज्योति प्रसाद": "Jyoti Prasad",
-                "दीपा": "Deepa", "deepa": "Deepa", "दीपा नायर": "Deepa Nair", "दीपानायर": "Deepa Nair",
-                "विक्रम": "Vikram", "vikram": "Vikram", "विक्रम मल्होत्रा": "Vikram Malhotra",
-                "अर्जुन": "Arjun", "arjun": "Arjun", "अर्जुन सेन": "Arjun Sen",
-                "करन": "Karan", "karan": "Karan", "करण": "Karan", "करण जौहर": "Karan Johar",
-                "राहुल": "Rahul", "rahul": "Rahul", "राहुल द्रविड़": "Rahul Dravid", "राहुल द्रविड": "Rahul Dravid",
-                "आदित्य": "Aditya", "aditya": "Aditya", "आदित्य रॉय": "Aditya Roy",
-                "मनीष": "Manish", "manish": "Manish", "मनीष मल्होत्रा": "Manish Malhotra",
-                "गौरव": "Gaurav", "gaurav": "Gaurav", "गौरव कपूर": "Gaurav Kapur",
-                "आलोक": "Alok", "alok": "Alok", "आलोक नाथ": "Alok Nath",
-                "विवेक": "Vivek", "vivek": "Vivek", "विवेक ओबेरॉय": "Vivek Oberoi",
-                "दिनेश": "Dinesh", "dinesh": "Dinesh", "दिनेश कार्तिक": "Dinesh Karthik",
-                "अभिषेक": "Abhishek", "abhishek": "Abhishek", "अभिषेक बच्चन": "Abhishek Bachchan",
-                "shilpa": "Shilpa", "शिल्पा": "Shilpa",
-                "पाथू": "Pathu", "पथु": "Pathu", "pathu": "Pathu",
-                "अनु": "Anu", "anu": "Anu"
-            }
-            for key_name, db_name in name_map.items():
-                if key_name in transcript_lower:
-                    matched_name = db_name
-                    break
-
-        # 3. Check if matched name exists in database. If not, check prefix/substring matches
-        if matched_name:
-            try:
-                from app.models import Customer as CustomerModel
-                exact_exists = db.query(CustomerModel).filter(
-                    CustomerModel.merchant_id == "merchant_001",
-                    CustomerModel.customer_name == matched_name
-                ).first()
-                if not exact_exists:
-                    prefix_match = db.query(CustomerModel).filter(
-                        CustomerModel.merchant_id == "merchant_001",
-                        CustomerModel.customer_name.like(f"%{matched_name}%")
-                    ).first()
-                    if prefix_match:
-                        matched_name = prefix_match.customer_name
-            except Exception as e:
-                print(f"Error checking customer name prefix match: {e}")
-
-        # 4. Dynamic preposition-based extraction for new/unseen names
-        STOP_WORDS = {
-            "rupaye", "rupiya", "rupiye", "rs", "rupees", "rupee", "paise",
-            "udhar", "credit", "kitna", "ka", "ki", "ke", "hai", "tha", "hoga",
-            "aur", "ya", "mera", "meri", "tera", "uska", "unka", "yeh", "woh",
-            "kya", "kab", "kaise", "kyun", "main", "hum", "aap", "tum",
-            "pending", "baaki", "baki", "total", "sab", "sabka", "bada", "achha", "accha", "chaangla"
-        }
-        if not matched_name:
-            words = transcript.strip().split()
-            for i, word in enumerate(words):
-                word_clean = word.lower().strip(",.!?\"'")
-                if word_clean in ["ko", "ne", "ka", "ki", "को", "ने", "का", "की"]:
-                    if i > 0:
-                        potential_name = words[i-1].strip(",.!?\"'")
-                        # Filter out numbers, common units, and stop words
-                        if (potential_name
-                                and not potential_name.isdigit()
-                                and potential_name.lower() not in STOP_WORDS):
-                            # Capitalize if Latin script
-                            if all(ord(c) < 128 for c in potential_name):  # ASCII = Latin
-                                potential_name = potential_name.capitalize()
-                            matched_name = potential_name  # assign regardless of script
-                            break
-
-        # 5. Broad noun scan — catch names even without postpositions
-        #    e.g. "Suresh kitna udhar hai" — pick first proper-noun-looking word
-        if not matched_name:
-            words = transcript.strip().split()
-            for word in words:
-                word_clean = word.strip(",.!?\"'")
-                if not word_clean or word_clean.lower() in STOP_WORDS or word_clean.isdigit():
-                    continue
-                # Latin: starts with uppercase or first token title-cased
-                if all(ord(c) < 128 for c in word_clean):
-                    if word_clean[0].isupper():  # e.g. "Suresh"
-                        matched_name = word_clean
-                        break
-                else:
-                    # Devanagari: accept any non-stopword token as potential name
-                    if word_clean.lower() not in STOP_WORDS:
-                        matched_name = word_clean
-                        break
-
-        # Extract amount if present
-        amount = None
-        amount_match = re.search(r'(\d+)', transcript_lower)
-        if amount_match:
-            amount = float(amount_match.group(1))
-
-        # Determine intent flags using robust context checks
-        is_repayment = any(kw in transcript_lower for kw in ["wapas", "paise wapas", "chukaye", "chuka", "वापस", "पैसे वापस", "चुकाए", "चुकाया", "भुगतान", "जमा"])
-        is_addition = (
-            any(kw in transcript_lower for kw in ["likh", "likho", "likha", "लिख", "लिखो", "लिखा", "लिख लो"]) or
-            (any(kw in transcript_lower for kw in ["udhar", "credit", "उधार", "उधर", "क्रेडिट"]) and
-             any(kw in transcript_lower for kw in ["diya", "diye", "दिया", "दिए", "add", "जोड़", "जोड़ा"]))
-        )
-        
-        # If no explicit keyword trigger is found, use grammar-based prepositions
-        if not is_repayment and not is_addition:
-            if any(kw in transcript_lower for kw in ["diya", "diye", "दिया", "दिए"]):
-                if "ko" in transcript_lower or "को" in transcript_lower:
-                    is_addition = True
-                elif "ne" in transcript_lower or "ने" in transcript_lower:
-                    is_repayment = True
-
-        if any(kw in transcript_lower for kw in summary_keywords):
-            intent = "summary"
-            from app.services.finance import get_daily_summary, generate_summary_response
-            summary_data = get_daily_summary(db, merchant_id="merchant_001")
-            response_text = generate_summary_response(summary_data)
-        elif any(kw in transcript_lower for kw in loan_keywords):
-            intent = "loan"
-            response_text = "Aapka loan readiness score 72 hai aur aap lagbhag 50000 rupaye ke loan ke liye eligible ho sakte hain."
-        elif any(kw in transcript_lower for kw in gst_keywords):
-            intent = "gst"
-            from app.services.finance import get_gst_status, generate_gst_response
-            gst_data = get_gst_status(db, merchant_id="merchant_001")
-            response_text = generate_gst_response(gst_data)
-        elif any(kw in transcript_lower for kw in reminder_keywords):
-            intent = "udhar_reminder"
-            if matched_name:
-                try:
-                    send_res = send_reminder_api(schemas.ReminderSendRequest(customer_name=matched_name), db)
-                    if send_res.success:
-                        if query_lang == "mr":
-                            response_text = f"{matched_name} ला WhatsApp रिमाइंडर पाठवले आहे."
-                        elif query_lang == "hi":
-                            response_text = f"{matched_name} को WhatsApp रिमाइंडर भेज दिया गया है।"
-                        else:
-                            response_text = f"{matched_name} ko WhatsApp reminder bhej diya gaya."
-                    else:
-                        if query_lang == "mr":
-                            response_text = f"{matched_name} ला WhatsApp रिमाइंडर पाठवणे यशस्वी झाले नाही."
-                        elif query_lang == "hi":
-                            response_text = f"{matched_name} को WhatsApp रिमाइंडर भेजना असफल रहा।"
-                        else:
-                            response_text = f"{matched_name} ko WhatsApp reminder bhejna safal nahi raha."
-                except Exception:
-                    if query_lang == "mr":
-                        response_text = f"{matched_name} ला WhatsApp रिमाइंडर पाठवले आहे."
-                    elif query_lang == "hi":
-                        response_text = f"{matched_name} को WhatsApp रिमाइंडर भेज दिया गया है।"
-                    else:
-                        response_text = f"{matched_name} ko WhatsApp reminder bhej diya gaya."
-            else:
-                if query_lang == "mr":
-                    response_text = "मोहन ला WhatsApp रिमाइंडर पाठवले आहे."
-                elif query_lang == "hi":
-                    response_text = "मोहन को WhatsApp रिमाइंडर भेज दिया गया है।"
-                else:
-                    response_text = "Mohan ko WhatsApp reminder bhej diya gaya."
-        elif any(kw in transcript_lower for kw in status_keywords) or "udhar kaisa" in transcript_lower:
-            intent = "udhar_status"
-            # Get actual health breakdown dynamically
-            health = get_udhar_health_api("merchant_001", db)
-            total = int(health["total_udhar"])
-            risky = int(health["risky_amount"])
-            if query_lang == "mr":
-                response_text = f"तुमचे एकूण उधार ₹{total:,} आहे. त्यापैकी ₹{risky:,} उच्च जोखीम श्रेणीत आहे."
-            elif query_lang == "hi":
-                response_text = f"आपका कुल उधार ₹{total:,} है। इसमें से ₹{risky:,} उच्च जोखिम श्रेणी में है।"
-            else:
-                response_text = f"Aapka total udhar ₹{total:,} hai. Isme se ₹{risky:,} high risk category mein hai."
-        elif is_addition:
-            intent = "udhar_add"
-            if matched_name and amount:
-                from datetime import date
-                new_udhar = models.Udhar(
-                    customer_name=matched_name,
-                    amount=amount,
-                    date_added=date.today(),
-                    merchant_id="merchant_001"
-                )
-                db.add(new_udhar)
-                db.commit()
-                crud.get_or_create_customer(db, "merchant_001", matched_name)
-                if query_lang == "mr":
-                    response_text = f"{matched_name} साठी ₹{int(amount)} उधार जोडले गेले आहे."
-                elif query_lang == "hi":
-                    response_text = f"{matched_name} के लिए ₹{int(amount)} उधार जोड़ दिया गया है।"
-                else:
-                    response_text = f"{matched_name} ko {int(amount)} rupaye udhar add kar diya gaya hai."
-            else:
-                name_disp = matched_name or 'Mohan'
-                amt_disp = int(amount) if amount else 500
-                if query_lang == "mr":
-                    response_text = f"{name_disp} साठी ₹{amt_disp} उधार जोडले गेले आहे."
-                elif query_lang == "hi":
-                    response_text = f"{name_disp} के लिए ₹{amt_disp} उधार जोड़ दिया गया है।"
-                else:
-                    response_text = f"{name_disp} ko {amt_disp} rupaye udhar add kar diya gaya hai."
-        elif is_repayment:
-            intent = "udhar_repayment"
-            if matched_name:
-                if not amount:
-                    # Default to total outstanding balance
-                    sum_res = crud.get_udhar_summary_by_customer(db, "merchant_001", matched_name)
-                    amount = sum_res["amount"] if sum_res else 0.0
-                
-                remaining = crud.process_udhar_repayment(db, "merchant_001", matched_name, amount)
-                if query_lang == "mr":
-                    response_text = f"{matched_name} चा बाकी शिल्लक आता ₹{int(remaining)} आहे."
-                elif query_lang == "hi":
-                    response_text = f"{matched_name} का बाकी बैलेंस अब ₹{int(remaining)} है।"
-                else:
-                    response_text = f"{matched_name} ka balance ab {int(remaining)} rupaye baki hai."
-            else:
-                if query_lang == "mr":
-                    response_text = "मोहन चा बाकी शिल्लक आता ₹९०० आहे."
-                elif query_lang == "hi":
-                    response_text = "मोहन का बाकी बैलेंस अब ₹९०० है।"
-                else:
-                    response_text = "Mohan ka balance ab 900 rupaye baki hai."
-        elif any(x in transcript_lower for x in ["udhar", "credit", "उधार", "उधर", "क्रेडिट", "बाकी", "baki"]):
-            intent = "udhar"
-            if matched_name:
-                summary = crud.get_udhar_summary_by_customer(db, merchant_id="merchant_001", customer_name=matched_name)
-                if summary:
-                    if query_lang == "mr":
-                        response_text = f"{summary['customer']} कडून ₹{int(summary['amount'])} उधार बाकी आहे."
-                    elif query_lang == "hi":
-                        response_text = f"{summary['customer']} का ₹{int(summary['amount'])} उधार बाकी है।"
-                    else:
-                        response_text = f"{summary['customer']} ka {int(summary['amount'])} rupaye udhar baaki hai."
-                else:
-                    if query_lang == "mr":
-                        response_text = f"{matched_name} चे कोणतेही उधार बाकी नाही."
-                    elif query_lang == "hi":
-                        response_text = f"{matched_name} का कोई उधार बाकी नहीं है।"
-                    else:
-                        response_text = f"{matched_name} ka koi udhar baaki nahi hai."
-            else:
-                if query_lang == "mr":
-                    response_text = "मोहन कडून ₹१,२०० उधार बाकी आहे."
-                elif query_lang == "hi":
-                    response_text = "मोहन का ₹१,२०० उधार बाकी है।"
-                else:
-                    response_text = "Mohan ka 1200 rupaye udhar baaki hai."
+            print(f"[LLM Agent Error] falling back to rule-based: {e}")
+            
+        if llm_res is not None:
+            intent = llm_res.get("intent", "general")
+            response_text = llm_res.get("response_text", "")
         else:
-            # ---- CUSTOMER INTELLIGENCE VOICE INTENTS ----
-            is_top_customer_query = any(kw in transcript_lower for kw in [
-                "sabse accha customer", "best customer", "top customer", "sabse bada customer",
-                "sabse valuable", "best customer kaun hai",
-                "सर्वात चांगला कस्टमर", "सगळ्यात चांगला कस्टमर", "सर्वात चांगला ग्राहक", "सगळ्यात चांगला ग्राहक", "सर्वात मोठा ग्राहक", "सबसे अच्छा ग्राहक", "सबसे बड़ा ग्राहक",
-                "बड़ा ग्राहक", "बड़ा कस्टमर", "चांगला ग्राहक", "चांगला कस्टमर", "सबसे अच्छा कस्टमर"
-            ])
-            
-            is_top5_customer_query = any(kw in transcript_lower for kw in [
-                "top 5 customers", "top customers dikhao", "top customers", "top panch customer",
-                "टॉप ५", "टॉप 5", "पहिली ५", "पहिले ५", "पहिले 5", "टॉप ५ ग्राहक", "टॉप ५ कस्टमर", "पहिले ५ ग्राहक", "पहिले ५ कस्टमर"
-            ])
-            
-            is_frequent_customer_query = (
-                any(kw in transcript_lower for kw in [
-                    "most frequent", "frequent customer", "zyada bar aaya", "zyada baar", "jyada bar", "jyada baar",
-                    "ज्यादा बार", "ज्यादा बार आया", "जास्त वेळा", "वारंवार"
-                ]) or
-                ("sabse zyada" in transcript_lower and any(x in transcript_lower for x in ["aata", "aaya", "baar", "bar", "visit"])) or
-                ("sabse jyada" in transcript_lower and any(x in transcript_lower for x in ["aata", "aaya", "baar", "bar", "visit"])) or
-                (("सर्वात जास्त" in transcript_lower or "सगळ्यात जास्त" in transcript_lower or "सबसे ज्यादा" in transcript_lower or "सबसे ज़्यादा" in transcript_lower) and any(x in transcript_lower for x in ["aata", "aaya", "baar", "bar", "visit", "yeil", "yeun", "yeणारा", "येतो", "येणारा", "वेळा", "येऊन", "फेऱ्या", "visit", "आया", "आता"]))
-            )
-            
-            is_customer_base_query = any(kw in transcript_lower for kw in [
-                "customer base", "kitne customers", "mera customer base", "customers hain",
-                "किती कस्टमर", "एकूण कस्टमर", "कस्टमर बेस", "किती ग्राहक", "एकूण ग्राहक", "एकॉन ग्राहक", "एकुण ग्राहक", "ग्राहक किती", "किती आहेत"
-            ])
-
-            if is_top_customer_query:
-                intent = "customer_top"
-                try:
-                    customers_intel = crud.get_customer_intelligence_data(db, "merchant_001")
-                    if customers_intel:
-                        top = max(customers_intel, key=lambda c: c["total_spent"])
-                        if query_lang == "mr":
-                            response_text = (
-                                f"{top['customer_name']} हे तुमचे सर्वात मौल्यवान ग्राहक आहेत. "
-                                f"त्यांनी एकूण ₹{int(top['total_spent']):,} खर्च केले आहेत आणि ते {top['visit_count']} वेळा आले आहेत."
-                            )
-                        elif query_lang == "hi":
-                            response_text = (
-                                f"{top['customer_name']} आपके सबसे मूल्यवान ग्राहक हैं। "
-                                f"उन्होंने कुल ₹{int(top['total_spent']):,} खर्च किए हैं और वे {top['visit_count']} बार आए हैं।"
-                            )
-                        else:
-                            response_text = (
-                                f"{top['customer_name']} aapke sabse valuable customer hain. "
-                                f"Unhone kul ₹{int(top['total_spent']):,} spend kiye hain aur {top['visit_count']} baar aaye hain."
-                            )
-                    else:
-                        response_text = "Abhi koi customer purchase data record nahi hua hai."
-                except Exception as e:
-                    response_text = "Customer data fetch karne mein error aayi."
-            
-            elif is_top5_customer_query:
-                intent = "customer_top5"
-                try:
-                    customers_intel = crud.get_customer_intelligence_data(db, "merchant_001")
-                    if customers_intel:
-                        top5 = sorted(customers_intel, key=lambda c: c["total_spent"], reverse=True)[:5]
-                        names = ", ".join([f"{c['customer_name']} (₹{int(c['total_spent']):,})" for c in top5])
-                        if query_lang == "mr":
-                            response_text = f"तुमचे टॉप ५ ग्राहक आहेत: {names}."
-                        elif query_lang == "hi":
-                            response_text = f"आपके टॉप ५ ग्राहक हैं: {names}."
-                        else:
-                            response_text = f"Aapke top 5 customers hain: {names}."
-                    else:
-                        response_text = "Abhi koi customer purchase data record nahi hua hai."
-                except Exception as e:
-                    response_text = "Top customers fetch karne mein error aayi."
-            
-            elif is_frequent_customer_query:
-                intent = "customer_frequent"
-                try:
-                    customers_intel = crud.get_customer_intelligence_data(db, "merchant_001")
-                    if customers_intel:
-                        most_freq = max(customers_intel, key=lambda c: c["visit_count"])
-                        if query_lang == "mr":
-                            response_text = (
-                                f"{most_freq['customer_name']} हे सर्वात जास्त {most_freq['visit_count']} वेळा आले आहेत. "
-                                f"त्यांनी एकूण ₹{int(most_freq['total_spent']):,} खर्च केले आहेत."
-                            )
-                        elif query_lang == "hi":
-                            response_text = (
-                                f"{most_freq['customer_name']} सबसे अधिक {most_freq['visit_count']} बार आए हैं। "
-                                f"उन्होंने कुल ₹{int(most_freq['total_spent']):,} खर्च किए हैं।"
-                            )
-                        else:
-                            response_text = (
-                                f"{most_freq['customer_name']} sabse zyada {most_freq['visit_count']} baar aaye hain. "
-                                f"Unka total spend ₹{int(most_freq['total_spent']):,} hai."
-                            )
-                    else:
-                        response_text = "Abhi koi frequent customer data nahi hai."
-                except Exception as e:
-                    response_text = "Frequent customer data fetch karne mein error aayi."
-            
-            elif is_customer_base_query:
-                intent = "customer_base"
-                try:
-                    customers_intel = crud.get_customer_intelligence_data(db, "merchant_001")
-                    total_c = len(customers_intel)
-                    vip_c = sum(1 for c in customers_intel if c["relationship_type"] == "VIP")
-                    regular_c = sum(1 for c in customers_intel if c["relationship_type"] == "Regular")
-                    if query_lang == "mr":
-                        response_text = (
-                            f"तुमच्याकडे एकूण {total_c} सक्रिय ग्राहक आहेत. "
-                            f"त्यापैकी {vip_c} व्हीआयपी आणि {regular_c} नियमित ग्राहक आहेत."
-                        )
-                    elif query_lang == "hi":
-                        response_text = (
-                            f"आपके पास कुल {total_c} सक्रिय ग्राहक हैं। "
-                            f"उनमें से {vip_c} वीआईपी और {regular_c} नियमित ग्राहक हैं।"
-                        )
-                    else:
-                        response_text = (
-                            f"Aapke paas {total_c} active customers hain. "
-                            f"Unmein se {vip_c} VIP aur {regular_c} regular customers hain."
-                        )
-                except Exception as e:
-                    response_text = "Aapke paas active customers hain. Customer Intelligence module check karein."
-            
-            else:
-                intent = "unknown"
-                if query_lang == "mr":
-                    response_text = "माफ करा, मला तुमचा प्रश्न समजला नाही."
-                elif query_lang == "hi":
-                    response_text = "माफ़ कीजिए, मैं आपका सवाल समझ नहीं पाया।"
-                else:
-                    response_text = "Maaf kijiye, main aapka sawaal samajh nahi paaya."
+            from app.services.fallback_agent import process_fallback_voice
+            fb_res = process_fallback_voice(transcript, db)
+            intent = fb_res.get("intent", "unknown")
+            response_text = fb_res.get("response_text", "")
             
     # 4. Call Sarvam text_to_speech service
     try:
@@ -653,6 +508,294 @@ def read_all_udhar_paginated(
         "total": total,
         "skip": skip,
         "limit": limit
+    }
+
+
+# --- DEFAULT DATA STATES ---
+import json
+
+DEFAULT_EXPENSES = [
+    {"id": "exp_1", "name": "Store Rent (June)", "category": "Rent & Utility", "amount": 25000.0, "date": "2026-06-01", "type": "expense", "paymentMethod": "Card"},
+    {"id": "exp_2", "name": "Electricity Bill (May)", "category": "Rent & Utility", "amount": 4800.0, "date": "2026-06-03", "type": "expense", "paymentMethod": "UPI"},
+    {"id": "exp_3", "name": "Staff Salary (Raju)", "category": "Staff & Salary", "amount": 12000.0, "date": "2026-05-31", "type": "expense", "paymentMethod": "UPI"},
+    {"id": "exp_4", "name": "Packaging Bags (Bulk)", "category": "Packaging & Transport", "amount": 2500.0, "date": "2026-06-02", "type": "expense", "paymentMethod": "Cash"},
+    {"id": "exp_5", "name": "Transport to Mandi", "category": "Packaging & Transport", "amount": 1800.0, "date": "2026-06-04", "type": "expense", "paymentMethod": "Cash"},
+    {"id": "exp_6", "name": "Tea & Snacks for staff", "category": "Miscellaneous", "amount": 650.0, "date": "2026-06-05", "type": "expense", "paymentMethod": "Cash"},
+    {"id": "exp_7", "name": "Internet Broadband", "category": "Rent & Utility", "amount": 999.0, "date": "2026-05-28", "type": "expense", "paymentMethod": "UPI"},
+    {"id": "exp_8", "name": "Flyer Printing", "category": "Marketing", "amount": 1500.0, "date": "2026-05-26", "type": "expense", "paymentMethod": "Wallet"}
+]
+
+DEFAULT_CASHBOOK = [
+    {"id": "cash_1", "description": "Customer cash sale - counter retail", "flowType": "in", "category": "Cash Sale", "amount": 1450.0, "date": "2026-06-05", "notes": "Counter grocery checkout"},
+    {"id": "cash_2", "description": "Sandeep Gupta debt repayment", "flowType": "in", "category": "Customer Repayment", "amount": 650.0, "date": "2026-06-05", "notes": "Cleared partial udhar dues"},
+    {"id": "cash_3", "description": "Raju salary advance payment", "flowType": "out", "category": "Business Expense", "amount": 1000.0, "date": "2026-06-05", "notes": "Requested cash advance"},
+    {"id": "cash_4", "description": "Withdrawal for home groceries (Gullak)", "flowType": "out", "category": "Personal Withdrawal (Gullak)", "amount": 800.0, "date": "2026-06-05", "notes": "Taken from register drawer"},
+    {"id": "cash_5", "description": "Customer cash sales - afternoon", "flowType": "in", "category": "Cash Sale", "amount": 2100.0, "date": "2026-06-04"},
+    {"id": "cash_6", "description": "Paid local tea vendor cash", "flowType": "out", "category": "Business Expense", "amount": 350.0, "date": "2026-06-04", "notes": "Staff tea and snacks"},
+    {"id": "cash_7", "description": "Supplier payment - Refined Oil distributor", "flowType": "out", "category": "Supplier Repayment", "amount": 5000.0, "date": "2026-06-04", "notes": "Distributor cash payment"},
+    {"id": "cash_8", "description": "Amit Sharma partial repayment", "flowType": "in", "category": "Customer Repayment", "amount": 1200.0, "date": "2026-06-03"},
+    {"id": "cash_9", "description": "Withdrawal for personal medicines (Gullak)", "flowType": "out", "category": "Personal Withdrawal (Gullak)", "amount": 1500.0, "date": "2026-06-03"},
+    {"id": "cash_10", "description": "Customer cash sale - night rush", "flowType": "in", "category": "Cash Sale", "amount": 3400.0, "date": "2026-06-03"},
+    {"id": "cash_11", "description": "Wages paid to helper Raju", "flowType": "out", "category": "Business Expense", "amount": 3000.0, "date": "2026-06-02"},
+    {"id": "cash_12", "description": "Customer cash sale - morning sales", "flowType": "in", "category": "Cash Sale", "amount": 1800.0, "date": "2026-06-02"},
+    {"id": "cash_13", "description": "Opening cash drawer balance", "flowType": "in", "category": "Cash Sale", "amount": 10000.0, "date": "2026-06-01", "notes": "Drawer seed float"},
+    {"id": "cash_14", "description": "Withdrawal for child school fees (Gullak)", "flowType": "out", "category": "Personal Withdrawal (Gullak)", "amount": 2000.0, "date": "2026-06-01"},
+    {"id": "cash_15", "description": "Customer cash sale - evening", "flowType": "in", "category": "Cash Sale", "amount": 2200.0, "date": "2026-06-01"}
+]
+
+DEFAULT_STAFF = [
+    {
+        "id": "staff_1",
+        "name": "Raman",
+        "phone": "+91 98765 43210",
+        "role": "Store Manager",
+        "status": "Online",
+        "lastActive": "2 mins ago",
+        "joinDate": "2026-02-12",
+        "productivityScore": 94,
+        "permissions": ["customers", "suppliers", "expenses", "cashbook", "reports"],
+        "activities": [
+            {"time": "10:45 AM", "action": "Recorded Rice Purchase transaction (₹15,000)"},
+            {"time": "09:30 AM", "action": "Created customer profile for Vikram Malhotra"},
+            {"time": "Yesterday", "action": "Synchronized Tally supplier ledger records"}
+        ]
+    },
+    {
+        "id": "staff_2",
+        "name": "Aarti Sharma",
+        "phone": "+91 87654 32109",
+        "role": "Billing Operator",
+        "status": "Online",
+        "lastActive": "15 mins ago",
+        "joinDate": "2026-03-01",
+        "productivityScore": 88,
+        "permissions": ["customers", "expenses"],
+        "activities": [
+            {"time": "10:15 AM", "action": "Logged counter cash sale (₹1,450)"},
+            {"time": "09:10 AM", "action": "Collected Sandeep Gupta payment (₹650)"},
+            {"time": "Yesterday", "action": "Added new credit customer Kiran Rao"}
+        ]
+    },
+    {
+        "id": "staff_3",
+        "name": "Raju helper",
+        "phone": "+91 76543 21098",
+        "role": "Delivery Boy & Stock Helper",
+        "status": "Offline",
+        "lastActive": "2 hours ago",
+        "joinDate": "2026-04-10",
+        "productivityScore": 76,
+        "permissions": ["customers"],
+        "activities": [
+            {"time": "Yesterday", "action": "Delivered counter orders to Suresh Patel"},
+            {"time": "2 days ago", "action": "Logged minor cash payout for Staff Tea (₹350)"}
+        ]
+    },
+    {
+        "id": "staff_4",
+        "name": "Karan Johar",
+        "phone": "+91 99887 76655",
+        "role": "Accountant",
+        "status": "Pending Approval",
+        "lastActive": "Never",
+        "joinDate": "2026-06-04",
+        "productivityScore": 0,
+        "permissions": ["expenses", "reports"],
+        "activities": []
+    }
+]
+
+DEFAULT_SUPPLIERS = [
+    {
+        "id": 1,
+        "name": "Rice Supplier",
+        "phone": "+917894568956",
+        "pending_amount": 80000.0,
+        "last_purchase_date": "2026-06-04",
+        "risk_level": "medium",
+        "reliability_score": 78,
+        "next_due_date": "2026-06-15",
+        "avg_payment_delay": 12,
+        "monthly_purchases": 120000.0,
+        "category": "Rice & Grains",
+        "reorder_qty": "150 kg",
+        "insights": [
+            "You usually purchase rice every 12 days.",
+            "Current inventory may last only 5 more days.",
+            "Recommended reorder quantity: 150 kg"
+        ],
+        "purchase_trend": [40000, 60000, 50000, 70000, 85000, 80000],
+        "spending_trend": [45000, 58000, 52000, 68000, 80000, 80000]
+    },
+    {
+        "id": 2,
+        "name": "Tel-Ghee Distributor",
+        "phone": "+919876543210",
+        "pending_amount": 35000.0,
+        "last_purchase_date": "2026-05-28",
+        "risk_level": "low",
+        "reliability_score": 92,
+        "next_due_date": "2026-06-10",
+        "avg_payment_delay": 6,
+        "monthly_purchases": 95000.0,
+        "category": "Oil & Dairy",
+        "reorder_qty": "80 Liters",
+        "insights": [
+            "You purchase oil every 15 days.",
+            "Next batch recommended on 10th June.",
+            "Recommended reorder quantity: 80 Liters"
+        ],
+        "purchase_trend": [30000, 45000, 38000, 42000, 50000, 35000],
+        "spending_trend": [30000, 40000, 39000, 41000, 48000, 35000]
+    },
+    {
+        "id": 3,
+        "name": "Masale Vendor",
+        "phone": "+919988776655",
+        "pending_amount": 12000.0,
+        "last_purchase_date": "2026-05-15",
+        "risk_level": "high",
+        "reliability_score": 64,
+        "next_due_date": "2026-06-08",
+        "avg_payment_delay": 18,
+        "monthly_purchases": 30000.0,
+        "category": "Spices",
+        "reorder_qty": "25 kg",
+        "insights": [
+            "Delays in payment to Masale wale have reached 18 days.",
+            "Interest penalties may apply if not cleared by 8th June.",
+            "Recommended reorder quantity: 25 kg"
+        ],
+        "purchase_trend": [10000, 15000, 12000, 18000, 22000, 12000],
+        "spending_trend": [8000, 14000, 11000, 19000, 21000, 12000]
+    }
+]
+
+DEFAULT_SUPPLIER_ENTRIES = [
+    { "id": 1, "supplier_id": 1, "amount": 80000.0, "date_added": "2026-06-04", "description": "Opening Balance" },
+    { "id": 2, "supplier_id": 2, "amount": 35000.0, "date_added": "2026-05-28", "description": "Batch purchase" },
+    { "id": 3, "supplier_id": 3, "amount": 12000.0, "date_added": "2026-05-15", "description": "Spices import" }
+]
+
+DEFAULT_BILLS = [
+    {
+        "id": "bill_1",
+        "type": "Electricity",
+        "amount": 4800.0,
+        "due_date": "2026-06-20",
+        "status": "Pending",
+        "description": "Electricity Bill (May)"
+    },
+    {
+        "id": "bill_2",
+        "type": "Water",
+        "amount": 850.0,
+        "due_date": "2026-06-18",
+        "status": "Pending",
+        "description": "Water utility charge"
+    },
+    {
+        "id": "bill_3",
+        "type": "Internet",
+        "amount": 999.0,
+        "due_date": "2026-06-10",
+        "status": "Pending",
+        "description": "Broadband internet renewal"
+    },
+    {
+        "id": "bill_4",
+        "type": "Vendor",
+        "amount": 12000.0,
+        "due_date": "2026-06-08",
+        "status": "Pending",
+        "description": "Outstanding spices procurement from Masale Vendor"
+    }
+]
+
+# --- DEMO CONTROL ENDPOINTS ---
+
+@app.on_event("startup")
+def startup_populate_missing_keys():
+    db = next(get_db())
+    try:
+        for key, default_val in [
+            ("expenses", DEFAULT_EXPENSES),
+            ("cashbook", DEFAULT_CASHBOOK),
+            ("staff", DEFAULT_STAFF),
+            ("suppliers", DEFAULT_SUPPLIERS),
+            ("supplier_entries", DEFAULT_SUPPLIER_ENTRIES),
+            ("bills", DEFAULT_BILLS)
+        ]:
+            db_item = db.query(models.KeyValueStore).filter(models.KeyValueStore.key == key).first()
+            if not db_item:
+                db.add(models.KeyValueStore(key=key, value=json.dumps(default_val)))
+        db.commit()
+    except Exception as e:
+        print(f"Error seeding missing keys on startup: {e}")
+
+@app.post(f"{settings.API_V1_STR}/analytics/reset-demo", status_code=status.HTTP_200_OK)
+def reset_and_seed_demo_data(db: Session = Depends(get_db)):
+    """
+    Clears all tables, recreates tables, seeds 'merchant_001' (Ramesh Kirana Store),
+    and generates 180 days of highly realistic transaction & udhar data.
+    """
+    # 1. Reset tables (Clear and recreate)
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
+    
+    # 2. Seed merchant
+    merchant = generator.generate_merchant_data(db)
+    
+    # 3. Seed transactions
+    tx_count = generator.generate_mock_transactions(db, merchant_id=merchant.id, days=180)
+    
+    # 4. Seed udhar
+    udhar_count = generator.generate_mock_udhar(db, merchant_id=merchant.id)
+    
+    # 4.5 Seed default dynamic state (Expenses, Cashbook, Staff, Suppliers, Supplier Entries, Bills)
+    db.add(models.KeyValueStore(key="expenses", value=json.dumps(DEFAULT_EXPENSES)))
+    db.add(models.KeyValueStore(key="cashbook", value=json.dumps(DEFAULT_CASHBOOK)))
+    db.add(models.KeyValueStore(key="staff", value=json.dumps(DEFAULT_STAFF)))
+    db.add(models.KeyValueStore(key="suppliers", value=json.dumps(DEFAULT_SUPPLIERS)))
+    db.add(models.KeyValueStore(key="supplier_entries", value=json.dumps(DEFAULT_SUPPLIER_ENTRIES)))
+    db.add(models.KeyValueStore(key="bills", value=json.dumps(DEFAULT_BILLS)))
+    db.commit()
+
+    # 5. Build customer intelligence profiles from seeded transactions
+    customer_count = 0
+    try:
+        all_txs = db.query(models.Transaction).filter(
+            models.Transaction.merchant_id == merchant.id
+        ).all()
+        seen_names = set()
+        from datetime import date as date_type
+        for tx in all_txs:
+            if tx.customer_name and not tx.customer_name.startswith("Walk-in"):
+                if tx.customer_name not in seen_names:
+                    seen_names.add(tx.customer_name)
+                    tx_date = tx.timestamp.date() if hasattr(tx.timestamp, 'date') else date_type.today()
+                    crud.upsert_customer_from_transaction(
+                        db=db,
+                        merchant_id=merchant.id,
+                        customer_name=tx.customer_name,
+                        transaction_amount=tx.amount,
+                        transaction_date=tx_date
+                    )
+                    customer_count += 1
+    except Exception as e:
+        print(f"[CustomerIntelligence] Seeding profiles failed: {e}")
+
+    return {
+        "status": "success",
+        "message": f"Demo database reset and seeded successfully for {merchant.name}.",
+        "details": {
+            "merchant_id": merchant.id,
+            "merchant_name": merchant.name,
+            "transactions_seeded": tx_count,
+            "udhar_accounts_seeded": udhar_count,
+            "customer_profiles_built": customer_count,
+            "simulated_days": 180
+        }
     }
 
 

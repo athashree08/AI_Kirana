@@ -1,3 +1,5 @@
+import os
+os.environ["TESTING"] = "true"
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -277,4 +279,238 @@ def test_multilingual_voice_cfo_intents(db_session):
 
     app.dependency_overrides.clear()
 
+
+def test_llm_agent_tool_calling(db_session, monkeypatch):
+    """
+    Test the multi-turn agent reasoning and database tool calling logic using mock LLM responses.
+    """
+    # 1. Seed customer data
+    from app.models import Customer
+    from datetime import date
+    c1 = Customer(
+        customer_name="Deepa Nair",
+        merchant_id="merchant_001",
+        relationship_type="VIP"
+    )
+    db_session.add(c1)
+    db_session.commit()
+
+    # 2. Mock environment keys and requests.post
+    monkeypatch.setenv("GEMINI_API_KEY", "mock_key")
+    monkeypatch.delenv("PAYTM_INFERENCE_API_KEY", raising=False)
+    monkeypatch.delenv("GROQ_API_KEY", raising=False)
+    monkeypatch.setenv("ALLOW_LLM_TEST", "true")
+    
+    call_count = 0
+    def mock_post(url, headers=None, json=None, timeout=None):
+        nonlocal call_count
+        class MockResponse:
+            def __init__(self, status_code, json_data):
+                self.status_code = status_code
+                self.json_data = json_data
+            def json(self):
+                return self.json_data
+            @property
+            def text(self):
+                return ""
+
+        # Turn 0: LLM wants to run get_customer_count
+        if call_count == 0:
+            call_count += 1
+            return MockResponse(200, {
+                "candidates": [{
+                    "content": {
+                        "parts": [{
+                            "functionCall": {
+                                "name": "get_customer_count",
+                                "args": {}
+                            }
+                        }]
+                    }
+                }]
+            })
+        # Turn 1: LLM returns the final response
+        else:
+            return MockResponse(200, {
+                "candidates": [{
+                    "content": {
+                        "parts": [{
+                            "text": "Aapke paas total 1 active customer hai."
+                        }]
+                    }
+                }]
+            })
+
+    def mock_post_wrapper(url, *args, **kwargs):
+        return mock_post(url, **kwargs)
+
+    monkeypatch.setattr("requests.post", mock_post_wrapper)
+
+    from app.services.llm_agent import process_voice_llm
+    result = process_voice_llm("kitne active customers hain", db_session, "merchant_001")
+    
+    assert result is not None
+    assert "1 active customer" in result["response_text"]
+
+
+def test_expanded_voice_cfo_intents(db_session):
+    from fastapi.testclient import TestClient
+    from app.main import app
+    from app.main import get_db
+    from app.models import Transaction, Customer, Udhar
+    from datetime import datetime, timedelta, date
+
+    app.dependency_overrides[get_db] = lambda: db_session
+    client = TestClient(app)
+
+    # Seed transactions
+    t1 = Transaction(
+        amount=1000.0,
+        timestamp=datetime.now(),
+        merchant_id="merchant_001",
+        category="grocery",
+        payment_mode="UPI",
+        customer_name="Deepa Nair"
+    )
+    t2 = Transaction(
+        amount=2500.0,
+        timestamp=datetime.now() - timedelta(days=2),
+        merchant_id="merchant_001",
+        category="dairy",
+        payment_mode="Cash",
+        customer_name="Mohan"
+    )
+    t3 = Transaction(
+        amount=5000.0,
+        timestamp=datetime.now() - timedelta(days=35),
+        merchant_id="merchant_001",
+        category="snacks",
+        payment_mode="UPI",
+        customer_name="Sita"
+    )
+    db_session.add_all([t1, t2, t3])
+    db_session.commit()
+
+    # 1. Today's sales (Hindi, Marathi, Hinglish)
+    r = client.post("/api/voice", data={"mock_text": "Aaj kitna kamaaya?"})
+    assert r.status_code == 200
+    assert r.json()["intent"] == "summary"
+    assert "1,000" in r.json()["response_text"] or "1000" in r.json()["response_text"]
+
+    r = client.post("/api/voice", data={"mock_text": "आज का हिसाब बताओ"})
+    assert r.status_code == 200
+    assert r.json()["intent"] == "summary"
+    assert "1,000" in r.json()["response_text"] or "1000" in r.json()["response_text"]
+
+    r = client.post("/api/voice", data={"mock_text": "आज किती कमाई झाली?"})
+    assert r.status_code == 200
+    assert r.json()["intent"] == "summary"
+    assert "1,000" in r.json()["response_text"] or "1000" in r.json()["response_text"]
+
+    # 2. Overall business summary
+    r = client.post("/api/voice", data={"mock_text": "Mera business summary kya hai?"})
+    assert r.status_code == 200
+    assert r.json()["intent"] == "summary"
+    assert "8,500" in r.json()["response_text"] or "8500" in r.json()["response_text"]
+
+    # 3. Weekly / Monthly sales
+    r = client.post("/api/voice", data={"mock_text": "Is hafte kitna business hua?"})
+    assert r.status_code == 200
+    assert r.json()["intent"] == "summary"
+    assert "3,500" in r.json()["response_text"] or "3500" in r.json()["response_text"]
+
+    r = client.post("/api/voice", data={"mock_text": "Pichle mahine kitna sale hua?"})
+    assert r.status_code == 200
+    assert r.json()["intent"] == "summary"
+    assert "5,000" in r.json()["response_text"] or "5000" in r.json()["response_text"]
+
+    # 4. GST Deadlines & Composition scheme
+    r = client.post("/api/voice", data={"mock_text": "GST kab bharna hai?"})
+    assert r.status_code == 200
+    assert r.json()["intent"] == "gst"
+    assert "11th" in r.json()["response_text"] or "११" in r.json()["response_text"]
+
+    r = client.post("/api/voice", data={"mock_text": "composition scheme kya hai?"})
+    assert r.status_code == 200
+    assert r.json()["intent"] == "gst"
+    assert "1%" in r.json()["response_text"] or "१%" in r.json()["response_text"]
+
+    # 5. Loan eligibility & how to improve
+    r = client.post("/api/voice", data={"mock_text": "Mera loan score kaise sudhare?"})
+    assert r.status_code == 200
+    assert r.json()["intent"] == "loan"
+    assert "UPI" in r.json()["response_text"] or "डिजिटल" in r.json()["response_text"] or "digital" in r.json()["response_text"]
+
+    # 6. App Help FAQ
+    r = client.post("/api/voice", data={"mock_text": "whatsapp reminder bhejne ka charge kya hai?"})
+    assert r.status_code == 200
+    assert r.json()["intent"] == "app_help"
+    assert "0.50" in r.json()["response_text"] or "०.५०" in r.json()["response_text"]
+
+    # 7. General Knowledge (Diwali, margin)
+    r = client.post("/api/voice", data={"mock_text": "diwali kab hai?"})
+    assert r.status_code == 200
+    assert r.json()["intent"] == "general"
+    assert "2026" in r.json()["response_text"]
+
+    r = client.post("/api/voice", data={"mock_text": "kirana store ka typical margin kitna hota hai?"})
+    assert r.status_code == 200
+    assert r.json()["intent"] == "general"
+    assert "10-20%" in r.json()["response_text"] or "१०-२०%" in r.json()["response_text"]
+
+    app.dependency_overrides.clear()
+
+
+def test_llm_agent_fallback_from_gemini_to_groq(db_session, monkeypatch):
+    """
+    Verify that if Gemini fallback fails, the agent falls back to Groq fallback.
+    """
+    monkeypatch.setenv("GEMINI_API_KEY", "gemini_mock_key")
+    monkeypatch.setenv("GROQ_API_KEY", "groq_mock_key")
+    monkeypatch.delenv("PAYTM_INFERENCE_API_KEY", raising=False)
+    monkeypatch.setenv("ALLOW_LLM_TEST", "true")
+    
+    gemini_called = False
+    groq_called = False
+    
+    def mock_post(url, headers=None, json=None, timeout=None):
+        nonlocal gemini_called, groq_called
+        class MockResponse:
+            def __init__(self, status_code, json_data):
+                self.status_code = status_code
+                self.json_data = json_data
+            def json(self):
+                return self.json_data
+            @property
+            def text(self):
+                return "Mock error or response text"
+                
+        if "generativelanguage.googleapis.com" in url:
+            gemini_called = True
+            # Simulate Gemini failure (Quota Exceeded, etc)
+            return MockResponse(429, {"error": {"message": "Quota exceeded"}})
+        elif "api.groq.com" in url:
+            groq_called = True
+            return MockResponse(200, {
+                "choices": [{
+                    "message": {
+                        "role": "assistant",
+                        "content": "Groq response text"
+                    }
+                }]
+            })
+        return MockResponse(404, {})
+        
+    def mock_post_wrapper(url, *args, **kwargs):
+        return mock_post(url, **kwargs)
+        
+    monkeypatch.setattr("requests.post", mock_post_wrapper)
+    
+    from app.services.llm_agent import process_voice_llm
+    result = process_voice_llm("test query", db_session, "merchant_001")
+    
+    assert gemini_called is True
+    assert groq_called is True
+    assert result is not None
+    assert result["response_text"] == "Groq response text"
 

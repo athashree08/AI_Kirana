@@ -16,9 +16,36 @@ def get_sarvam_config():
 
 def speech_to_text(audio_file_bytes: bytes, filename: str, content_type: str = "audio/webm") -> str:
     """
-    Sends audio bytes to Sarvam STT REST API and returns transcription.
-    Bypasses API calls if MOCK_SARVAM is enabled to save credits.
+    Sends audio bytes to STT REST API (Paytm Inference whisper-large-v3 preferred)
+    and returns transcription. Bypasses API calls if MOCK_SARVAM is enabled
+    and no Paytm Inference key is present.
     """
+    # Force reload environment variables unless in testing
+    if os.getenv("TESTING") != "true":
+        load_dotenv(override=True)
+    
+    paytm_key = os.getenv("PAYTM_INFERENCE_API_KEY", "").strip()
+    if paytm_key and paytm_key != "your_paytm_inference_api_key_here":
+        url = "https://api.inference.paytm.com/v1/audio/transcriptions"
+        headers = {
+            "Authorization": f"Bearer {paytm_key}"
+        }
+        files = {
+            "file": (filename, audio_file_bytes, content_type)
+        }
+        data = {
+            "model": "whisper-large-v3"
+        }
+        try:
+            response = requests.post(url, headers=headers, files=files, data=data, timeout=30)
+            if response.status_code == 200:
+                result = response.json()
+                return result.get("text", "")
+            else:
+                print(f"[Paytm STT] API returned status {response.status_code}: {response.text}")
+        except Exception as e:
+            print(f"[Paytm STT] Exception during transcription: {e}")
+
     api_key, mock_sarvam = get_sarvam_config()
     
     if mock_sarvam or not api_key or api_key == "your_sarvam_api_key_here":

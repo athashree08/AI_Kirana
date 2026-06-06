@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useLanguage } from "../context/LanguageContext";
 import {
   Search,
@@ -68,6 +68,81 @@ export default function ReportsAnalytics() {
   const { t } = useLanguage();
   // --- STATE ---
   const [activeCategory, setActiveCategory] = useState<typeof REPORT_CATEGORIES[number]["id"]>("transactions");
+  const [unifiedDb, setUnifiedDb] = useState<UnifiedRecord[]>(UNIFIED_DATABASE);
+
+  const loadUnifiedData = async () => {
+    try {
+      const salesRes = await fetch("/api/v1/transactions/merchant_001");
+      const salesData = salesRes.ok ? await salesRes.json() : [];
+
+      const udharsRes = await fetch("/api/udhar/all?merchant_id=merchant_001&limit=500");
+      const udharsData = udharsRes.ok ? (await udharsRes.json()).items : [];
+
+      const expensesRes = await fetch("/api/state/expenses");
+      const expensesJson = expensesRes.ok ? await expensesRes.json() : {};
+      const expensesData = expensesJson && expensesJson.value ? expensesJson.value : [];
+
+      const merged: UnifiedRecord[] = [];
+
+      salesData.forEach((tx: any) => {
+        const dtStr = tx.timestamp ? tx.timestamp.split("T")[0] : "2026-06-05";
+        merged.push({
+          id: `sales_${tx.id}`,
+          date: dtStr,
+          contact: tx.customer_name || "Walk-in Customer",
+          type: "Sale",
+          description: `${tx.category || "Grocery"} counter checkout via ${tx.payment_mode || "UPI"}`,
+          moneyIn: tx.amount || 0,
+          moneyOut: 0,
+          status: "Completed"
+        });
+      });
+
+      udharsData.forEach((ud: any) => {
+        const dtStr = ud.date_added ? ud.date_added.split("T")[0] : "2026-06-05";
+        const isRepayment = ud.amount < 0;
+        merged.push({
+          id: `udhar_${ud.id}`,
+          date: dtStr,
+          contact: ud.customer_name || "Customer",
+          type: isRepayment ? "Repayment" : "Sale",
+          description: isRepayment ? "Udhar repayment received" : "Extended credit billing",
+          moneyIn: isRepayment ? Math.abs(ud.amount) : 0,
+          moneyOut: isRepayment ? 0 : ud.amount,
+          status: "Completed"
+        });
+      });
+
+      expensesData.forEach((exp: any) => {
+        const isPurchase = exp.type === "purchase";
+        const isSale = exp.type === "sale";
+        const typeLabel = isPurchase ? "Purchase" : (isSale ? "Sale" : "Expense");
+        
+        merged.push({
+          id: `exp_${exp.id}`,
+          date: exp.date,
+          contact: exp.name || "Vendor",
+          type: typeLabel,
+          description: `${exp.category || "Overhead"} payout via ${exp.paymentMethod || "UPI"}`,
+          moneyIn: isSale ? exp.amount : 0,
+          moneyOut: !isSale ? exp.amount : 0,
+          status: isPurchase ? "Pending" : "Completed"
+        });
+      });
+
+      merged.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+      if (merged.length > 0) {
+        setUnifiedDb(merged);
+      }
+    } catch (err) {
+      console.error("Error loading unified report database:", err);
+    }
+  };
+
+  useEffect(() => {
+    loadUnifiedData();
+  }, [activeCategory]);
   
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
@@ -98,9 +173,8 @@ export default function ReportsAnalytics() {
     setTimeout(() => setToast(null), 4000);
   };
 
-  // --- FILTERED DATA COMPUTATION ---
   const filteredRecords = useMemo(() => {
-    return UNIFIED_DATABASE.filter(r => {
+    return unifiedDb.filter(r => {
       // 1. Report Category Filter
       if (activeCategory === "cashbook") {
         // Cashbook only shows Cash-based items (all mock items are cash-toggled except bulk purchases)
@@ -183,7 +257,7 @@ export default function ReportsAnalytics() {
     let collections = 14800; // Customer outstanding debt
     let payments = 27000; // Wholesaler debt
 
-    UNIFIED_DATABASE.forEach(r => {
+    unifiedDb.forEach(r => {
       if (r.type === "Sale") salesTotal += r.moneyIn;
       if (r.type === "Expense") expenseTotal += r.moneyOut;
     });

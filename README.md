@@ -214,3 +214,9 @@ All paths are prefixed with `/api/v1`.
 - **Pydantic Validation:** Inputs and outputs are fully typed and validated using Pydantic, enforcing constraints like positive amounts (`gt=0`).
 - **CORS Configured:** Setup to accept requests from frontend servers (such as React, Flutter, or Next.js clients).
 - **Separation of Concerns:** DB setup, SQL schemas, business services, API routing, and data populating are kept strictly isolated.
+
+---
+
+## 🎙️ Sample Questions & Prompts
+
+See the full catalogue of example queries, actions, and judge-ready test prompts in the AI Munshi QA document: ../AI_Munshi_QA.md

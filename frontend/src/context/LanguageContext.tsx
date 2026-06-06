@@ -60,6 +60,10 @@ export const translations: Record<string, Record<Language, string>> = {
     en: "Live QR Terminal",
     hinglish: "Live QR Payment Machine"
   },
+  "import_hub": {
+    en: "Import Hub (OCR/Billing)",
+    hinglish: "Import Hub (OCR/Bill Import)"
+  },
   "settings": {
     en: "Reset Demo Data",
     hinglish: "Demo Data Reset Karein"

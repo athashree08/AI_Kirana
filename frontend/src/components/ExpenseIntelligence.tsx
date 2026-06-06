@@ -245,11 +245,38 @@ const INITIAL_MOCK_DATA: TransactionItem[] = [
 
 export default function ExpenseIntelligence() {
   const { t } = useLanguage();
+
   // --- STATE ---
   const [transactions, setTransactions] = useState<TransactionItem[]>(() => {
     const local = localStorage.getItem("ai_munshi_expenses_data");
     return local ? JSON.parse(local) : INITIAL_MOCK_DATA;
   });
+
+  // Load from database on mount
+  useEffect(() => {
+    const fetchExpenses = async () => {
+      try {
+        const res = await fetch("/api/state/expenses");
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.value) {
+            setTransactions(data.value);
+            localStorage.setItem("ai_munshi_expenses_data", JSON.stringify(data.value));
+          } else {
+            // Seed DB
+            await fetch("/api/state/expenses", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ value: transactions })
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch expenses:", err);
+      }
+    };
+    fetchExpenses();
+  }, []);
 
   const [activeTab, setActiveTab] = useState<"expense" | "purchase" | "sale">("expense");
   const [selectedTxId, setSelectedTxId] = useState<string | null>(null);
@@ -272,9 +299,20 @@ export default function ExpenseIntelligence() {
   const [formDate, setFormDate] = useState("");
   const [formPaymentMethod, setFormPaymentMethod] = useState<"UPI" | "Cash" | "Wallet" | "Card">("UPI");
 
-  // Save to LocalStorage
+  // Save to LocalStorage and Database
   useEffect(() => {
     localStorage.setItem("ai_munshi_expenses_data", JSON.stringify(transactions));
+    
+    const syncBackend = async () => {
+      try {
+        await fetch("/api/state/expenses", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ value: transactions })
+        });
+      } catch (e) {}
+    };
+    syncBackend();
   }, [transactions]);
 
   // Set default category when formType changes

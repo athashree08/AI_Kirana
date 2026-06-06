@@ -177,6 +177,32 @@ export default function CashbookIntelligence() {
     return local ? JSON.parse(local) : INITIAL_CASH_RECORDS;
   });
 
+  // Load from database on mount
+  useEffect(() => {
+    const fetchCashRecords = async () => {
+      try {
+        const res = await fetch("/api/state/cashbook");
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.value) {
+            setRecords(data.value);
+            localStorage.setItem("ai_munshi_cashbook_data", JSON.stringify(data.value));
+          } else {
+            // Seed DB
+            await fetch("/api/state/cashbook", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ value: records })
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch cash records:", err);
+      }
+    };
+    fetchCashRecords();
+  }, []);
+
   const [activeTab, setActiveTab] = useState<"all" | "in" | "out">("all");
   const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -200,9 +226,20 @@ export default function CashbookIntelligence() {
   const [formDate, setFormDate] = useState("");
   const [formNotes, setFormNotes] = useState("");
 
-  // Save to LocalStorage
+  // Save to LocalStorage and Database
   useEffect(() => {
     localStorage.setItem("ai_munshi_cashbook_data", JSON.stringify(records));
+    
+    const syncBackend = async () => {
+      try {
+        await fetch("/api/state/cashbook", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ value: records })
+        });
+      } catch (e) {}
+    };
+    syncBackend();
   }, [records]);
 
   // Set default category when flowType changes

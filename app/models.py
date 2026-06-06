@@ -66,3 +66,11 @@ class Customer(Base):
     # Relationships
     merchant = relationship("Merchant")
 
+
+class KeyValueStore(Base):
+    __tablename__ = "key_value_store"
+
+    key = Column(String, primary_key=True, index=True)
+    value = Column(String, nullable=False)
+
+

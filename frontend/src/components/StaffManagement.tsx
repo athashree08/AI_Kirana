@@ -125,6 +125,32 @@ export default function StaffManagement() {
     return local ? JSON.parse(local) : INITIAL_STAFF;
   });
 
+  // Load from database on mount
+  useEffect(() => {
+    const fetchStaff = async () => {
+      try {
+        const res = await fetch("/api/state/staff");
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.value) {
+            setStaffList(data.value);
+            localStorage.setItem("ai_munshi_staff_data", JSON.stringify(data.value));
+          } else {
+            // Seed DB
+            await fetch("/api/state/staff", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ value: staffList })
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch staff:", err);
+      }
+    };
+    fetchStaff();
+  }, []);
+
   const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -147,9 +173,20 @@ export default function StaffManagement() {
     setShowAddModal(true);
   };
 
-  // Save to LocalStorage
+  // Save to LocalStorage and Database
   useEffect(() => {
     localStorage.setItem("ai_munshi_staff_data", JSON.stringify(staffList));
+    
+    const syncBackend = async () => {
+      try {
+        await fetch("/api/state/staff", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ value: staffList })
+        });
+      } catch (e) {}
+    };
+    syncBackend();
   }, [staffList]);
 
   // Filtered List
